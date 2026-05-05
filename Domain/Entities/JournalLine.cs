@@ -6,6 +6,9 @@ namespace Domain.Entities;
 
 public class JournalLine
 {
+    public int Id { get; private set; }
+
+
     public int AccountId { get;private set; }
 
     public decimal Debit { get; private set; }
