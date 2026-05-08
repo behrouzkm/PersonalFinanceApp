@@ -1,4 +1,4 @@
-@WebAPI_HostAddress = http://localhost:5133
+@WebAPI_HostAddress = https://localhost:7258
 
 
 ###
