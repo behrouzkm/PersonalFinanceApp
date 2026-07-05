@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using PersonalFinanceApp.Domain.Enums;
 using PersonalFinanceApp.Domain.Errors;
 
 namespace PersonalFinanceApp.Domain.Entities;
@@ -9,7 +10,7 @@ public class DocumentTypeTranslation
 
     // Foreign key to the related document type
     public byte DocumentTypeId { get; private set; }
-    public DocumentType DocumentType { get; private set; } = null!;
+    public DocumentType DocumentType { get; private set; } 
 
 
     // Foreign key to the related language

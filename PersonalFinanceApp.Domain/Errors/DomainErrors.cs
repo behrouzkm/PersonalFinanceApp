@@ -21,8 +21,8 @@ public static class DomainErrors
 
     public static class Attachment
     {
-        public const string ReferenceTypeRequired = "ErrorCodes.Attachment.ReferenceTypeRequired";
-        public const string ReferenceIdRequired = "ErrorCodes.Attachment.ReferenceIdRequired";
+        // public const string ReferenceTypeRequired = "ErrorCodes.Attachment.ReferenceTypeRequired";
+        // public const string ReferenceIdRequired = "ErrorCodes.Attachment.ReferenceIdRequired";
         public const string FileNameRequired = "ErrorCodes.Attachment.FileNameRequired";
         public const string FilePathRequired = "ErrorCodes.Attachment.FilePathRequired";
         public const string FileContentRequired = "ErrorCodes.Attachment.FileContentRequired";
@@ -40,10 +40,10 @@ public static class DomainErrors
     {
         public const string NameRequired = "ErrorCodes.DocumentType.NameRequired";
     }
-    public static class AccountType
-    {
-        public const string NameRequired = "ErrorCodes.AccountType.NameRequired";
-    }
+    // public static class AccountType
+    // {
+    //     public const string NameRequired = "ErrorCodes.AccountType.NameRequired";
+    // }
 
     public static class Language
     {
@@ -93,6 +93,8 @@ public static class DomainErrors
         public const string DocumentDateCannotBeInFuture = "ErrorCodes.AccountingDocument.DocumentDateCannotBeInFuture";
         public const string EntryRequired = "ErrorCodes.AccountingDocument.EntryRequired";
         public const string DuplicateEntryNotAllowed = "ErrorCodes.AccountingDocument.DuplicateEntryNotAllowed";
+        public const string CurrencyMismatch = "ErrorCodes.AccountingDocument.CurrencyMismatch";
+        public const string CurrencyRequired = "ErrorCodes.AccountingDocument.CurrencyRequired";
     }
 
     public static class AccountingEntry
@@ -102,7 +104,6 @@ public static class DomainErrors
         public const string NegativeAmountNotAllowed = "ErrorCodes.AccountingEntry.NegativeAmountNotAllowed";
         public const string CannotBeBothDebitAndCredit = "ErrorCodes.AccountingEntry.CannotBeBothDebitAndCredit";
         public const string DebitAndCreditCannotBothBeZero = "ErrorCodes.AccountingEntry.DebitAndCreditCannotBothBeZero";
-        public const string CurrencyRequired = "ErrorCodes.AccountingEntry.CurrencyRequired";
     }
 
     public static class MoneyTransfer

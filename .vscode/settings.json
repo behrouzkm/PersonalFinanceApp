@@ -33,5 +33,5 @@
   "editor.inlineSuggest.enabled": true,
 
   "workbench.editor.enablePreview": false,
-  "cSpell.words": ["IBAN"]
+  "cSpell.words": ["IBAN", "Mediat", "Postable"]
 }

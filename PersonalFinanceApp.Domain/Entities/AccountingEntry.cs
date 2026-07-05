@@ -15,9 +15,6 @@ public class AccountingEntry : BaseDetailEntity
     public decimal Debit { get; private set; }
     public decimal Credit { get; private set; }
 
-    public byte CurrencyId { get; private set; }
-    public Currency Currency { get; private set; } = null!;
-
     private AccountingEntry() { }
 
     // Simplified constructor: Only accepts essential IDs
@@ -26,7 +23,7 @@ public class AccountingEntry : BaseDetailEntity
         SetDocumentId(accountingDocumentId);
         SetLedgerAccountId(ledgerAccountId);
         SetAmounts(debit, credit);
-        SetDescription(description ?? string.Empty);
+         SetDescription(description ?? string.Empty);
     }
 
     public void UpdateEntry(decimal debit, decimal credit, string? description)
@@ -64,10 +61,4 @@ public class AccountingEntry : BaseDetailEntity
         Credit = credit;
     }
 
-    public void SetCurrencyId(byte currencyId)
-    {
-        if (currencyId == 0)
-            throw new DomainException(DomainErrors.AccountingEntry.CurrencyRequired);
-        CurrencyId = currencyId;
-    }
 }
