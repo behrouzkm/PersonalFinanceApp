@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="PersonalFinanceApp.Application/PersonalFinanceApp.Application.csproj" />
+  <Project Path="PersonalFinanceApp.BlazorUI/PersonalFinanceApp.BlazorUI.csproj" />
+  <Project Path="PersonalFinanceApp.Domain/PersonalFinanceApp.Domain.csproj" />
+  <Project Path="PersonalFinanceApp.Infrastructure/PersonalFinanceApp.Infrastructure.csproj" />
+  <Project Path="PersonalFinanceApp.WebApi/PersonalFinanceApp.WebApi.csproj" />
+</Solution>

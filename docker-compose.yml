@@ -1,0 +1,14 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:latest
+    container_name: sql_accounting_db
+    ports:
+      - "14330:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=jw#3Sfy{6LTru&yRWUxVH
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+volumes:
+  mssql_data:
