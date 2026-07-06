@@ -17,19 +17,18 @@ public class AccountingEntry : BaseDetailEntity
 
     private AccountingEntry() { }
 
-    // Simplified constructor: Only accepts essential IDs
     internal AccountingEntry(Guid accountingDocumentId, Guid ledgerAccountId, decimal debit, decimal credit, string? description)
     {
         SetDocumentId(accountingDocumentId);
         SetLedgerAccountId(ledgerAccountId);
         SetAmounts(debit, credit);
-         SetDescription(description ?? string.Empty);
+        SetDescription(description);
     }
 
     public void UpdateEntry(decimal debit, decimal credit, string? description)
     {
         SetAmounts(debit, credit);
-        SetDescription(description ?? string.Empty);
+        SetDescription(description);
     }
 
     public void SetDocumentId(Guid documentId)

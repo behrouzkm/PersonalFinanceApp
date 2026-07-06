@@ -18,8 +18,6 @@ public class LedgerAccount : BaseAuditableEntity
     public Guid? ParentId { get; private set; }
     public LedgerAccount? Parent { get; private set; }
 
-    public string? Description { get; private set; }
-
 
     private readonly List<LedgerAccount> _children = new();
     public IReadOnlyCollection<LedgerAccount> Children  => _children.AsReadOnly();
@@ -28,11 +26,10 @@ public class LedgerAccount : BaseAuditableEntity
     private LedgerAccount() { }
 
     public LedgerAccount(byte accountTypeId, string name, Guid tenantId, Guid createdBy, string? description = null)
-                            : base(tenantId, createdBy)
+                            : base(tenantId, createdBy,description)
     {
         ChangeAccountType(accountTypeId);
         ChangeName(name);
-        SetDescription(description);
 
         IsPostingAccount=true;
     }
@@ -75,5 +72,4 @@ public class LedgerAccount : BaseAuditableEntity
         Name = newName.Trim();
     }
 
-    public void SetDescription(string? description) => Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
 }

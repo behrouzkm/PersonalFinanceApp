@@ -9,8 +9,8 @@ public class DocumentTypeTranslation
     public int Id { get; set; }
 
     // Foreign key to the related document type
-    public byte DocumentTypeId { get; private set; }
-    public DocumentType DocumentType { get; private set; } 
+    //public byte DocumentTypeId { get; private set; }
+    public DocumentType DocumentType { get; private set; }
 
 
     // Foreign key to the related language
@@ -24,17 +24,17 @@ public class DocumentTypeTranslation
 
     private DocumentTypeTranslation() { }
 
-    public DocumentTypeTranslation(byte documentTypeId, byte languageId, string name, string? description = null)
+    public DocumentTypeTranslation(DocumentType documentType, byte languageId, string name, string? description = null)
     {
-        SetDocumentType(documentTypeId);
+        SetDocumentType(documentType);
         SetLanguage(languageId);
         ChangeName(name);
         SetDescription(description);
     }
 
-    public void UpdateDocumentTypeTranslation(byte documentTypeId, byte languageId, string name, string? description = null)
+    public void UpdateDocumentTypeTranslation(DocumentType documentType, byte languageId, string name, string? description = null)
     {
-        SetDocumentType(documentTypeId);
+        SetDocumentType(documentType);
         SetLanguage(languageId);
         ChangeName(name);
         SetDescription(description);
@@ -42,7 +42,7 @@ public class DocumentTypeTranslation
 
     public void SetLanguage(byte languageId) => LanguageId = languageId;
 
-    public void SetDocumentType(byte documentTypeId) => DocumentTypeId = documentTypeId;
+    public void SetDocumentType(DocumentType documentType) => DocumentType = documentType;
 
     public void ChangeName(string name)
     {

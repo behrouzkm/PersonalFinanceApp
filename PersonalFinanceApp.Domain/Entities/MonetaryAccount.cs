@@ -19,7 +19,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity
     public byte CurrencyId { get; private set; }
     public Currency Currency { get; private set; } = null!;
 
-     public int DisplayOrder { get; private set; }
+    public int DisplayOrder { get; private set; }
 
     public bool CanWithdraw(decimal amount) => CurrentBalance >= amount;
 
@@ -27,7 +27,8 @@ public abstract class MonetaryAccount : BaseAuditableEntity
     protected MonetaryAccount() { }
 
     public MonetaryAccount(string name, Guid ledgerAccountId, byte currencyId, decimal initialBalance, int displayOrder,
-                            Guid tenantId, Guid createdBy) : base(tenantId, createdBy)
+                            Guid tenantId, Guid createdBy, string? description = null) :
+                                    base(tenantId, createdBy, description)
     {
         SetName(name);
         SetLedgerAccountId(ledgerAccountId);

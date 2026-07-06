@@ -5,13 +5,18 @@ using System.Threading.Tasks;
 using MediatR;
 using PersonalFinanceApp.Application.Features.Expenditures.Common;
 
-namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.CreateExpenditure;
+namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.UpdateExpenditure;
 
-public class CreateExpenditureCommand :IRequest<Guid>, IExpenditureRequest
+public class UpdateExpenditureCommand : IRequest, IExpenditureRequest
 {
+    public Guid AccountingDocumentId { get; set; }
+
+    // The RowVersion the client last read (e.g. from a GetExpenditureById query).
+    // Used to detect if someone else edited this document in the meantime.
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+
     public DateOnly DocumentDate { get; set; }
     public byte CurrencyId { get; set; }
-
 
     // What was it spent on, and how much for each item. Every line becomes a debit entry.
     public List<ExpenditureLineDto> ExpenditureLines { get; set; } = new();

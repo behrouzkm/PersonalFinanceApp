@@ -18,7 +18,7 @@ public static class ApplicationErrorCodes
         public const string InsufficientBalance = "ErrorCodes.Expenditure.InsufficientBalance";
         public const string DocumentDateInFuture = "ErrorCodes.Expenditure.DocumentDateInFuture";
         public const string DocumentDateRequired = "ErrorCodes.Expenditure.DocumentDateRequired";
-public const string CurrencyRequired = "ErrorCodes.Expenditure.CurrencyRequired";
+        public const string CurrencyRequired = "ErrorCodes.Expenditure.CurrencyRequired";
         public const string LinesRequired = "ErrorCodes.Expenditure.LinesRequired";
         public const string ExpenseAccountRequired = "ErrorCodes.Expenditure.ExpenseAccountRequired";
         public const string LineAmountMustBePositive = "ErrorCodes.Expenditure.LineAmountMustBePositive";
@@ -27,5 +27,8 @@ public const string CurrencyRequired = "ErrorCodes.Expenditure.CurrencyRequired"
         public const string MonetaryAccountRequired = "ErrorCodes.Expenditure.MonetaryAccountRequired";
         public const string PersonRequired = "ErrorCodes.Expenditure.PersonRequired";
         public const string NotBalanced = "ErrorCodes.Expenditure.NotBalanced";
+
+        public const string AccountingDocumentIdRequired = "ErrorCodes.Expenditure.AccountingDocumentIdRequired";
+        public const string RowVersionRequired = "ErrorCodes.Expenditure.RowVersionRequired";
     }
 }

@@ -7,6 +7,7 @@ namespace PersonalFinanceApp.Domain.Common;
 
 public abstract class BaseAuditableEntity : BaseEntity
 {
+    public string? Description { get; private set; }
 
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow; // Set to UTC time for consistency across time zones
     public Guid CreatedBy { get; private set; }
@@ -20,10 +21,11 @@ public abstract class BaseAuditableEntity : BaseEntity
 
     protected BaseAuditableEntity() { }
 
-    protected BaseAuditableEntity(Guid tenantId, Guid createdBy) : base(tenantId)
+    protected BaseAuditableEntity(Guid tenantId, Guid createdBy,string? description = null) : base(tenantId)
     {
         CreatedBy = createdBy;
         CreatedAt = DateTime.UtcNow;
+        SetDescription(description);
     }
 
     public void UpdateAudit(Guid modifiedBy)
@@ -45,4 +47,8 @@ public abstract class BaseAuditableEntity : BaseEntity
     }
 
 
+    public void SetDescription(string? description)
+    {
+        Description = string.IsNullOrWhiteSpace(description) ? string.Empty : description.Trim();
+    }
 }

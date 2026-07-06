@@ -15,9 +15,10 @@ public class Attachment : BaseAuditableEntity
 
     private Attachment() { }
 
-    
+
     public Attachment(AttachmentReferenceType referenceType, string fileName, string filePath,
-                        string contentType, long fileSize, Guid tenantId, Guid createdBy) : base(tenantId, createdBy)
+                        string contentType, long fileSize, Guid tenantId, Guid createdBy, string? description = null)
+                        : base(tenantId, createdBy, description)
     {
         SetReferenceType(referenceType);
         SetFileName(fileName);

@@ -20,21 +20,19 @@ public class MoneyTransfer : BaseAuditableEntity
 
     public DateTime TransferDate { get; private set; }
 
-    public string? Description { get; private set; }
-
     private MoneyTransfer() { }
 
     public MoneyTransfer(Guid fromMonetaryAccountId, Guid toMonetaryAccountId, decimal amount, byte currencyId, DateTime transferDate,
-                         Guid tenantId, Guid createdBy, string? description = null) : base(tenantId, createdBy)
+                         Guid tenantId, Guid createdBy, string? description = null) : base(tenantId, createdBy,description)
     {
         SetMonetaryAccounts(fromMonetaryAccountId, toMonetaryAccountId);
         SetAmount(amount);
         SetCurrencyId(currencyId);
         SetTransferDate(transferDate);
-        SetDescription(description);
-    }
+     }
 
-    public void UpdateMoneyTransfer(Guid fromMonetaryAccountId, Guid toMonetaryAccountId, decimal amount, byte currencyId, DateTime transferDate, string? description = null)
+    public void UpdateMoneyTransfer(Guid fromMonetaryAccountId, Guid toMonetaryAccountId, decimal amount, byte currencyId,
+                                    DateTime transferDate, string? description = null)
     {
         SetMonetaryAccounts(fromMonetaryAccountId, toMonetaryAccountId);
 
@@ -42,6 +40,7 @@ public class MoneyTransfer : BaseAuditableEntity
         SetAmount(amount);
         SetCurrencyId(currencyId);
         SetTransferDate(transferDate);
+
         SetDescription(description);
     }
 
@@ -59,7 +58,6 @@ public class MoneyTransfer : BaseAuditableEntity
         ToMonetaryAccountId = toMonetaryAccountId;
     }
 
-    public void SetDescription(string? description) => Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
 
     public void SetAmount(decimal amount)
     {

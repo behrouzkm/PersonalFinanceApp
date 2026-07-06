@@ -25,8 +25,9 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
 
     private AccountingDocument() { }
 
-    public AccountingDocument(DocumentType documentType, DateOnly documentDate,byte currencyId, Guid tenantId, Guid createdBy)
-        : base(tenantId, createdBy)
+    public AccountingDocument(DocumentType documentType, DateOnly documentDate, byte currencyId,
+                                Guid tenantId, Guid createdBy, string? description = null)
+        : base(tenantId, createdBy, description)
     {
         SetDocumentType(documentType);
         SetDocumentDate(documentDate);
@@ -34,7 +35,7 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
     }
 
     // We pass AccountCategory (Enum) instead of the whole LedgerAccount entity
-    public void AddEntry(Guid accountId,  decimal debit, decimal credit, string description)
+    public void AddEntry(Guid accountId, decimal debit, decimal credit, string description)
     {
         ValidateEntryConsistency(accountId, description);
 

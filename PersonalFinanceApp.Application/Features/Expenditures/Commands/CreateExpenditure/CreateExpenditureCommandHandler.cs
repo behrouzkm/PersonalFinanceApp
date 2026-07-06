@@ -48,7 +48,7 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
                     account.Id, account.Name);
         }
 
-        // load and validate every monetary account (credit) side account
+        // --- Load every monetary account and person referenced on the payment side ---
         var monetaryAccountIds = request.MonetaryAccountPayments
             .Select(p => p.MonetaryAccountId)
             .Distinct()
@@ -80,11 +80,10 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
 
         foreach (var payment in request.PersonPayments)
         {
-            if (!persons.TryGetValue(payment.PersonId, out var person))
+            if (!persons.ContainsKey(payment.PersonId))
                 throw new NotFoundException(nameof(Person), payment.PersonId);
 
-            // Additional validation for person-specific logic can be added here
-        }
+         }
 
         var expenditure = new AccountingDocument(
             DocumentType.Expenditure,

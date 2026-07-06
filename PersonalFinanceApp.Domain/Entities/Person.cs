@@ -44,7 +44,8 @@ public class Person : BaseAuditableEntity
 
     public Person(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId,
                     decimal initialBalance, int displayOrder, string? email, string? mobileNumber,
-                    string? telNumber, Guid tenantId, Guid createdBy) : base(tenantId, createdBy)
+                    string? telNumber, Guid tenantId, Guid createdBy, string? description = null) :
+                            base(tenantId, createdBy, description)
     {
         SetPersonType(personType);
         SetDisplayName(displayName);
@@ -59,7 +60,7 @@ public class Person : BaseAuditableEntity
 
 
     public void UpdatePerson(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId, decimal initialBalance,
-                            int displayOrder, string? email, string? mobileNumber, string? telNumber)
+                            int displayOrder, string? email, string? mobileNumber, string? telNumber, string? description = null)
     {
         SetPersonType(personType);
         SetDisplayName(displayName);
@@ -70,6 +71,8 @@ public class Person : BaseAuditableEntity
         SetEmail(email);
         SetMobileNumber(mobileNumber);
         SetTelNumber(telNumber);
+
+        SetDescription(description);
     }
 
     public void SetPersonType(PersonType personType)
