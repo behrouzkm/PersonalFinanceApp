@@ -35,20 +35,21 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
     }
 
     // We pass AccountCategory (Enum) instead of the whole LedgerAccount entity
-    public void AddEntry(Guid accountId, decimal debit, decimal credit, string description)
+    public void AddEntry(Guid accountId, decimal debit, decimal credit, string? description, Guid createdBy)
     {
-        ValidateEntryConsistency(accountId, description);
+        // ValidateEntryConsistency(accountId, description ?? string.Empty);
 
-        var entry = new AccountingEntry(this.Id, accountId, debit, credit, description);
+        var entry = new AccountingEntry(this.Id, accountId, debit, credit, description,this.TenantId, createdBy);
         _entries.Add(entry);
     }
 
-    public void RemoveEntry(AccountingEntry entry)
+    public void RemoveEntry(AccountingEntry entry,Guid deletedBy)
     {
         if (entry is null)
             throw new DomainException(DomainErrors.AccountingDocument.EntryRequired);
 
-        _entries.Remove(entry);
+        //_entries.Remove(entry);
+        entry.SoftDelete(deletedBy);
     }
 
     // Call before posting to any MonetaryAccount or Person to enforce that the account's
@@ -59,13 +60,25 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
             throw new DomainException(DomainErrors.AccountingDocument.CurrencyMismatch);
     }
 
-    private void ValidateEntryConsistency(Guid accountId, string description)
+
+    public new void SoftDelete(Guid deletedBy)
     {
-        if (_entries.Any(e => e.LedgerAccountId == accountId && e.Description == description.Trim()))
+
+        foreach (var entry in _entries.Where(e => !e.IsDeleted).ToList())
         {
-            throw new DomainException(DomainErrors.AccountingDocument.DuplicateEntryNotAllowed);
+            entry.SoftDelete(deletedBy);
         }
+
+        base.SoftDelete(deletedBy);
     }
+
+    // private void ValidateEntryConsistency(Guid accountId, string description)
+    // {
+    //     if (_entries.Any(e => e.LedgerAccountId == accountId && e.Description == description.Trim()))
+    //     {
+    //         throw new DomainException(DomainErrors.AccountingDocument.DuplicateEntryNotAllowed);
+    //     }
+    // }
 
 
     public void SetDocumentType(DocumentType documentType)

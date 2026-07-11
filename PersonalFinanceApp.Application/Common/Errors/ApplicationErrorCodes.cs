@@ -30,5 +30,6 @@ public static class ApplicationErrorCodes
 
         public const string AccountingDocumentIdRequired = "ErrorCodes.Expenditure.AccountingDocumentIdRequired";
         public const string RowVersionRequired = "ErrorCodes.Expenditure.RowVersionRequired";
+        public const string EntryNotFoundOnDocument = "ErrorCodes.Expenditure.EntryNotFoundOnDocument";
     }
 }

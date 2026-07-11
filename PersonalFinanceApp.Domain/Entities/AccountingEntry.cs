@@ -4,7 +4,7 @@ using PersonalFinanceApp.Domain.Enums; // Assume AccountCategory enum is here
 
 namespace PersonalFinanceApp.Domain.Entities;
 
-public class AccountingEntry : BaseDetailEntity
+public class AccountingEntry : BaseAuditableEntity
 {
     public Guid AccountingDocumentId { get; private set; }
     public AccountingDocument Document { get; private set; } = null!;
@@ -17,19 +17,21 @@ public class AccountingEntry : BaseDetailEntity
 
     private AccountingEntry() { }
 
-    internal AccountingEntry(Guid accountingDocumentId, Guid ledgerAccountId, decimal debit, decimal credit, string? description)
+    internal AccountingEntry(Guid accountingDocumentId, Guid ledgerAccountId, decimal debit, decimal credit,
+                            string? description,Guid tenantId, Guid createdBy) : base(tenantId,createdBy,description)
     {
         SetDocumentId(accountingDocumentId);
+        SetLedgerAccountId(ledgerAccountId);
+        SetAmounts(debit, credit);
+    }
+
+    public void UpdateEntry(Guid ledgerAccountId, decimal debit, decimal credit, string? description)
+    {
         SetLedgerAccountId(ledgerAccountId);
         SetAmounts(debit, credit);
         SetDescription(description);
     }
 
-    public void UpdateEntry(decimal debit, decimal credit, string? description)
-    {
-        SetAmounts(debit, credit);
-        SetDescription(description);
-    }
 
     public void SetDocumentId(Guid documentId)
     {

@@ -7,6 +7,7 @@ namespace PersonalFinanceApp.Application.Features.Expenditures.Common;
 
 public class MonetaryAccountPaymentDto
 {
+    public Guid? AccountingEntryId {get; set;}
     public Guid MonetaryAccountId { get; set; }
     public decimal Amount { get; set; }
     public string? Description { get; set; }

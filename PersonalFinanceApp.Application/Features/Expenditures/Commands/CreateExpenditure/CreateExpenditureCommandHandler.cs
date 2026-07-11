@@ -67,6 +67,8 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
             .Where(p => personIds.Contains(p.Id))
             .ToDictionaryAsync(p => p.Id, cancellationToken);
 
+
+        // check to missing references and insufficient funds before touching the document
         foreach (var payment in request.MonetaryAccountPayments)
         {
             if (!monetaryAccounts.TryGetValue(payment.MonetaryAccountId, out var account))
@@ -85,6 +87,8 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
 
          }
 
+
+        // -- build the document --
         var expenditure = new AccountingDocument(
             DocumentType.Expenditure,
             request.DocumentDate,
@@ -94,7 +98,7 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
 
         foreach (var line in request.ExpenditureLines)
         {
-            expenditure.AddEntry(line.ExpenseLedgerAccountId, line.Amount, 0, line.Description ?? string.Empty);
+            expenditure.AddEntry(line.ExpenseLedgerAccountId, line.Amount, 0, line.Description ?? string.Empty,_currentUser.UserId);
 
             expenseAccounts[line.ExpenseLedgerAccountId].MarkAsUsed();
         }
@@ -107,7 +111,7 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
             // enforce that the account's native currency matches this document's currency.
             expenditure.EnsureCurrencyMatches(monetaryAccount.CurrencyId);
 
-            expenditure.AddEntry(monetaryAccount.LedgerAccountId, 0, payment.Amount, payment.Description ?? string.Empty);
+            expenditure.AddEntry(monetaryAccount.LedgerAccountId, 0, payment.Amount, payment.Description ?? string.Empty, _currentUser.UserId);
             monetaryAccount.AdjustBalance(-payment.Amount);
         }
 
@@ -118,7 +122,7 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
             // enforce that the person's native currency matches this document's currency.
             expenditure.EnsureCurrencyMatches(person.CurrencyId);
 
-            expenditure.AddEntry(person.LedgerAccountId, 0, payment.Amount, payment.Description ?? string.Empty);
+            expenditure.AddEntry(person.LedgerAccountId, 0, payment.Amount, payment.Description ?? string.Empty, _currentUser.UserId);
             person.AdjustBalance(-payment.Amount);
         }
 

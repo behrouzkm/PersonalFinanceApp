@@ -11,9 +11,10 @@ public interface IExpenditureRequest
 {
     DateOnly DocumentDate { get; }
     byte CurrencyId { get; }
+    string? Description { get; }
     List<ExpenditureLineDto> ExpenditureLines { get; }
     List<MonetaryAccountPaymentDto> MonetaryAccountPayments { get; }
     List<PersonPaymentDto> PersonPayments { get; }
 
-    string? Description { get; }
+
 }
