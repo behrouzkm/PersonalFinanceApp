@@ -32,11 +32,11 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
         CreditLimit = 0; // Default to 0 if not provided
     }
 
-    public MonetaryAccount(string name, Guid ledgerAccountId, byte currencyId, decimal initialBalance, int displayOrder,
+    public MonetaryAccount(string displayName, Guid ledgerAccountId, byte currencyId, decimal initialBalance, int displayOrder,
                             Guid tenantId, Guid createdBy, decimal creditLimit = 0, string? description = null) :
                                     base(tenantId, createdBy, description)
     {
-        SetName(name);
+        SetDisplayName(displayName);
         SetLedgerAccountId(ledgerAccountId);
         SetCurrencyId(currencyId);
         SetCreditLimit(creditLimit);
@@ -44,12 +44,24 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
         SetDisplayOrder(displayOrder);
     }
 
-    public void SetName(string name)
+    public void UpdateMonetaryAccount(string displayName, byte currencyId, int displayOrder,
+                                    decimal creditLimit, string? description)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException(DomainErrors.MonetaryAccount.NameRequired);
+        SetDisplayName(displayName);
+        SetCurrencyId(currencyId);
+        SetCreditLimit(creditLimit);
+        SetDisplayOrder(displayOrder);
 
-        DisplayName = name.Trim();
+        SetDescription(description);
+
+    }
+
+    public void SetDisplayName(string displayName)
+    {
+        if (string.IsNullOrWhiteSpace(displayName))
+            throw new DomainException(DomainErrors.MonetaryAccount.DisplayNameRequired);
+
+        DisplayName = displayName.Trim();
     }
 
     public void SetLedgerAccountId(Guid ledgerAccountId)

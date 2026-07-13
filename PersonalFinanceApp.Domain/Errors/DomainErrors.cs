@@ -19,6 +19,7 @@ public static class DomainErrors
         public const string CreditLimitCannotBeNegative = "ErrorCodes.Person.CreditLimitCannotBeNegative";
         public const string CreditLimitCannotBeLessThanCurrentNegativeBalance = "ErrorCodes.Person.CreditLimitCannotBeLessThanCurrentNegativeBalance";
         public const string InitialBalanceCannotBeLessThanCreditLimit = "ErrorCodes.Person.InitialBalanceCannotBeLessThanCreditLimit";
+       public const string CurrentBalanceCannotBeLessThanCreditLimit = "ErrorCodes.Person.CurrentBalanceCannotBeLessThanCreditLimit";
 
     }
 
@@ -72,7 +73,7 @@ public static class DomainErrors
 
     public static class MonetaryAccount
     {
-        public const string NameRequired = "ErrorCodes.MonetaryAccount.NameRequired";
+        public const string DisplayNameRequired = "ErrorCodes.MonetaryAccount.NameRequired";
         public const string CurrencyRequired = "ErrorCodes.MonetaryAccount.CurrencyRequired";
         public const string LedgerAccountRequired = "ErrorCodes.MonetaryAccount.LedgerAccountRequired";
         public const string InitialBalanceCannotBeLessThanCreditLimit = "ErrorCodes.MonetaryAccount.InitialBalanceCannotBeLessThanCreditLimit";

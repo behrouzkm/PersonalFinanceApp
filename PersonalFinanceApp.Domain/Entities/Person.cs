@@ -46,17 +46,17 @@ public class Person : BaseAuditableEntity, IFundSource
 
     private Person() { }
 
-    public Person(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId,
-                    decimal initialBalance, decimal creditLimit, int displayOrder, string? email, string? mobileNumber,
-                    string? telNumber, Guid tenantId, Guid createdBy, string? description = null) :
-                            base(tenantId, createdBy, description)
+    public Person(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId, int displayOrder,
+                    decimal initialBalance, Guid tenantId, Guid createdBy, string? email = null, string? mobileNumber = null,
+                    string? telNumber = null, string? description = null, decimal? creditLimit = null) :
+                    base(tenantId, createdBy, description)
     {
         SetPersonType(personType);
         SetDisplayName(displayName);
         SetLedgerAccountId(ledgerAccountId);
         SetCurrencyId(currencyId);
-        SetInitialBalance(initialBalance);
         SetCreditLimit(creditLimit);
+        SetInitialBalance(initialBalance);
         SetDisplayOrder(displayOrder);
         SetEmail(email);
         SetMobileNumber(mobileNumber);
@@ -65,15 +65,14 @@ public class Person : BaseAuditableEntity, IFundSource
 
 
     public void UpdatePerson(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId,
-                                decimal initialBalance, decimal creditLimit, int displayOrder, string? email,
-                                string? mobileNumber, string? telNumber, string? description = null)
+                                 decimal? creditLimit, int displayOrder, string? email,
+                                string? mobileNumber, string? telNumber, string? description)
     {
         SetPersonType(personType);
         SetDisplayName(displayName);
         SetLedgerAccountId(ledgerAccountId);
         SetCurrencyId(currencyId);
-        SetInitialBalance(initialBalance);
-        SetCreditLimit(creditLimit);
+         SetCreditLimit(creditLimit);
         SetDisplayOrder(displayOrder);
         SetEmail(email);
         SetMobileNumber(mobileNumber);
@@ -202,7 +201,7 @@ public class Person : BaseAuditableEntity, IFundSource
 
     public bool CanWithdraw(decimal amount)
     {
-        if(CreditLimit.HasValue)
+        if (CreditLimit.HasValue)
             return amount <= CurrentBalance + CreditLimit.GetValueOrDefault(0);
         else
             return true;
@@ -210,7 +209,11 @@ public class Person : BaseAuditableEntity, IFundSource
 
     public void AdjustBalance(decimal amount)
     {
-        CurrentBalance += amount;
+        decimal newBalance = CurrentBalance + amount;
+        if (CreditLimit.HasValue && newBalance < CreditLimit.GetValueOrDefault(0) * -1) // Ensure current balance does not go below negative credit limit
+            throw new DomainException(DomainErrors.Person.CurrentBalanceCannotBeLessThanCreditLimit);
+
+        CurrentBalance = newBalance;
     }
 
 
