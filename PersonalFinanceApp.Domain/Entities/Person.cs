@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using PersonalFinanceApp.Domain.Common;
 using PersonalFinanceApp.Domain.Enums;
 using PersonalFinanceApp.Domain.Errors;
+using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Domain.Entities;
 
-public class Person : BaseAuditableEntity
+public class Person : BaseAuditableEntity, IFundSource
 {
 
 
@@ -25,6 +26,9 @@ public class Person : BaseAuditableEntity
     public decimal InitialBalance { get; private set; }
 
     public decimal CurrentBalance { get; private set; }
+
+    public decimal? CreditLimit { get; private set; } // Optional credit limit for accounts that can go negative
+
 
     // Foreign key to the related currency
     public byte CurrencyId { get; private set; }
@@ -43,7 +47,7 @@ public class Person : BaseAuditableEntity
     private Person() { }
 
     public Person(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId,
-                    decimal initialBalance, int displayOrder, string? email, string? mobileNumber,
+                    decimal initialBalance, decimal creditLimit, int displayOrder, string? email, string? mobileNumber,
                     string? telNumber, Guid tenantId, Guid createdBy, string? description = null) :
                             base(tenantId, createdBy, description)
     {
@@ -52,6 +56,7 @@ public class Person : BaseAuditableEntity
         SetLedgerAccountId(ledgerAccountId);
         SetCurrencyId(currencyId);
         SetInitialBalance(initialBalance);
+        SetCreditLimit(creditLimit);
         SetDisplayOrder(displayOrder);
         SetEmail(email);
         SetMobileNumber(mobileNumber);
@@ -59,14 +64,16 @@ public class Person : BaseAuditableEntity
     }
 
 
-    public void UpdatePerson(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId, decimal initialBalance,
-                            int displayOrder, string? email, string? mobileNumber, string? telNumber, string? description = null)
+    public void UpdatePerson(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId,
+                                decimal initialBalance, decimal creditLimit, int displayOrder, string? email,
+                                string? mobileNumber, string? telNumber, string? description = null)
     {
         SetPersonType(personType);
         SetDisplayName(displayName);
         SetLedgerAccountId(ledgerAccountId);
         SetCurrencyId(currencyId);
         SetInitialBalance(initialBalance);
+        SetCreditLimit(creditLimit);
         SetDisplayOrder(displayOrder);
         SetEmail(email);
         SetMobileNumber(mobileNumber);
@@ -162,12 +169,6 @@ public class Person : BaseAuditableEntity
         CurrencyId = currencyId;
     }
 
-    public void SetInitialBalance(decimal initialBalance)
-    {
-
-        InitialBalance = initialBalance;
-        CurrentBalance = initialBalance; // Set current balance to initial balance when creating the person
-    }
 
     public void SetDisplayOrder(int displayOrder)
     {
@@ -177,10 +178,38 @@ public class Person : BaseAuditableEntity
         DisplayOrder = displayOrder;
     }
 
+    public void SetCreditLimit(decimal? creditLimit)
+    {
+        if (creditLimit.HasValue && creditLimit.Value < 0)
+            throw new DomainException(DomainErrors.Person.CreditLimitCannotBeNegative);
+
+        if (CurrentBalance < 0 && creditLimit.HasValue && creditLimit.Value < Math.Abs(CurrentBalance))
+            throw new DomainException(DomainErrors.Person.CreditLimitCannotBeLessThanCurrentNegativeBalance);
+
+        CreditLimit = creditLimit;
+    }
+
+    public void SetInitialBalance(decimal initialBalance)
+    {
+
+        if (initialBalance < CreditLimit.GetValueOrDefault(0) * -1) // Ensure initial balance is not less than negative credit limit
+            throw new DomainException(DomainErrors.Person.InitialBalanceCannotBeLessThanCreditLimit);
+
+        InitialBalance = initialBalance;
+        CurrentBalance = initialBalance; // Set current balance to initial balance when creating the person
+    }
+
+
+    public bool CanWithdraw(decimal amount)
+    {
+        if(CreditLimit.HasValue)
+            return amount <= CurrentBalance + CreditLimit.GetValueOrDefault(0);
+        else
+            return true;
+    }
 
     public void AdjustBalance(decimal amount)
     {
-
         CurrentBalance += amount;
     }
 

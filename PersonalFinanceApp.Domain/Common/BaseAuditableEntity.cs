@@ -34,7 +34,7 @@ public abstract class BaseAuditableEntity : BaseEntity
         LastModifiedBy = modifiedBy;
     }
 
-    public void SoftDelete(Guid deletedBy)
+    public virtual void SoftDelete(Guid deletedBy)
     {
         IsDeleted = true;
         UpdateAudit(deletedBy);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using PersonalFinanceApp.Application.Features.Expenditures.Common;
+using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.UpdateExpenditure;
 
@@ -28,4 +29,5 @@ public class UpdateExpenditureCommand : IRequest, IExpenditureRequest
     public List<MonetaryAccountPaymentDto> MonetaryAccountPayments { get; set; } = new();
 
     public string? Description { get; set; }
+
 }

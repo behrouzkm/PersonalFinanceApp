@@ -16,6 +16,9 @@ public static class DomainErrors
         public const string DisplayOrderCannotBeNegative = "ErrorCodes.Person.DisplayOrderCannotBeNegative";
         public const string InvalidMobileNumberFormat = "ErrorCodes.Person.InvalidMobileNumberFormat";
         public const string InvalidTelNumberFormat = "ErrorCodes.Person.InvalidTelNumberFormat";
+        public const string CreditLimitCannotBeNegative = "ErrorCodes.Person.CreditLimitCannotBeNegative";
+        public const string CreditLimitCannotBeLessThanCurrentNegativeBalance = "ErrorCodes.Person.CreditLimitCannotBeLessThanCurrentNegativeBalance";
+        public const string InitialBalanceCannotBeLessThanCreditLimit = "ErrorCodes.Person.InitialBalanceCannotBeLessThanCreditLimit";
 
     }
 
@@ -72,9 +75,12 @@ public static class DomainErrors
         public const string NameRequired = "ErrorCodes.MonetaryAccount.NameRequired";
         public const string CurrencyRequired = "ErrorCodes.MonetaryAccount.CurrencyRequired";
         public const string LedgerAccountRequired = "ErrorCodes.MonetaryAccount.LedgerAccountRequired";
-        public const string InitialBalanceCannotBeNegative = "ErrorCodes.MonetaryAccount.InitialBalanceCannotBeNegative";
+        public const string InitialBalanceCannotBeLessThanCreditLimit = "ErrorCodes.MonetaryAccount.InitialBalanceCannotBeLessThanCreditLimit";
         public const string DisplayOrderCannotBeNegative = "ErrorCodes.MonetaryAccount.DisplayOrderCannotBeNegative";
-        public const string CurrentBalanceCannotBeNegative = "ErrorCodes.MonetaryAccount.CurrentBalanceCannotBeNegative";
+        public const string CurrentBalanceCannotBeLessThanCreditLimit = "ErrorCodes.MonetaryAccount.CurrentBalanceCannotBeLessThanCreditLimit";
+        public const string CreditLimitCannotBeNegative = "ErrorCodes.MonetaryAccount.CreditLimitCannotBeNegative";
+        public const string CreditLimitCannotBeLessThanCurrentNegativeBalance = "ErrorCodes.MonetaryAccount.CreditLimitCannotBeLessThanCurrentNegativeBalance";
+
     }
 
     public static class CashAccount

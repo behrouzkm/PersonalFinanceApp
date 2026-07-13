@@ -10,6 +10,7 @@ using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Entities;
 using PersonalFinanceApp.Domain.Enums;
+using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.CreateExpenditure;
 
@@ -74,18 +75,14 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
             if (!monetaryAccounts.TryGetValue(payment.MonetaryAccountId, out var account))
                 throw new NotFoundException(nameof(MonetaryAccount), payment.MonetaryAccountId);
 
-            if (!account.CanWithdraw(payment.Amount))
-                throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
-                    account.Id, account.Name, payment.Amount);
-
         }
 
         foreach (var payment in request.PersonPayments)
         {
-            if (!persons.ContainsKey(payment.PersonId))
+            if (!persons.TryGetValue(payment.PersonId, out var person))
                 throw new NotFoundException(nameof(Person), payment.PersonId);
 
-         }
+        }
 
 
         // -- build the document --
@@ -94,11 +91,12 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
             request.DocumentDate,
             request.CurrencyId,
             _currentUser.TenantId,
-            _currentUser.UserId);
+            _currentUser.UserId,
+            request.Description);
 
         foreach (var line in request.ExpenditureLines)
         {
-            expenditure.AddEntry(line.ExpenseLedgerAccountId, line.Amount, 0, line.Description ?? string.Empty,_currentUser.UserId);
+            expenditure.AddEntry(line.ExpenseLedgerAccountId, line.Amount, 0, line.Description ?? string.Empty, _currentUser.UserId);
 
             expenseAccounts[line.ExpenseLedgerAccountId].MarkAsUsed();
         }
@@ -108,22 +106,15 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
         {
             var monetaryAccount = monetaryAccounts[payment.MonetaryAccountId];
 
-            // enforce that the account's native currency matches this document's currency.
-            expenditure.EnsureCurrencyMatches(monetaryAccount.CurrencyId);
+            ApplyPayment(expenditure, monetaryAccount, payment.Amount, payment.Description, _currentUser.UserId);
 
-            expenditure.AddEntry(monetaryAccount.LedgerAccountId, 0, payment.Amount, payment.Description ?? string.Empty, _currentUser.UserId);
-            monetaryAccount.AdjustBalance(-payment.Amount);
         }
 
         foreach (var payment in request.PersonPayments)
         {
             var person = persons[payment.PersonId];
 
-            // enforce that the person's native currency matches this document's currency.
-            expenditure.EnsureCurrencyMatches(person.CurrencyId);
-
-            expenditure.AddEntry(person.LedgerAccountId, 0, payment.Amount, payment.Description ?? string.Empty, _currentUser.UserId);
-            person.AdjustBalance(-payment.Amount);
+            ApplyPayment(expenditure, person, payment.Amount, payment.Description, _currentUser.UserId);
         }
 
         _context.AccountingDocuments.Add(expenditure);
@@ -131,4 +122,19 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
 
         return expenditure.Id;
     }
+
+    public void ApplyPayment(AccountingDocument accountingDocument, IFundSource source, decimal amount,
+                                string? description, Guid actingUserId)
+    {
+        // enforce that the bank/person account's native currency matches this document's currency.
+        accountingDocument.EnsureCurrencyMatches(source.CurrencyId);
+
+        if (!source.CanWithdraw(amount))
+            throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
+                                                source.LedgerAccountId, amount);
+
+        accountingDocument.AddEntry(source.LedgerAccountId, 0, amount, description, actingUserId);
+        source.AdjustBalance(-amount);
+    }
+
 }

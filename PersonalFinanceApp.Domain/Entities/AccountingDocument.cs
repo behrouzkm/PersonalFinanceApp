@@ -61,7 +61,7 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
     }
 
 
-    public new void SoftDelete(Guid deletedBy)
+    public override void SoftDelete(Guid deletedBy)
     {
 
         foreach (var entry in _entries.Where(e => !e.IsDeleted).ToList())

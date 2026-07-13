@@ -5,6 +5,7 @@ using PersonalFinanceApp.Application.Common.Errors;
 using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Entities;
+using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.UpdateExpenditure;
 
@@ -73,10 +74,11 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
         SetExpenditureEntries(document, request, existingEntriesById, expenseAccounts, modifiedBy);
 
         // -- Monetary account (credit) entries --
-        SetMonetaryAccountsPayment(document, request, existingEntriesById, monetaryAccountsById, monetaryAccountsByLedgerId, modifiedBy);
-
+        SetPayment(document, request.MonetaryAccountPayments, existingEntriesById, monetaryAccountsById,
+                    monetaryAccountsByLedgerId,nameof(MonetaryAccount), modifiedBy);
         // -- Person (credit) entries --
-        SetPersonPayments(document, request, existingEntriesById, personAccountById, personAccountByLedgerId, modifiedBy);
+        SetPayment(document, request.PersonPayments, existingEntriesById, personAccountById,
+                    personAccountByLedgerId,nameof(Person), modifiedBy);
 
         await _context.SaveChangesAsync(cancellationToken);
     }
@@ -122,15 +124,14 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
                     : throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.EntryNotFoundOnDocument,
                         line.AccountingEntryId.Value);
 
-            var desciption = line.Description ?? string.Empty;
             var changed = entry.LedgerAccountId != line.ExpenseLedgerAccountId
                             || entry.Debit != line.Amount
-                            || entry.Description != desciption;
+                            || entry.Description != line.Description;
 
             if (!changed)
                 continue;
 
-            entry.UpdateEntry(line.ExpenseLedgerAccountId, line.Amount, 0, desciption);
+            entry.UpdateEntry(line.ExpenseLedgerAccountId, line.Amount, 0, line.Description);
             entry.UpdateAudit(modifiedBy);
 
             account.MarkAsUsed();
@@ -139,14 +140,16 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
 
     }
 
-    private void SetMonetaryAccountsPayment(AccountingDocument document,
-                                                UpdateExpenditureCommand request,
-                                                Dictionary<Guid, AccountingEntry> existingEntriesById,
-                                                Dictionary<Guid, MonetaryAccount> monetaryAccountsById,
-                                                Dictionary<Guid, MonetaryAccount> monetaryAccountsByLedgerId,
-                                                Guid modifiedBy)
+    private void SetPayment<TSource>(AccountingDocument document,
+                                IEnumerable<IPaymentDto> payments,
+                                Dictionary<Guid, AccountingEntry> existingEntriesById,
+                                Dictionary<Guid, TSource> fundSourceAccountsById,
+                                Dictionary<Guid, TSource> fundSourceAccountsByLedgerId,
+                                string entityName,
+                                Guid modifiedBy)
+                            where TSource : class, IFundSource
     {
-        var requestedIds = request.MonetaryAccountPayments
+        var requestedIds = payments
             .Where(r => r.AccountingEntryId.HasValue)
             .Select(p => p.AccountingEntryId!.Value)
             .ToHashSet();
@@ -154,32 +157,32 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
         // rows which user removed - reverse the withdrawal , then soft delete the entry
         foreach (var oldEntry in document.Entries.Where(r => r.Credit > 0 && !requestedIds.Contains(r.Id)).ToList())
         {
-            if (monetaryAccountsByLedgerId.TryGetValue(oldEntry.LedgerAccountId, out var oldAccount))
+            if (fundSourceAccountsByLedgerId.TryGetValue(oldEntry.LedgerAccountId, out var oldSourceAccount))
             {
-                oldAccount.AdjustBalance(oldEntry.Credit);
+                oldSourceAccount.AdjustBalance(oldEntry.Credit);
                 document.RemoveEntry(oldEntry, modifiedBy);
             }
         }
 
-        foreach (var payment in request.MonetaryAccountPayments)
+        foreach (var payment in payments)
         {
-            var moneyAccount = monetaryAccountsById.TryGetValue(payment.MonetaryAccountId, out var mon)
-                    ? mon
-                    : throw new NotFoundException(nameof(MonetaryAccount), payment.MonetaryAccountId);
+            var source = fundSourceAccountsById.TryGetValue(payment.FundSourceId, out var src)
+                    ? src
+                    : throw new NotFoundException(entityName, payment.FundSourceId);
 
 
 
             if (payment.AccountingEntryId is null)
             {
                 // new row
-                document.EnsureCurrencyMatches(moneyAccount.CurrencyId);
+                document.EnsureCurrencyMatches(source.CurrencyId);
 
-                if (!moneyAccount.CanWithdraw(payment.Amount))
+                if (!source.CanWithdraw(payment.Amount))
                     throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
-                        moneyAccount.Id, moneyAccount.Name, payment.Amount);
+                        source.Id, source.DisplayName, payment.Amount);
 
-                document.AddEntry(moneyAccount.LedgerAccountId, 0, payment.Amount, payment.Description, modifiedBy);
-                moneyAccount.AdjustBalance(-payment.Amount);
+                document.AddEntry(source.LedgerAccountId, 0, payment.Amount, payment.Description, modifiedBy);
+                source.AdjustBalance(-payment.Amount);
                 continue;
             }
 
@@ -188,119 +191,41 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
                 ? existing
                 : throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.EntryNotFoundOnDocument);
 
-            var description = payment.Description ?? string.Empty;
-            var ledgerAccountChanged = entry.LedgerAccountId != moneyAccount.LedgerAccountId;
+            var ledgerAccountChanged = entry.LedgerAccountId != source.LedgerAccountId;
 
             if (ledgerAccountChanged)
             {
                 // reverse the old account balance
-                if (monetaryAccountsByLedgerId.TryGetValue(entry.LedgerAccountId, out var oldAccount))
+                if (fundSourceAccountsByLedgerId.TryGetValue(entry.LedgerAccountId, out var oldAccount))
                 {
                     oldAccount.AdjustBalance(entry.Credit);
                 }
 
-                document.EnsureCurrencyMatches(moneyAccount.CurrencyId);
-                if (!moneyAccount.CanWithdraw(payment.Amount))
+                document.EnsureCurrencyMatches(source.CurrencyId);
+                if (!source.CanWithdraw(payment.Amount))
                     throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
-                        moneyAccount.Id, moneyAccount.Name, payment.Amount);
+                        source.Id, source.DisplayName, payment.Amount);
 
-                entry.UpdateEntry(moneyAccount.LedgerAccountId, 0, payment.Amount, description);
+                entry.UpdateEntry(source.LedgerAccountId, 0, payment.Amount, payment.Description);
                 entry.UpdateAudit(modifiedBy);
-                moneyAccount.AdjustBalance(-payment.Amount);
+                source.AdjustBalance(-payment.Amount);
 
                 continue;
             }
 
             // same account, we only need to check if the amount and/or description has changed
             var amountDelta = payment.Amount - entry.Credit;
-            if (amountDelta == 0 && entry.Description == description)
+            if (amountDelta == 0 && entry.Description == payment.Description)
                 continue;
 
-            if (amountDelta > 0 && !moneyAccount.CanWithdraw(amountDelta))
+            if (amountDelta > 0 && !source.CanWithdraw(amountDelta))
                 throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
-                    moneyAccount.Id, moneyAccount.Name, amountDelta);
+                    source.Id, source.DisplayName, amountDelta);
 
             entry.SetAmounts(0, payment.Amount);
-            entry.SetDescription(description);
+            entry.SetDescription(payment.Description);
             entry.UpdateAudit(modifiedBy);
-            moneyAccount.AdjustBalance(-amountDelta);
-
-        }
-    }
-
-    private void SetPersonPayments(AccountingDocument document,
-                                    UpdateExpenditureCommand request,
-                                    Dictionary<Guid, AccountingEntry> existingEntriesById,
-                                    Dictionary<Guid, Person> personAccountById,
-                                    Dictionary<Guid, Person> personAccountByLedgerId,
-                                    Guid modifiedBy)
-    {
-        var requestedIds = request.PersonPayments
-            .Where(r => r.AccountingEntryId.HasValue)
-            .Select(p => p.AccountingEntryId!.Value)
-            .ToHashSet();
-
-        // rows which user removed - reverse the withdrawal
-        foreach (var oldEntry in document.Entries.Where(r => r.Credit > 0 && !requestedIds.Contains(r.Id)).ToList())
-        {
-            if (personAccountByLedgerId.TryGetValue(oldEntry.LedgerAccountId, out var oldPersonAccount))
-            {
-                // reverse the old person account balance
-                oldPersonAccount.AdjustBalance(oldEntry.Credit);
-                document.RemoveEntry(oldEntry, modifiedBy);
-            }
-        }
-
-        foreach (var payment in request.PersonPayments)
-        {
-            var personAccount = personAccountById.TryGetValue(payment.PersonId, out var per)
-                    ? per
-                    : throw new NotFoundException(nameof(Person), payment.PersonId);
-
-
-            if (payment.AccountingEntryId is null)
-            {
-                // new row
-                document.EnsureCurrencyMatches(personAccount.CurrencyId);
-                document.AddEntry(personAccount.LedgerAccountId, 0, payment.Amount, payment.Description, modifiedBy);
-                personAccount.AdjustBalance(-payment.Amount);
-                continue;
-            }
-
-
-            var entry = existingEntriesById.TryGetValue(payment.AccountingEntryId.Value, out var existing)
-                ? existing
-                : throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.EntryNotFoundOnDocument,
-                                                     payment.AccountingEntryId.Value);
-
-            var description = payment.Description ?? string.Empty;
-            var ledgerAccountChanged = entry.LedgerAccountId != personAccount.LedgerAccountId;
-
-            if (ledgerAccountChanged)
-            {
-                // reverse the old account balance
-                if (personAccountByLedgerId.TryGetValue(entry.LedgerAccountId, out var oldPersonAccount))
-                {
-                    oldPersonAccount.AdjustBalance(entry.Credit);
-                }
-
-                document.EnsureCurrencyMatches(personAccount.CurrencyId);
-                entry.UpdateEntry(personAccount.LedgerAccountId, 0, payment.Amount, description);
-                entry.UpdateAudit(modifiedBy);
-                personAccount.AdjustBalance(-payment.Amount);
-
-                continue;
-            }
-
-            // same account, we only need to check if the amount and/or description has changed
-            var amountDelta = payment.Amount - entry.Credit;
-            if (amountDelta == 0 && entry.Description == description)
-                continue;
-
-            entry.SetAmounts(0, payment.Amount);
-            entry.SetDescription(description);
-            entry.UpdateAudit(modifiedBy);
-            personAccount.AdjustBalance(-amountDelta);
+            source.AdjustBalance(-amountDelta);
 
         }
     }
