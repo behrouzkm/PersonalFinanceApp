@@ -12,6 +12,8 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
     public Guid LedgerAccountId { get; private set; }
     public LedgerAccount LedgerAccount { get; private set; } = null!;
 
+    public DateOnly OpeningDate { get; private set; } = DateOnly.FromDateTime(DateTime.UtcNow);
+
     public decimal InitialBalance { get; private set; }
 
     public decimal CurrentBalance { get; private set; }
@@ -32,13 +34,15 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
         CreditLimit = 0; // Default to 0 if not provided
     }
 
-    public MonetaryAccount(string displayName, Guid ledgerAccountId, byte currencyId, decimal initialBalance, int displayOrder,
-                            Guid tenantId, Guid createdBy, decimal creditLimit = 0, string? description = null) :
+    public MonetaryAccount(string displayName, Guid ledgerAccountId, byte currencyId, DateOnly openingDate,
+                            decimal initialBalance, int displayOrder, Guid tenantId, Guid createdBy,
+                            decimal creditLimit = 0, string? description = null) :
                                     base(tenantId, createdBy, description)
     {
         SetDisplayName(displayName);
         SetLedgerAccountId(ledgerAccountId);
         SetCurrencyId(currencyId);
+        SetOpeningDate(openingDate);
         SetCreditLimit(creditLimit);
         SetInitialBalance(initialBalance);
         SetDisplayOrder(displayOrder);
@@ -95,6 +99,13 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
         CreditLimit = creditLimit;
     }
 
+    public void SetOpeningDate(DateOnly openingDate)
+    {
+        if (openingDate > DateOnly.FromDateTime(DateTime.UtcNow))
+            throw new DomainException(DomainErrors.MonetaryAccount.OpeningDateCannotBeInFuture);
+
+        OpeningDate = openingDate;
+    }
     public void SetInitialBalance(decimal initialBalance)
     {
         if (initialBalance < CreditLimit.GetValueOrDefault(0) * -1) // Ensure initial balance is not less than negative credit limit

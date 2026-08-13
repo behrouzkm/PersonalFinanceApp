@@ -23,6 +23,7 @@ public class Person : BaseAuditableEntity, IFundSource
     public Guid LedgerAccountId { get; private set; }
     public LedgerAccount LedgerAccount { get; private set; } = null!;
 
+    public DateOnly OpeningDate { get; private set; } = DateOnly.FromDateTime(DateTime.UtcNow);
     public decimal InitialBalance { get; private set; }
 
     public decimal CurrentBalance { get; private set; }
@@ -47,12 +48,13 @@ public class Person : BaseAuditableEntity, IFundSource
     private Person() { }
 
     public Person(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId, int displayOrder,
-                    decimal initialBalance, Guid tenantId, Guid createdBy, string? email = null, string? mobileNumber = null,
+                    DateOnly openingDate, decimal initialBalance, Guid tenantId, Guid createdBy, string? email = null, string? mobileNumber = null,
                     string? telNumber = null, string? description = null, decimal? creditLimit = null) :
                     base(tenantId, createdBy, description)
     {
         SetPersonType(personType);
         SetDisplayName(displayName);
+        SetOpeningDate(openingDate);
         SetLedgerAccountId(ledgerAccountId);
         SetCurrencyId(currencyId);
         SetCreditLimit(creditLimit);
@@ -186,6 +188,14 @@ public class Person : BaseAuditableEntity, IFundSource
             throw new DomainException(DomainErrors.Person.CreditLimitCannotBeLessThanCurrentNegativeBalance);
 
         CreditLimit = creditLimit;
+    }
+
+    public void SetOpeningDate(DateOnly openingDate)
+    {
+        if (openingDate > DateOnly.FromDateTime(DateTime.UtcNow))
+            throw new DomainException(DomainErrors.Person.OpeningDateCannotBeInFuture);
+
+        OpeningDate = openingDate;
     }
 
     public void SetInitialBalance(decimal initialBalance)

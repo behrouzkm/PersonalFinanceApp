@@ -7,11 +7,12 @@ namespace PersonalFinanceApp.Domain.Interfaces;
 
 public interface IFundSource
 {
-    Guid Id {get;}
+    Guid Id { get; }
     Guid LedgerAccountId { get; }
-    string DisplayName{get;}
+    string DisplayName { get; }
 
     byte CurrencyId { get; }
+    DateOnly OpeningDate { get; }
     decimal InitialBalance { get; }
     decimal CurrentBalance { get; }
     decimal? CreditLimit { get; }
