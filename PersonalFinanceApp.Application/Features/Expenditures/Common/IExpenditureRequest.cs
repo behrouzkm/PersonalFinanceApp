@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalFinanceApp.Application.Features.Common;
 
 namespace PersonalFinanceApp.Application.Features.Expenditures.Common;
 
@@ -12,9 +13,9 @@ public interface IExpenditureRequest
     DateOnly DocumentDate { get; }
     byte CurrencyId { get; }
     string? Description { get; }
-    List<ExpenditureLineDto> ExpenditureLines { get; }
-    List<MonetaryAccountPaymentDto> MonetaryAccountPayments { get; }
-    List<PersonPaymentDto> PersonPayments { get; }
+    List<AccountingEntryDto> ExpenditureLedgerAccountLines { get; }
+    List<MonetaryAccountEntryDto> MonetaryAccountEntries { get; }
+    List<PersonPaymentDto> PersonPaymentEntries { get; }
 
 
 }

@@ -39,7 +39,7 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
     {
         // ValidateEntryConsistency(accountId, description ?? string.Empty);
 
-        var entry = new AccountingEntry(this.Id, accountId, debit, credit, description,this.TenantId, createdBy);
+        var entry = new AccountingEntry(this.Id, accountId, debit, credit, description ?? string.Empty, this.TenantId, createdBy);
         _entries.Add(entry);
     }
 
