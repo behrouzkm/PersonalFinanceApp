@@ -8,6 +8,8 @@ using AutoMapper;
 using MediatR;
 using PersonalFinanceApp.Application.Common.Behaviors;
 using System.Reflection;
+using PersonalFinanceApp.Application.Common.Interfaces;
+using PersonalFinanceApp.Application.Common.Services;
 
 namespace PersonalFinanceApp.Application;
 
@@ -21,6 +23,9 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(assembly);
         services.AddAutoMapper(cfg => cfg.AddMaps(assembly));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+        services.AddScoped<IAccountingLookupService, AccountingLookupService>();
+        services.AddScoped<ILedgerBalanceValidationService, LedgerBalanceValidationService>();
 
         return services;
     }

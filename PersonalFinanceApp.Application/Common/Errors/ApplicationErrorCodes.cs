@@ -11,7 +11,10 @@ public static class ApplicationErrorCodes
     {
         public const string NotFound = "ErrorCodes.Common.NotFound";
     }
-
+    public static class ExpenditureList
+    {
+        public const string FromLaterThanToDate = "ErrorCodes.ExpenditureList.FromLaterThanToDate";
+    }
     public static class Expenditure
     {
         public const string ExpenseAccountNotPostable = "ErrorCodes.Expenditure.ExpenseAccountNotPostable";
@@ -46,6 +49,7 @@ public static class ApplicationErrorCodes
         //public const string PaymentsRequired = "ErrorCodes.Income.PaymentsRequired";
         public const string IncomeAmountMustBePositive = "ErrorCodes.Income.IncomeAmountMustBePositive";
         public const string MonetaryAccountEntriesRequired = "ErrorCodes.Income.MonetaryAccountEntriesRequired";
+        public const string MonetaryAccountRequired = "ErrorCodes.Income.MonetaryAccountRequired";
         //public const string PersonRequired = "ErrorCodes.Income.PersonRequired";
         public const string NotBalanced = "ErrorCodes.Income.NotBalanced";
 

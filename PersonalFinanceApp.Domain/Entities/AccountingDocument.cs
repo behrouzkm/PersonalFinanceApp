@@ -72,6 +72,23 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
         base.SoftDelete(deletedBy);
     }
 
+
+    // Known, accepted limitation: this restores every currently-deleted entry, including
+    // any that were individually soft-deleted by a row-level edit BEFORE the whole
+    // document was deleted (not just ones deleted as a direct consequence of this
+    // document's own deletion). There's no per-entry marker distinguishing "deleted
+    // together with the parent" from "deleted independently earlier", so a full cascade
+    // restore is the simplest correct-by-default behavior here.
+    public override void Restore(Guid restoredBy)
+    {
+        foreach (var entry in _entries.Where(e => e.IsDeleted).ToList())
+        {
+            entry.Restore(restoredBy);
+        }
+
+        base.Restore(restoredBy);
+    }
+
     // private void ValidateEntryConsistency(Guid accountId, string description)
     // {
     //     if (_entries.Any(e => e.LedgerAccountId == accountId && e.Description == description.Trim()))

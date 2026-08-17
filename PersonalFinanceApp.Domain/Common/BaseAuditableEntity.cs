@@ -40,7 +40,7 @@ public abstract class BaseAuditableEntity : BaseEntity
         UpdateAudit(deletedBy);
     }
 
-    public void Restore(Guid restoredBy)
+    public virtual void Restore(Guid restoredBy)
     {
         IsDeleted = false;
         UpdateAudit(restoredBy);

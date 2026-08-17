@@ -37,16 +37,19 @@ public static class IncomeValidationRules
                 .WithErrorCode(Application.Common.Errors.ApplicationErrorCodes.Income.LineAmountMustBePositive);
         });
 
+        // List-level: the whole collection must not be empty.
         validator.RuleFor(x => x.MonetaryAccountEntries)
             .NotEmpty()
             .WithErrorCode(Application.Common.Errors.ApplicationErrorCodes.Income.MonetaryAccountEntriesRequired);
 
         validator.RuleForEach(x => x.MonetaryAccountEntries).ChildRules(payment =>
         {
-            payment.RuleFor(p => p.MonetaryLedgerAccountId)
+            // Item-level: this one entry's own account reference must not be empty -
+            // a distinct failure from the list being empty, so a client can tell them apart.
+            payment.RuleFor(p => p.MonetaryAccountId)
                 .NotEmpty()
                 .NotEqual(Guid.Empty)
-                .WithErrorCode(Application.Common.Errors.ApplicationErrorCodes.Income.MonetaryAccountEntriesRequired);
+                .WithErrorCode(Application.Common.Errors.ApplicationErrorCodes.Income.MonetaryAccountRequired);
 
             payment.RuleFor(p => p.Amount)
                 .GreaterThan(0)

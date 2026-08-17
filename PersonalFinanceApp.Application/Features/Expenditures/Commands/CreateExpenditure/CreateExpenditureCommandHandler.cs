@@ -19,11 +19,16 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
 
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAccountingLookupService _lookupService;
+    private readonly ILedgerBalanceValidationService _ledgerValidator;
 
-    public CreateExpenditureCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser)
+    public CreateExpenditureCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
+                        IAccountingLookupService lookupService, ILedgerBalanceValidationService ledgerValidator)
     {
         _context = context;
         _currentUser = currentUser;
+        _lookupService = lookupService;
+        _ledgerValidator = ledgerValidator;
     }
 
     public async Task<Guid> Handle(CreateExpenditureCommand request, CancellationToken cancellationToken)
@@ -35,9 +40,7 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
             .Distinct()
             .ToList();
 
-        var expenseLedgerAccounts = await _context.LedgerAccounts
-            .Where(a => expenseLedgerAccountIds.Contains(a.Id))
-            .ToDictionaryAsync(a => a.Id, cancellationToken);
+        var expenseLedgerAccounts = await _lookupService.GetLedgerAccountsAsync(expenseLedgerAccountIds, cancellationToken);
 
         foreach (var id in expenseLedgerAccountIds)
         {
@@ -51,18 +54,12 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
 
         // --- Load every monetary account and person referenced on the payment side ---
         var monetaryAccountIds = request.MonetaryAccountEntries
-            .Select(p => p.MonetaryLedgerAccountId)
+            .Select(p => p.MonetaryAccountId)
             .Distinct()
             .ToList();
 
-        var monetaryAccounts = await _context.MonetaryAccounts
-            .Include(i => i.LedgerAccount)
-            .Where(a => monetaryAccountIds.Contains(a.Id))
-            .ToDictionaryAsync(a => a.Id, cancellationToken);
-
-        var monetaryAccountsLedgerAccountIds = monetaryAccounts.Values
-            .ToDictionary(ma => ma.LedgerAccountId, ma => ma.LedgerAccount);
-
+        var monetaryAccountLookup = await _lookupService.GetMonetaryAccountsAsync(monetaryAccountIds,
+                                                Enumerable.Empty<Guid>(), cancellationToken);
 
 
         var personIds = request.PersonPaymentEntries
@@ -70,25 +67,19 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
             .Distinct()
             .ToList();
 
-        var persons = await _context.Persons
-            .Include(p => p.LedgerAccount)
-            .Where(p => personIds.Contains(p.Id))
-            .ToDictionaryAsync(p => p.Id, cancellationToken);
-
-        var personLedgerAccountIds = persons.Values
-            .ToDictionary(p => p.LedgerAccountId, p => p.LedgerAccount);
+        var personLookup = await _lookupService.GetPersonsAsync(personIds, Enumerable.Empty<Guid>(), cancellationToken);
 
         // check to missing references and insufficient funds before touching the document
         foreach (var payment in request.MonetaryAccountEntries)
         {
-            if (!monetaryAccounts.TryGetValue(payment.MonetaryLedgerAccountId, out var account))
-                throw new NotFoundException(nameof(MonetaryAccount), payment.MonetaryLedgerAccountId);
+            if (!monetaryAccountLookup.ById.ContainsKey(payment.MonetaryAccountId))
+                throw new NotFoundException(nameof(MonetaryAccount), payment.MonetaryAccountId);
 
         }
 
         foreach (var payment in request.PersonPaymentEntries)
         {
-            if (!persons.TryGetValue(payment.PersonId, out var person))
+            if (!personLookup.ById.ContainsKey(payment.PersonId))
                 throw new NotFoundException(nameof(Person), payment.PersonId);
 
         }
@@ -114,20 +105,20 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
         // add the payment (credit) side entries for monetary accounts
         foreach (var payment in request.MonetaryAccountEntries)
         {
-            var monetaryAccount = monetaryAccounts[payment.MonetaryLedgerAccountId];
-            var paymentLedgerAccount = monetaryAccountsLedgerAccountIds[monetaryAccount.LedgerAccountId];
+            var monetaryAccount = monetaryAccountLookup.ById[payment.MonetaryAccountId];
 
-            ApplyPayment(expenditureDocument, monetaryAccount, paymentLedgerAccount, payment.Amount, payment.Description, _currentUser.UserId);
+            ApplyPayment(expenditureDocument, monetaryAccount, monetaryAccount.LedgerAccount, request.DocumentDate,
+                    payment.Amount, payment.Description, _currentUser.UserId, cancellationToken);
 
         }
 
         // add the payment (credit) side entries for persons
         foreach (var payment in request.PersonPaymentEntries)
         {
-            var person = persons[payment.PersonId];
-            var paymentLedgerAccount = personLedgerAccountIds[person.LedgerAccountId];
+            var person = personLookup.ById[payment.PersonId];
 
-            ApplyPayment(expenditureDocument, person, paymentLedgerAccount, payment.Amount, payment.Description, _currentUser.UserId);
+            ApplyPayment(expenditureDocument, person, person.LedgerAccount, request.DocumentDate,
+                    payment.Amount, payment.Description, _currentUser.UserId, cancellationToken);
         }
 
         _context.AccountingDocuments.Add(expenditureDocument);
@@ -136,8 +127,15 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
         return expenditureDocument.Id;
     }
 
-    public void ApplyPayment(AccountingDocument accountingDocument, IFundSource source, LedgerAccount paymentLedgerAccount, decimal amount,
-                                string? description, Guid actingUserId)
+    public async Task ApplyPayment(
+        AccountingDocument accountingDocument,
+        IFundSource source,
+        LedgerAccount paymentLedgerAccount,
+        DateOnly documentDate,
+        decimal amount,
+        string? description,
+        Guid actingUserId,
+        CancellationToken cancellationToken)
     {
         // enforce that the bank/person account's native currency matches this document's currency.
         accountingDocument.EnsureCurrencyMatches(source.CurrencyId);
@@ -145,6 +143,12 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
         if (!source.CanWithdraw(amount))
             throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
                                                 source.LedgerAccountId, amount);
+
+
+        // Authoritative check: replays the account's full chronological history (not just
+        // the current in-memory balance CanWithdraw looked at above) and rejects if the
+        // running balance would ever dip below the credit limit at any intermediate point.
+        await _ledgerValidator.ValidateAsync(source, documentDate, 0, amount, replacingEntryId: null, cancellationToken);
 
         accountingDocument.AddEntry(source.LedgerAccountId, 0, amount, description, actingUserId);
         source.AdjustBalance(-amount);

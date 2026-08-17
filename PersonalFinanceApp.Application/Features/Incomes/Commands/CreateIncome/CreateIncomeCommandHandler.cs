@@ -18,12 +18,22 @@ public class CreateIncomeCommandHandler : IRequestHandler<CreateIncomeCommand, G
 
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAccountingLookupService _lookup;
+    private readonly ILedgerBalanceValidationService _ledgerValidator;
 
-    public CreateIncomeCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+    public CreateIncomeCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUserService,
+        IAccountingLookupService lookup,
+        ILedgerBalanceValidationService ledgerValidator)
     {
         _context = context;
         _currentUser = currentUserService;
+        _lookup = lookup;
+        _ledgerValidator = ledgerValidator;
     }
+
+
     public async Task<Guid> Handle(CreateIncomeCommand request, CancellationToken cancellationToken)
     {
         var incomeAccountIds = request.IncomeLedgerAccountLines
@@ -31,9 +41,7 @@ public class CreateIncomeCommandHandler : IRequestHandler<CreateIncomeCommand, G
             .Distinct()
             .ToList();
 
-        var incomeLedgerAccounts = await _context.LedgerAccounts
-            .Where(a => incomeAccountIds.Contains(a.Id))
-            .ToDictionaryAsync(a => a.Id, cancellationToken);
+        var incomeLedgerAccounts = await _lookup.GetLedgerAccountsAsync(incomeAccountIds, cancellationToken);
 
         foreach (var id in incomeAccountIds)
         {
@@ -46,22 +54,20 @@ public class CreateIncomeCommandHandler : IRequestHandler<CreateIncomeCommand, G
         }
 
         var monetaryAccountIds = request.MonetaryAccountEntries
-            .Select(p => p.MonetaryLedgerAccountId)
+            .Select(p => p.MonetaryAccountId)
             .Distinct()
             .ToList();
 
-        var monetaryAccounts = await _context.MonetaryAccounts
-             .Where(a => monetaryAccountIds.Contains(a.Id))
-            .ToDictionaryAsync(a => a.Id, cancellationToken);
+        // Single lookup gives both dictionaries correctly - ById for resolving the DTO's
+        // own MonetaryAccountId, ByLedgerAccountId for anything keyed off an entry's
+        // LedgerAccountId later. This is what the old hand-rolled query got wrong.
+        var monetaryAccountLookup = await _lookup.GetMonetaryAccountsAsync(
+            monetaryAccountIds, Enumerable.Empty<Guid>(), cancellationToken);
 
-        var monetaryLedgerAccounts = await _context.LedgerAccounts
-            .Where(a => monetaryAccountIds.Contains(a.Id))
-            .ToDictionaryAsync(a => a.Id, a => a, cancellationToken);
-
-        foreach (var id in request.MonetaryAccountEntries)
+        foreach (var deposit in request.MonetaryAccountEntries)
         {
-            if (!monetaryAccounts.TryGetValue(id.MonetaryLedgerAccountId, out var account))
-                throw new NotFoundException(nameof(MonetaryAccount), id.MonetaryLedgerAccountId);
+            if (!monetaryAccountLookup.ById.ContainsKey(deposit.MonetaryAccountId))
+                throw new NotFoundException(nameof(MonetaryAccount), deposit.MonetaryAccountId);
         }
 
         var income = new AccountingDocument(
@@ -81,14 +87,16 @@ public class CreateIncomeCommandHandler : IRequestHandler<CreateIncomeCommand, G
 
         foreach (var deposit in request.MonetaryAccountEntries)
         {
-            var monetaryAccount = monetaryAccounts[deposit.MonetaryLedgerAccountId];
-            var monetaryLedgerAccount = monetaryLedgerAccounts[deposit.MonetaryLedgerAccountId];
+            var monetaryAccount = monetaryAccountLookup.ById[deposit.MonetaryAccountId];
 
             income.EnsureCurrencyMatches(monetaryAccount.CurrencyId);
-            income.AddEntry(deposit.MonetaryLedgerAccountId, 0, deposit.Amount, deposit.Description, _currentUser.UserId);
 
-            monetaryLedgerAccount.MarkAsUsed();
+            await _ledgerValidator.ValidateAsync(
+                monetaryAccount, request.DocumentDate, deposit.Amount, 0, replacingEntryId: null, cancellationToken);
 
+            income.AddEntry(monetaryAccount.LedgerAccountId, deposit.Amount, 0, deposit.Description, _currentUser.UserId);
+
+            monetaryAccount.LedgerAccount.MarkAsUsed();
             monetaryAccount.AdjustBalance(deposit.Amount);
         }
 

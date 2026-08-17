@@ -15,11 +15,19 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAccountingLookupService _lookup;
+    private readonly ILedgerBalanceValidationService _ledgerValidator;
 
-    public UpdateIncomeCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser)
+    public UpdateIncomeCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        IAccountingLookupService lookup,
+        ILedgerBalanceValidationService ledgerValidator)
     {
         _context = context;
         _currentUser = currentUser;
+        _lookup = lookup;
+        _ledgerValidator = ledgerValidator;
     }
 
     public async Task Handle(UpdateIncomeCommand request, CancellationToken cancellationToken)
@@ -41,40 +49,27 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
         var existingDebitEntries = document.Entries.Where(e => e.Debit > 0).ToList();
         var existingDebitLedgerAccountIds = existingDebitEntries.Select(e => e.LedgerAccountId).Distinct().ToList();
 
-         var requestedMonetaryAccountIds = request.MonetaryAccountEntries
-                .Select(e => e.MonetaryLedgerAccountId)
-                .Distinct()
-                .ToList();
+        var requestedMonetaryAccountIds = request.MonetaryAccountEntries
+               .Select(e => e.MonetaryAccountId)
+               .Distinct()
+               .ToList();
 
-        var monetaryAccounts = await _context.MonetaryAccounts
-            .Include(ma => ma.LedgerAccount)
-            .Where(a => requestedMonetaryAccountIds.Contains(a.Id) ||
-                    existingDebitLedgerAccountIds.Contains(a.Id))
-            .ToListAsync(cancellationToken);
+        var monetaryAccountLookup = await _lookup.GetMonetaryAccountsAsync(
+            requestedMonetaryAccountIds, existingDebitLedgerAccountIds, cancellationToken);
 
-        var monetaryAccountsById = monetaryAccounts.ToDictionary(a => a.Id);
-        var monetaryAccountsByLedgerId = monetaryAccounts.ToDictionary(a => a.LedgerAccountId);
-        var monetaryLedgerAccounts = monetaryAccounts.ToDictionary(a => a.LedgerAccountId, a => a.LedgerAccount);
-
-
-        // load requested credit entries( income ledger accounts)
+        // load requested credit entries (income ledger accounts)
         var requestedIncomeAccountIds = request.IncomeLedgerAccountLines.Select(l => l.LedgerAccountId).Distinct().ToList();
-        var incomeAccounts = await _context.LedgerAccounts
-            .Where(a => requestedIncomeAccountIds.Contains(a.Id) )
-            .ToDictionaryAsync(a => a.Id, cancellationToken);
-
-
-
+        var incomeAccounts = await _lookup.GetLedgerAccountsAsync(requestedIncomeAccountIds, cancellationToken);
 
         var existingEntriesById = document.Entries.ToDictionary(e => e.Id);
 
-        var incomeLedgerAccountIds = request.IncomeLedgerAccountLines
-            .Where(id => id.AccountingEntryId.HasValue)
-            .Select(id => id.AccountingEntryId!.Value)
+        var incomeLineEntryIds = request.IncomeLedgerAccountLines
+            .Where(l => l.AccountingEntryId.HasValue)
+            .Select(l => l.AccountingEntryId!.Value)
             .ToHashSet();
 
         // soft delete any credit entries (income ledger accounts) that are no longer on the document
-        foreach (var oldEntry in document.Entries.Where(e => e.Credit > 0 && !incomeLedgerAccountIds.Contains(e.Id)).ToList())
+        foreach (var oldEntry in document.Entries.Where(e => e.Credit > 0 && !incomeLineEntryIds.Contains(e.Id)).ToList())
         {
             document.RemoveEntry(oldEntry, _currentUser.UserId);
         }
@@ -82,7 +77,8 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
         foreach (var line in request.IncomeLedgerAccountLines)
         {
             var account = incomeAccounts.TryGetValue(line.LedgerAccountId, out var acc)
-                ? acc : throw new NotFoundException(nameof(LedgerAccount), line.LedgerAccountId);
+                ? acc
+                : throw new NotFoundException(nameof(LedgerAccount), line.LedgerAccountId);
 
             if (!account.IsPostingAccount)
                 throw new BusinessRuleException(Application.Common.Errors.ApplicationErrorCodes.Income.IncomeAccountNotPostable,
@@ -99,7 +95,8 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
 
             // update existing row
             var entry = existingEntriesById.TryGetValue(line.AccountingEntryId.Value, out var existingEntry)
-                ? existingEntry : throw new BusinessRuleException(ApplicationErrorCodes.Income.EntryNotFoundOnDocument,
+                ? existingEntry
+                : throw new BusinessRuleException(ApplicationErrorCodes.Income.EntryNotFoundOnDocument,
                     line.AccountingEntryId.Value);
 
             var changed = entry.LedgerAccountId != line.LedgerAccountId ||
@@ -124,7 +121,7 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
         // rows which user removed - reverse the deposits, then soft delete the entry
         foreach (var oldEntry in document.Entries.Where(e => e.Debit > 0 && !monetaryAccountEntryIds.Contains(e.Id)).ToList())
         {
-            if (monetaryAccountsByLedgerId.TryGetValue(oldEntry.LedgerAccountId, out var oldDepositAccount))
+            if (monetaryAccountLookup.ByLedgerAccountId.TryGetValue(oldEntry.LedgerAccountId, out var oldDepositAccount))
             {
                 oldDepositAccount.AdjustBalance(-oldEntry.Debit);
                 document.RemoveEntry(oldEntry, _currentUser.UserId);
@@ -133,18 +130,21 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
 
         foreach (var deposit in request.MonetaryAccountEntries)
         {
-            var monetaryAccount = monetaryAccountsById.TryGetValue(deposit.MonetaryLedgerAccountId, out var account)
-                ? account : throw new NotFoundException(nameof(MonetaryAccount), deposit.MonetaryLedgerAccountId);
+            var monetaryAccount = monetaryAccountLookup.ById.TryGetValue(deposit.MonetaryAccountId, out var account)
+                ? account
+                : throw new NotFoundException(nameof(MonetaryAccount), deposit.MonetaryAccountId);
 
-            var monetaryLedgerAccount = monetaryLedgerAccounts[monetaryAccount.LedgerAccountId];
 
             if (deposit.AccountingEntryId == null)
             {
                 // new row
                 document.EnsureCurrencyMatches(monetaryAccount.CurrencyId);
 
-                document.AddEntry(deposit.MonetaryLedgerAccountId, deposit.Amount, 0, deposit.Description, _currentUser.UserId);
-                monetaryLedgerAccount.MarkAsUsed();
+                await _ledgerValidator.ValidateAsync(monetaryAccount, request.DocumentDate, deposit.Amount, 0,
+                                    replacingEntryId: null, cancellationToken);
+
+                document.AddEntry(monetaryAccount.LedgerAccountId, deposit.Amount, 0, deposit.Description, _currentUser.UserId);
+                monetaryAccount.LedgerAccount.MarkAsUsed();
                 monetaryAccount.AdjustBalance(deposit.Amount);
                 continue;
             }
@@ -157,20 +157,25 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
 
 
 
-            if (entry.LedgerAccountId != deposit.MonetaryLedgerAccountId)
+            if (entry.LedgerAccountId != monetaryAccount.LedgerAccountId)
             {
                 // user changed the deposit account, so we need to reverse the old deposit and apply the new one
-                var oldDepositAccount = monetaryAccountsByLedgerId.TryGetValue(entry.LedgerAccountId, out var oldAccount)
-                    ? oldAccount : throw new BusinessRuleException(ApplicationErrorCodes.Income.EntryNotFoundOnDocument,
-                        (object)entry.LedgerAccountId);
+                if (monetaryAccountLookup.ByLedgerAccountId.TryGetValue(entry.LedgerAccountId, out var oldDepositAccount))
+                {
+                    oldDepositAccount.AdjustBalance(-entry.Debit);
 
-                oldDepositAccount.AdjustBalance(-entry.Debit);
+                    await _ledgerValidator.ValidateRemovalAsync(oldDepositAccount, entry.Id, cancellationToken);
+                }
 
                 document.EnsureCurrencyMatches(monetaryAccount.CurrencyId);
-                entry.UpdateEntry(deposit.MonetaryLedgerAccountId, deposit.Amount, 0, deposit.Description);
+
+                await _ledgerValidator.ValidateAsync(
+                    monetaryAccount, request.DocumentDate, deposit.Amount, 0, replacingEntryId: entry.Id, cancellationToken);
+
+                entry.UpdateEntry(monetaryAccount.LedgerAccountId, deposit.Amount, 0, deposit.Description);
                 entry.UpdateAudit(_currentUser.UserId);
                 monetaryAccount.AdjustBalance(deposit.Amount);
-                monetaryLedgerAccount.MarkAsUsed();
+                monetaryAccount.LedgerAccount.MarkAsUsed();
 
                 continue;
 
@@ -181,6 +186,9 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
             var amountDelta = deposit.Amount - entry.Debit;
             if (amountDelta == 0 && entry.Description == deposit.Description)
                 continue;
+
+            await _ledgerValidator.ValidateAsync(
+                monetaryAccount, request.DocumentDate, deposit.Amount, 0, replacingEntryId: entry.Id, cancellationToken);
 
             entry.SetAmounts(deposit.Amount, 0);
             entry.SetDescription(deposit.Description);

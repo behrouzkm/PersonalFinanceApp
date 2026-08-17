@@ -45,7 +45,7 @@ public static class ExpenditureValidationRules
 
         validator.RuleForEach(x => x.MonetaryAccountEntries).ChildRules(payment =>
         {
-            payment.RuleFor(p => p.MonetaryLedgerAccountId)
+            payment.RuleFor(p => p.MonetaryAccountId)
                 .NotEmpty()
                 .NotEqual(Guid.Empty)
                 .WithErrorCode(ApplicationErrorCodes.Expenditure.MonetaryAccountRequired);

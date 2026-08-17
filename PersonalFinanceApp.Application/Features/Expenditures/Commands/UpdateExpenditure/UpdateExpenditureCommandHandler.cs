@@ -14,11 +14,18 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
 
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
-
-    public UpdateExpenditureCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser)
+    private readonly IAccountingLookupService _lookupService;
+    private readonly ILedgerBalanceValidationService _ledgerValidator;
+    public UpdateExpenditureCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        IAccountingLookupService lookupService,
+        ILedgerBalanceValidationService ledgerValidator)
     {
         _context = context;
         _currentUser = currentUser;
+        _lookupService = lookupService;
+        _ledgerValidator = ledgerValidator;
     }
 
     public async Task Handle(UpdateExpenditureCommand request, CancellationToken cancellationToken)
@@ -42,35 +49,18 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
         var existingCreditEntries = document.Entries.Where(r => r.Credit > 0).ToList();
         var existingCreditLedgerAccountIds = existingCreditEntries.Select(s => s.LedgerAccountId).Distinct().ToList();
 
-        var requestedMonetaryAccountIds = request.MonetaryAccountEntries.Select(s => s.MonetaryLedgerAccountId).Distinct().ToList();
+        var requestedMonetaryAccountIds = request.MonetaryAccountEntries.Select(s => s.MonetaryAccountId).Distinct().ToList();
         var requestedPersonIds = request.PersonPaymentEntries.Select(s => s.PersonId).Distinct().ToList();
 
         // load all monetary accounts and persons that are either in the request or already on the document
-        var monetaryAccounts = await _context.MonetaryAccounts
-            .Include(m => m.LedgerAccount)
-            .Where(r => requestedMonetaryAccountIds.Contains(r.Id) ||
-                    existingCreditLedgerAccountIds.Contains(r.LedgerAccountId))
-            .ToListAsync();
+        var monetaryAccountLookup = await _lookupService.GetMonetaryAccountsAsync(
+         requestedMonetaryAccountIds, existingCreditLedgerAccountIds, cancellationToken);
 
-        var persons = await _context.Persons
-            .Where(r => requestedPersonIds.Contains(r.Id) ||
-                    existingCreditLedgerAccountIds.Contains(r.LedgerAccountId))
-            .ToListAsync();
-
-
-        var monetaryAccountsById = monetaryAccounts.ToDictionary(s => s.Id);
-        var monetaryAccountsByLedgerId = monetaryAccounts.ToDictionary(s => s.LedgerAccountId);
-        var monetaryLedgerAccounts = monetaryAccounts.ToDictionary(s => s.LedgerAccountId, s => s.LedgerAccount);
-
-        var personAccountById = persons.ToDictionary(d => d.Id);
-        var personAccountByLedgerId = persons.ToDictionary(d => d.LedgerAccountId);
-        var personLedgerAccounts = persons.ToDictionary(d => d.LedgerAccountId, d => d.LedgerAccount);
+        var personLookup = await _lookupService.GetPersonsAsync(
+            requestedPersonIds, existingCreditLedgerAccountIds, cancellationToken);
 
         var expenseAccountIds = request.ExpenditureLedgerAccountLines.Select(s => s.LedgerAccountId).Distinct().ToList();
-        var expenseAccounts = await _context.LedgerAccounts
-            .Where(r => expenseAccountIds.Contains(r.Id))
-            .ToDictionaryAsync(d => d.Id, cancellationToken);
-
+        var expenseAccounts = await _lookupService.GetLedgerAccountsAsync(expenseAccountIds, cancellationToken);
 
         var existingEntriesById = document.Entries.ToDictionary(d => d.Id);
         var modifiedBy = _currentUser.UserId;
@@ -80,11 +70,13 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
         SetExpenditureEntries(document, request, existingEntriesById, expenseAccounts, modifiedBy);
 
         // -- Monetary account (credit) entries --
-        SetPayment<MonetaryAccount>(document, request.MonetaryAccountEntries, existingEntriesById, monetaryAccountsById,
-                    monetaryAccountsByLedgerId, monetaryLedgerAccounts, nameof(MonetaryAccount), modifiedBy);
+        await SetPaymentAsync<MonetaryAccount>(document, request.MonetaryAccountEntries, request.DocumentDate,
+                existingEntriesById, monetaryAccountLookup.ById, monetaryAccountLookup.ByLedgerAccountId,
+                nameof(MonetaryAccount), modifiedBy, cancellationToken);
         // -- Person (credit) entries --
-        SetPayment<Person>(document, request.PersonPaymentEntries, existingEntriesById, personAccountById,
-                    personAccountByLedgerId, personLedgerAccounts, nameof(Person), modifiedBy);
+        await SetPaymentAsync<Person>(document, request.PersonPaymentEntries, request.DocumentDate,
+                existingEntriesById, personLookup.ById, personLookup.ByLedgerAccountId,
+                nameof(Person), modifiedBy, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
     }
@@ -113,12 +105,13 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
         foreach (var line in request.ExpenditureLedgerAccountLines)
         {
             var expenseLedgerAccount = expenseAccounts.TryGetValue(line.LedgerAccountId, out var acc)
-                ? acc : throw new NotFoundException(nameof(LedgerAccount), line.LedgerAccountId);
+                ? acc
+                : throw new NotFoundException(nameof(LedgerAccount), line.LedgerAccountId);
 
 
             if (!expenseLedgerAccount.IsPostingAccount)
                 throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.ExpenseAccountNotPostable,
-                                                    expenseLedgerAccount.Id, expenseLedgerAccount.Name);
+                    expenseLedgerAccount.Id, expenseLedgerAccount.Name);
 
             // new debit row
             if (line.AccountingEntryId is null)
@@ -150,15 +143,17 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
 
     }
 
-    private void SetPayment<TSource>(AccountingDocument document,
-                                IEnumerable<IPaymentDto> payments,
-                                Dictionary<Guid, AccountingEntry> existingEntriesById,
-                                Dictionary<Guid, TSource> fundSourceAccountsById,
-                                Dictionary<Guid, TSource> fundSourceAccountsByLedgerId,
-                                Dictionary<Guid, LedgerAccount> fundSourceLedgerAccounts,
-                                string entityName,
-                                Guid modifiedBy)
-                            where TSource : class, IFundSource
+    private async Task SetPaymentAsync<TSource>(
+        AccountingDocument document,
+        IEnumerable<IPaymentDto> payments,
+        DateOnly documentDate,
+        Dictionary<Guid, AccountingEntry> existingEntriesById,
+        Dictionary<Guid, TSource> fundSourceAccountsById,
+        Dictionary<Guid, TSource> fundSourceAccountsByLedgerId,
+        string entityName,
+        Guid modifiedBy,
+        CancellationToken cancellationToken)
+        where TSource : class, IFundSource
     {
         // get document's existing credit (Monetary Account/Person payments) entries from request, so we can detect which ones were removed
         // these Ids are existing credit entries on the document, not new ones to be added or removed
@@ -174,30 +169,36 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
             {
                 oldSourceAccount.AdjustBalance(oldEntry.Credit);
                 document.RemoveEntry(oldEntry, modifiedBy);
+
+                await _ledgerValidator.ValidateRemovalAsync(oldSourceAccount, oldEntry.Id, cancellationToken);
             }
         }
 
         // process new credit (Monetary Account/Person payments) rows or updated existing credit rows
         foreach (var payment in payments)
         {
-            var paymentLedgerAccount = fundSourceAccountsById.TryGetValue(payment.FundSourceId, out var src)
+            var paymentSource = fundSourceAccountsById.TryGetValue(payment.FundSourceId, out var src)
                     ? src
                     : throw new NotFoundException(entityName, payment.FundSourceId);
 
-            var ledgerAccount = fundSourceLedgerAccounts[paymentLedgerAccount.LedgerAccountId];
+            var ledgerAccountEntity = GetLedgerAccount(paymentSource);
 
 
             // new credit (Monetary Account/Person payments) row
             if (payment.AccountingEntryId is null)
             {
-                document.EnsureCurrencyMatches(paymentLedgerAccount.CurrencyId);
-                if (!paymentLedgerAccount.CanWithdraw(payment.Amount))
-                    throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
-                        paymentLedgerAccount.Id, paymentLedgerAccount.DisplayName, payment.Amount);
+                document.EnsureCurrencyMatches(paymentSource.CurrencyId);
 
-                document.AddEntry(paymentLedgerAccount.LedgerAccountId, 0, payment.Amount, payment.Description, modifiedBy);
-                ledgerAccount.MarkAsUsed();
-                paymentLedgerAccount.AdjustBalance(-payment.Amount);
+                if (!paymentSource.CanWithdraw(payment.Amount))
+                    throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
+                        paymentSource.Id, paymentSource.DisplayName, payment.Amount);
+
+                await _ledgerValidator.ValidateAsync(paymentSource, documentDate, 0, payment.Amount,
+                    replacingEntryId: null, cancellationToken);
+
+                document.AddEntry(paymentSource.LedgerAccountId, 0, payment.Amount, payment.Description, modifiedBy);
+                ledgerAccountEntity.MarkAsUsed();
+                paymentSource.AdjustBalance(-payment.Amount);
                 continue;
             }
 
@@ -206,7 +207,7 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
                 ? existing
                 : throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.EntryNotFoundOnDocument);
 
-            var ledgerAccountChanged = entry.LedgerAccountId != paymentLedgerAccount.LedgerAccountId;
+            var ledgerAccountChanged = entry.LedgerAccountId != paymentSource.LedgerAccountId;
 
             // if the ledger account has changed, we need to reverse the old account's balance and apply
             // the new account's balance
@@ -216,19 +217,23 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
                 if (fundSourceAccountsByLedgerId.TryGetValue(entry.LedgerAccountId, out var oldAccount))
                 {
                     oldAccount.AdjustBalance(entry.Credit);
+                    await _ledgerValidator.ValidateRemovalAsync(oldAccount, entry.Id, cancellationToken);
                 }
 
-                document.EnsureCurrencyMatches(paymentLedgerAccount.CurrencyId);
+                document.EnsureCurrencyMatches(paymentSource.CurrencyId);
 
-                if (!paymentLedgerAccount.CanWithdraw(payment.Amount))
+                if (!paymentSource.CanWithdraw(payment.Amount))
                     throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
-                        paymentLedgerAccount.Id, paymentLedgerAccount.DisplayName, payment.Amount);
+                        paymentSource.Id, paymentSource.DisplayName, payment.Amount);
 
-                entry.UpdateEntry(paymentLedgerAccount.LedgerAccountId, 0, payment.Amount, payment.Description);
+                await _ledgerValidator.ValidateAsync(paymentSource, documentDate, 0, payment.Amount,
+                        replacingEntryId: entry.Id, cancellationToken);
+
+                entry.UpdateEntry(paymentSource.LedgerAccountId, 0, payment.Amount, payment.Description);
                 entry.UpdateAudit(modifiedBy);
-                paymentLedgerAccount.AdjustBalance(-payment.Amount);
+                paymentSource.AdjustBalance(-payment.Amount);
 
-                ledgerAccount.MarkAsUsed();
+                ledgerAccountEntity.MarkAsUsed();
 
                 continue;
             }
@@ -238,15 +243,29 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
             if (amountDelta == 0 && entry.Description == payment.Description)
                 continue;
 
-            if (amountDelta > 0 && !paymentLedgerAccount.CanWithdraw(amountDelta))
+            if (amountDelta > 0 && !paymentSource.CanWithdraw(amountDelta))
                 throw new BusinessRuleException(ApplicationErrorCodes.Expenditure.InsufficientBalance,
-                    paymentLedgerAccount.Id, paymentLedgerAccount.DisplayName, amountDelta);
+                    paymentSource.Id, paymentSource.DisplayName, amountDelta);
+
+            await _ledgerValidator.ValidateAsync(paymentSource, documentDate, 0, payment.Amount,
+                      replacingEntryId: entry.Id, cancellationToken);
 
             entry.SetAmounts(0, payment.Amount);
             entry.SetDescription(payment.Description);
             entry.UpdateAudit(modifiedBy);
-            paymentLedgerAccount.AdjustBalance(-amountDelta);
+            paymentSource.AdjustBalance(-amountDelta);
 
         }
+
     }
+
+    // IFundSource doesn't expose the LedgerAccount navigation (only LedgerAccountId),
+    // so MarkAsUsed() needs the concrete entity's own property - this switch keeps that
+    // one narrow cast in a single place instead of repeating it at every call site.
+    private static LedgerAccount GetLedgerAccount(IFundSource source) => source switch
+    {
+        MonetaryAccount monetaryAccount => monetaryAccount.LedgerAccount,
+        Person person => person.LedgerAccount,
+        _ => throw new NotSupportedException($"Unsupported fund source type: {source.GetType().Name}")
+    };
 }
