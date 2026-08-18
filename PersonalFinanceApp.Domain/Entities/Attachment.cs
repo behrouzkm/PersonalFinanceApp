@@ -2,6 +2,8 @@ using PersonalFinanceApp.Domain.Common;
 using PersonalFinanceApp.Domain.Enums;
 using PersonalFinanceApp.Domain.Errors;
 
+namespace PersonalFinanceApp.Domain.Entities;
+
 public class Attachment : BaseAuditableEntity
 {
     public Guid ReferenceId { get; private set; }
