@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalFinanceApp.Application.Common.Errors;
 
 namespace PersonalFinanceApp.Application.Common.Exceptions;
 
@@ -15,7 +16,7 @@ public class NotFoundException : Exception
     public NotFoundException(string entityName, object key)
         : base($"Entity \"{entityName}\" ({key}) was not found.")
     {
-        ErrorCode = "ApplicationErrorCodes.Common.NotFound";
+        ErrorCode = ApplicationErrorCodes.Common.NotFound;
         EntityName = entityName;
         Key = key;
     }

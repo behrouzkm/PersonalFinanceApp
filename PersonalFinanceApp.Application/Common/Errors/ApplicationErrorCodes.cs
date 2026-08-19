@@ -10,6 +10,9 @@ public static class ApplicationErrorCodes
     public static class Common
     {
         public const string NotFound = "ErrorCodes.Common.NotFound";
+        public const string ValidationFailed = "ErrorCodes.Common.ValidationFailed";
+        public const string ConcurrencyConflict = "ErrorCodes.Common.ConcurrencyConflict";
+        public const string UnexpectedError = "ErrorCodes.Common.UnexpectedError";
     }
     public static class ExpenditureList
     {
