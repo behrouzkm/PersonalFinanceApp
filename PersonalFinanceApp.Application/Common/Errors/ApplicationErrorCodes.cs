@@ -14,6 +14,23 @@ public static class ApplicationErrorCodes
         public const string ConcurrencyConflict = "ErrorCodes.Common.ConcurrencyConflict";
         public const string UnexpectedError = "ErrorCodes.Common.UnexpectedError";
     }
+
+    public static class Auth
+    {
+        public const string EmailRequired = "ErrorCodes.Auth.EmailRequired";
+        public const string EmailInvalid = "ErrorCodes.Auth.EmailInvalid";
+        public const string PasswordRequired = "ErrorCodes.Auth.PasswordRequired";
+        public const string TenantNameRequired = "ErrorCodes.Auth.TenantNameRequired";
+        public const string FirstNameRequired = "ErrorCodes.Auth.FirstNameRequired";
+        public const string LastNameRequired = "ErrorCodes.Auth.LastNameRequired";
+        public const string DefaultLanguageRequired = "ErrorCodes.Auth.DefaultLanguageRequired";
+        public const string DefaultCurrencyRequired = "ErrorCodes.Auth.DefaultCurrencyRequired";
+
+        public const string RegistrationFailed = "ErrorCodes.Auth.RegistrationFailed";
+        public const string LoginFailed = "ErrorCodes.Auth.LoginFailed";
+
+
+    }
     public static class ExpenditureList
     {
         public const string FromLaterThanToDate = "ErrorCodes.ExpenditureList.FromLaterThanToDate";

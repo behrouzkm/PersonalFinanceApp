@@ -1,12 +1,15 @@
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Common;
 using PersonalFinanceApp.Domain.Entities;
+using PersonalFinanceApp.Infrastructure.Identity;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence;
 
-public class ApplicationDbContext : DbContext, IApplicationDbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser,IdentityRole<Guid>,Guid>, IApplicationDbContext
 {
     private readonly ICurrentUserService _currentUser;
 
@@ -37,6 +40,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Must run first - configures Identity's own tables (AspNetUsers, AspNetRoles,
+        // etc.) before our own configurations and filters are applied on top.
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
         // Global query filter: every entity derived from BaseAuditableEntity is
@@ -49,10 +56,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (!typeof(BaseAuditableEntity).IsAssignableFrom(entityType.ClrType))
-                continue;
-
-            var type = entityType as BaseEntity;
-            if (type == null)
                 continue;
 
             var parameter = Expression.Parameter(entityType.ClrType, "e");
@@ -70,7 +73,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
         }
 
-        base.OnModelCreating(modelBuilder);
+
     }
 
     // Entry<TEntity>(TEntity) is not redeclared here - DbContext already exposes a

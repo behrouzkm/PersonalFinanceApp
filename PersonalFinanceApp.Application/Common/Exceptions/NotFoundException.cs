@@ -9,7 +9,7 @@ namespace PersonalFinanceApp.Application.Common.Exceptions;
 public class NotFoundException : Exception
 {
 
-    public string ErrorCode {get; }
+    public string ErrorCode { get; }
     public string EntityName { get; }
     public object Key { get; }
 

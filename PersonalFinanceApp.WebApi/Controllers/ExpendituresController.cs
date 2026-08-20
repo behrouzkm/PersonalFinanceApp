@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinanceApp.Application.Common.Models;
 using PersonalFinanceApp.Application.Features.Expenditures.Commands.CreateExpenditure;
@@ -16,6 +17,7 @@ namespace PersonalFinanceApp.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ExpendituresController : ControllerBase
 {
     private readonly IMediator _mediator;
