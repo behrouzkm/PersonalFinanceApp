@@ -427,3 +427,12 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+ 
+# App secrets - local override files that may contain real connection strings,
+# API keys, or JWT secrets. appsettings.json itself stays tracked (placeholders
+# only) - these are the files a developer's own machine might populate with
+# real values and must never be committed.
+appsettings.Development.json
+appsettings.*.local.json
+*.env.local
+secrets.json
