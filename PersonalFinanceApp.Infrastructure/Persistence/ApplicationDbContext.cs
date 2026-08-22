@@ -9,7 +9,7 @@ using PersonalFinanceApp.Infrastructure.Identity;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser,IdentityRole<Guid>,Guid>, IApplicationDbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IApplicationDbContext
 {
     private readonly ICurrentUserService _currentUser;
 
@@ -37,6 +37,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser,IdentityRo
     public DbSet<Person> Persons => Set<Person>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<SystemTemplate> SystemTemplates => Set<SystemTemplate>();
+    public DbSet<ApiAuditLog> ApiAuditLogs => Set<ApiAuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +57,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser,IdentityRo
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (!typeof(BaseAuditableEntity).IsAssignableFrom(entityType.ClrType))
+                continue;
+
+            // Under TPC (and any EF inheritance mapping), a query filter can only be
+            // declared on the hierarchy's root entity type - EF Core rejects it on a
+            // derived type (e.g. BankAccount/CashAccount under MonetaryAccount) and
+            // propagates a root-level filter down to every derived type automatically.
+            // entityType.BaseType is non-null exactly when this type is NOT the root.
+            if (entityType.BaseType != null)
                 continue;
 
             var parameter = Expression.Parameter(entityType.ClrType, "e");

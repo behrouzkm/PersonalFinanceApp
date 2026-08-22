@@ -26,11 +26,12 @@ public class GlobalExceptionHandler : IExceptionHandler
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        var (statusCode, body) = Map(exception);
+        var correlationId = httpContext.TraceIdentifier;
+        var (statusCode, body) = Map(exception,correlationId);
 
         // Full exception (with English message, stack trace) goes to the log only -
         // never to the client response.
-        _logger.LogError(exception, "Request failed, mapped to {StatusCode}", statusCode);
+        _logger.LogError(exception, "Request {CorrelationId} failed, mapped to {StatusCode}",correlationId, statusCode);
 
         httpContext.Response.StatusCode = statusCode;
         await httpContext.Response.WriteAsJsonAsync(body, cancellationToken);
@@ -38,30 +39,30 @@ public class GlobalExceptionHandler : IExceptionHandler
         return true;
     }
 
-    private static (int StatusCode, object Body) Map(Exception exception) => exception switch
+    private static (int StatusCode, object Body) Map(Exception exception,string correlationId) => exception switch
     {
         DomainException domainEx => (
             StatusCodes.Status400BadRequest,
-            new { errorCode = domainEx.ErrorCode, parameters = Array.Empty<object>() }),
+            new { errorCode = domainEx.ErrorCode, parameters = Array.Empty<object>(),correlationId }),
 
         BusinessRuleException businessEx => (
             StatusCodes.Status400BadRequest,
-            new { errorCode = businessEx.ErrorCode, parameters = businessEx.Parameters }),
+            new { errorCode = businessEx.ErrorCode, parameters = businessEx.Parameters, correlationId }),
 
         NotFoundException notFoundEx => (
             StatusCodes.Status404NotFound,
-            new { errorCode = notFoundEx.ErrorCode, entityName = notFoundEx.EntityName, key = notFoundEx.Key }),
+            new { errorCode = notFoundEx.ErrorCode, entityName = notFoundEx.EntityName, key = notFoundEx.Key, correlationId }),
 
         ValidationException validationEx => (
             StatusCodes.Status400BadRequest,
-            new { errorCode = ApplicationErrorCodes.Common.ValidationFailed, errors = validationEx.Errors }),
+            new { errorCode = ApplicationErrorCodes.Common.ValidationFailed, errors = validationEx.Errors, correlationId }),
 
         DbUpdateConcurrencyException => (
             StatusCodes.Status409Conflict,
-            new { errorCode = ApplicationErrorCodes.Common.ConcurrencyConflict, parameters = Array.Empty<object>() }),
+            new { errorCode = ApplicationErrorCodes.Common.ConcurrencyConflict, parameters = Array.Empty<object>(), correlationId }),
 
         _ => (
             StatusCodes.Status500InternalServerError,
-            new { errorCode = ApplicationErrorCodes.Common.UnexpectedError, parameters = Array.Empty<object>() })
+            new { errorCode = ApplicationErrorCodes.Common.UnexpectedError, parameters = Array.Empty<object>(), correlationId })
     };
 }

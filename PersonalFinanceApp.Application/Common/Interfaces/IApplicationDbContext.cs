@@ -28,6 +28,7 @@ public interface IApplicationDbContext
     DbSet<Person> Persons { get; }
     DbSet<Tenant> Tenants { get; }
     DbSet<SystemTemplate> SystemTemplates { get; }
+    DbSet<ApiAuditLog> ApiAuditLogs {get;}
 
 
     EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;

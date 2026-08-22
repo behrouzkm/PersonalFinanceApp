@@ -28,6 +28,43 @@ public class IdentityService : IIdentityService
         _context = context;
     }
 
+
+    public async Task<IdentityRegistrationResult> CreateUserForExistingTenantAsync(
+            string email,
+            string password,
+            string firstName,
+            string lastName,
+            Guid tenantId,
+            CancellationToken cancellationToken)
+    {
+        var user = new ApplicationUser
+        {
+            UserName=email,
+            Email=email,
+            FirstName=firstName,
+            LastName=lastName,
+            TenantId=tenantId
+
+        };
+
+        var result = await _userManager.CreateAsync(user,password);
+
+        if(!result.Succeeded)
+        {
+            return new IdentityRegistrationResult
+            {
+                Succeeded=false,
+                Errors= result.Errors.Select(e=>e.Description).ToList()
+            };
+        }
+
+        return new IdentityRegistrationResult
+        {
+            Succeeded=true,
+            UserId = user.Id
+        };
+    }
+
     public async Task<IdentityLoginResult> LoginAsync(
             string email,
             string password,

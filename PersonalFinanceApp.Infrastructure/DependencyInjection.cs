@@ -42,10 +42,15 @@ public static class DependencyInjection
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
+        var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>() ?? new JwtSettings();
+
+        // TokenService's constructor takes JwtSettings directly (not IOptions<JwtSettings>),
+        // so it needs its own registration here - Configure<T> alone only registers the
+        // IOptions<T>/IOptionsSnapshot<T>/IOptionsMonitor<T> wrappers, never the bare type.
+        services.AddSingleton(jwtSettings);
+
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IIdentityService, IdentityService>();
-
-        var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>() ?? new JwtSettings();
 
         services.AddAuthentication(options =>
             {

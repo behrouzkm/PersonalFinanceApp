@@ -15,16 +15,11 @@ using PersonalFinanceApp.Application.Features.Expenditures.Queries.GetExpenditur
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
 [Authorize]
-public class ExpendituresController : ControllerBase
+public class ExpendituresController : BaseApiController
 {
-    private readonly IMediator _mediator;
-
-    public ExpendituresController(IMediator mediator)
+    public ExpendituresController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     [HttpPost]

@@ -29,7 +29,7 @@ public static class ApplicationErrorCodes
         public const string RegistrationFailed = "ErrorCodes.Auth.RegistrationFailed";
         public const string LoginFailed = "ErrorCodes.Auth.LoginFailed";
 
-
+        public const string TenantInactive = "ErrorCodes.Auth.TenantInactive";
     }
     public static class ExpenditureList
     {

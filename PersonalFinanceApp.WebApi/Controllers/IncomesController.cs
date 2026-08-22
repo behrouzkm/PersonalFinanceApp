@@ -15,16 +15,11 @@ using PersonalFinanceApp.Application.Features.Incomes.Queries.GetIncomesList;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
 [Authorize]
-public class IncomesController : ControllerBase
+public class IncomesController : BaseApiController
 {
-    private readonly IMediator _mediator;
-
-    public IncomesController(IMediator mediator)
+      public IncomesController(IMediator mediator): base(mediator)
     {
-        _mediator = mediator;
     }
 
     [HttpPost]

@@ -18,6 +18,17 @@ public interface IIdentityService
         CancellationToken cancellationToken
     );
 
+    // no tenant is created here - tenantId must already exist
+    Task<IdentityRegistrationResult> CreateUserForExistingTenantAsync(
+        string email,
+        string password,
+        string firstName,
+        string lastName,
+        Guid tenantId,
+        CancellationToken cancellationToken
+    );
+
+
     Task<IdentityLoginResult> LoginAsync(
         string email,
         string password,

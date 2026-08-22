@@ -6,24 +6,22 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PersonalFinanceApp.Application.Features.Auth.Commands.CreateTenantUser;
 using PersonalFinanceApp.Application.Features.Auth.Commands.Login;
 using PersonalFinanceApp.Application.Features.Auth.Commands.Register;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-[AllowAnonymous]
-public class AuthController : ControllerBase
-{
-    private readonly IMediator _mediator;
 
-    public AuthController(IMediator mediator)
+public class AuthController : BaseApiController
+{
+
+    public AuthController(IMediator mediator): base(mediator)
     {
-        _mediator = mediator;
     }
 
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<ActionResult<Guid>> Register(RegisterCommand command, CancellationToken cancellationToken)
     {
         var userId = await _mediator.Send(command,cancellationToken);
@@ -32,11 +30,22 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<ActionResult<string>> Login (LoginCommand command,CancellationToken cancellationToken)
     {
         var token = await _mediator.Send(command,cancellationToken);
 
         return Ok(token);
+    }
+
+    [HttpPost("users")]
+    [Authorize]
+    public async Task<ActionResult<Guid>> CreateTenantUser(CreateTenantUserCommand command,
+                        CancellationToken cancellationToken)
+    {
+        var userId = await _mediator.Send(command,cancellationToken);
+
+        return Ok(userId);
     }
 
 }
