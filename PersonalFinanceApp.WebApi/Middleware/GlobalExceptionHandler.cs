@@ -15,14 +15,8 @@ namespace PersonalFinanceApp.WebApi.Middleware;
 // parameters where relevant) - never a formatted English sentence. Translating the
 // code into the user's language is the client's job, not this API's - see the
 // multi-lingual design decided earlier in this project.
-public class GlobalExceptionHandler : IExceptionHandler
+public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
-    private readonly ILogger<GlobalExceptionHandler> _logger;
-
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
-    {
-        _logger = logger;
-    }
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
@@ -31,7 +25,7 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         // Full exception (with English message, stack trace) goes to the log only -
         // never to the client response.
-        _logger.LogError(exception, "Request {CorrelationId} failed, mapped to {StatusCode}",correlationId, statusCode);
+        logger.LogError(exception, "Request {CorrelationId} failed, mapped to {StatusCode}",correlationId, statusCode);
 
         httpContext.Response.StatusCode = statusCode;
         await httpContext.Response.WriteAsJsonAsync(body, cancellationToken);

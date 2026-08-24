@@ -11,11 +11,10 @@ using PersonalFinanceApp.Application.Features.Expenditures.Commands.DeleteExpend
 using PersonalFinanceApp.Application.Features.Expenditures.Commands.RestoreExpenditure;
 using PersonalFinanceApp.Application.Features.Expenditures.Commands.UpdateExpenditure;
 using PersonalFinanceApp.Application.Features.Expenditures.Queries.GetExpenditureById;
-using PersonalFinanceApp.Application.Features.Expenditures.Queries.GetExpenditureByList;
+using PersonalFinanceApp.Application.Features.Expenditures.Queries.GetExpendituresList;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
-[Authorize]
 public class ExpendituresController : BaseApiController
 {
     public ExpendituresController(IMediator mediator) : base(mediator)

@@ -17,8 +17,9 @@ public class Currency
 
     private Currency() { }
 
-    public Currency(string code, string name, int decimalPlaces = 2, string symbol = "")
+    public Currency(byte id, string code, string name, int decimalPlaces = 2, string symbol = "")
     {
+        SetId(id);
         ChangeCode(code);
         ChangeName(name);
         SetDecimalPlaces(decimalPlaces);
@@ -33,6 +34,13 @@ public class Currency
         ChangeSymbol(symbol);
     }
 
+    private void SetId(byte id)
+    {
+        if (id == 0)
+            throw new DomainException(DomainErrors.Currency.InvalidId);
+
+        Id = id;
+    }
     public void ChangeName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -46,7 +54,7 @@ public class Currency
         if (string.IsNullOrWhiteSpace(code))
             throw new DomainException(DomainErrors.Currency.CodeRequired);
 
-        if(code.Length != 3 || !code.All(char.IsLetter))
+        if (code.Length != 3 || !code.All(char.IsLetter))
             throw new DomainException(DomainErrors.Currency.CodeMustBeThreeLetters);
 
         Code = code.Trim().ToUpperInvariant();

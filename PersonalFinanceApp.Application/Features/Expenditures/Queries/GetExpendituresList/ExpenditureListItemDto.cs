@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PersonalFinanceApp.Application.Features.Expenditures.Queries.GetExpenditureByList;
+namespace PersonalFinanceApp.Application.Features.Expenditures.Queries.GetExpendituresList;
 
 public class ExpenditureListItemDto
 {

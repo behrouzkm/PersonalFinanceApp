@@ -15,7 +15,6 @@ using PersonalFinanceApp.Application.Features.Incomes.Queries.GetIncomesList;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
-[Authorize]
 public class IncomesController : BaseApiController
 {
       public IncomesController(IMediator mediator): base(mediator)
@@ -25,7 +24,7 @@ public class IncomesController : BaseApiController
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(CreateIncomeCommand command, CancellationToken cancellationToken)
     {
-        var id = _mediator.Send(command, cancellationToken);
+        var id = await _mediator.Send(command, cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id }, id);
     }
@@ -66,7 +65,7 @@ public class IncomesController : BaseApiController
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<IncomeDetailsDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var result = _mediator.Send(new GetIncomeByIdQuery
+        var result = await _mediator.Send(new GetIncomeByIdQuery
         {
             AccountingDocumentId = id
         }, cancellationToken);
@@ -78,7 +77,7 @@ public class IncomesController : BaseApiController
     public async Task<ActionResult<PaginatedList<IncomeListItemDto>>> GetList([FromQuery] GetIncomesListQuery query,
                         CancellationToken cancellationToken)
     {
-        var result = _mediator.Send(query, cancellationToken);
+        var result = await _mediator.Send(query, cancellationToken);
 
         return Ok(result);
     }

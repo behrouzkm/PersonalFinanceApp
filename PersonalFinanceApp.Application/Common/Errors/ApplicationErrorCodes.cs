@@ -15,6 +15,17 @@ public static class ApplicationErrorCodes
         public const string UnexpectedError = "ErrorCodes.Common.UnexpectedError";
     }
 
+    public static class Currency
+    {
+        public const string IdRequired = "ApplicationErrorCodes.Currency.IdRequired";
+        public const string CodeRequired = "ApplicationErrorCodes.Currency.CodeRequired";
+        public const string InvalidCurrencyCode = "ApplicationErrorCodes.Currency.InvalidCurrencyCode";
+        public const string NameRequired = "ApplicationErrorCodes.Currency.NameRequired";
+        public const string DecimalRequired = "ApplicationErrorCodes.Currency.DecimalRequired";
+        public const string InvalidDecimalPlaces = "ApplicationErrorCodes.Currency.InvalidDecimalPlaces";
+        public const string SymbolRequired = "ApplicationErrorCodes.Currency.SymbolRequired";
+        public const string DuplicateCodeOrName = "ApplicationErrorCodes.Currency.DuplicateCodeOrName";
+    }
     public static class Auth
     {
         public const string EmailRequired = "ErrorCodes.Auth.EmailRequired";
@@ -31,10 +42,12 @@ public static class ApplicationErrorCodes
 
         public const string TenantInactive = "ErrorCodes.Auth.TenantInactive";
     }
+
     public static class ExpenditureList
     {
         public const string FromLaterThanToDate = "ErrorCodes.ExpenditureList.FromLaterThanToDate";
     }
+
     public static class Expenditure
     {
         public const string ExpenseAccountNotPostable = "ErrorCodes.Expenditure.ExpenseAccountNotPostable";

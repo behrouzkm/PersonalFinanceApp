@@ -10,7 +10,7 @@ public static class DomainErrors
     public static class Person
     {
         public const string OpeningDateCannotBeInFuture = "ErrorCodes.Person.OpeningDateCannotBeInFuture";
-      public const string DisplayNameRequired = "ErrorCodes.Person.DisplayNameRequired";
+        public const string DisplayNameRequired = "ErrorCodes.Person.DisplayNameRequired";
         public const string LedgerAccountRequired = "ErrorCodes.Person.LedgerAccountRequired";
         public const string CurrencyRequired = "ErrorCodes.Person.CurrencyRequired";
         public const string InvalidEmailFormat = "ErrorCodes.Person.InvalidEmailFormat";
@@ -20,7 +20,7 @@ public static class DomainErrors
         public const string CreditLimitCannotBeNegative = "ErrorCodes.Person.CreditLimitCannotBeNegative";
         public const string CreditLimitCannotBeLessThanCurrentNegativeBalance = "ErrorCodes.Person.CreditLimitCannotBeLessThanCurrentNegativeBalance";
         public const string InitialBalanceCannotBeLessThanCreditLimit = "ErrorCodes.Person.InitialBalanceCannotBeLessThanCreditLimit";
-       public const string CurrentBalanceCannotBeLessThanCreditLimit = "ErrorCodes.Person.CurrentBalanceCannotBeLessThanCreditLimit";
+        public const string CurrentBalanceCannotBeLessThanCreditLimit = "ErrorCodes.Person.CurrentBalanceCannotBeLessThanCreditLimit";
 
     }
 
@@ -64,6 +64,7 @@ public static class DomainErrors
 
     public static class Currency
     {
+        public const string InvalidId = "ErrorCodes.Currency.InvalidId";
         public const string CodeRequired = "ErrorCodes.Currency.CodeRequired";
         public const string CodeMustBeThreeLetters = "ErrorCodes.Currency.CodeMustBeThreeLetters";
         public const string NameRequired = "ErrorCodes.Currency.NameRequired";
@@ -79,7 +80,7 @@ public static class DomainErrors
         public const string LedgerAccountRequired = "ErrorCodes.MonetaryAccount.LedgerAccountRequired";
         public const string OpeningDateCannotBeInFuture = "ErrorCodes.MonetaryAccount.OpeningDateCannotBeInFuture";
         public const string InitialBalanceCannotBeLessThanCreditLimit = "ErrorCodes.MonetaryAccount.InitialBalanceCannotBeLessThanCreditLimit";
-      public const string DisplayOrderCannotBeNegative = "ErrorCodes.MonetaryAccount.DisplayOrderCannotBeNegative";
+        public const string DisplayOrderCannotBeNegative = "ErrorCodes.MonetaryAccount.DisplayOrderCannotBeNegative";
         public const string CurrentBalanceCannotBeLessThanCreditLimit = "ErrorCodes.MonetaryAccount.CurrentBalanceCannotBeLessThanCreditLimit";
         public const string CreditLimitCannotBeNegative = "ErrorCodes.MonetaryAccount.CreditLimitCannotBeNegative";
         public const string CreditLimitCannotBeLessThanCurrentNegativeBalance = "ErrorCodes.MonetaryAccount.CreditLimitCannotBeLessThanCurrentNegativeBalance";
@@ -99,9 +100,9 @@ public static class DomainErrors
     public static class AccountingDocument
     {
         public const string DocumentTypeRequired = "ErrorCodes.AccountingDocument.DocumentTypeRequired";
-    public const string RunningBalanceBelowCreditLimit = "ErrorCodes.AccountingDocument.RunningBalanceBelowCreditLimit";
-      public const string DocumentDateCannotBeBeforeFundSourceOpeningDate = "ErrorCodes.AccountingDocument.DocumentDateCannotBeBeforeFundSourceOpeningDate";
-   public const string DocumentDateCannotBeInFuture = "ErrorCodes.AccountingDocument.DocumentDateCannotBeInFuture";
+        public const string RunningBalanceBelowCreditLimit = "ErrorCodes.AccountingDocument.RunningBalanceBelowCreditLimit";
+        public const string DocumentDateCannotBeBeforeFundSourceOpeningDate = "ErrorCodes.AccountingDocument.DocumentDateCannotBeBeforeFundSourceOpeningDate";
+        public const string DocumentDateCannotBeInFuture = "ErrorCodes.AccountingDocument.DocumentDateCannotBeInFuture";
         public const string EntryRequired = "ErrorCodes.AccountingDocument.EntryRequired";
         public const string DuplicateEntryNotAllowed = "ErrorCodes.AccountingDocument.DuplicateEntryNotAllowed";
         public const string CurrencyMismatch = "ErrorCodes.AccountingDocument.CurrencyMismatch";
