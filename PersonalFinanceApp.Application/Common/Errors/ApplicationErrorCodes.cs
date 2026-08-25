@@ -25,6 +25,7 @@ public static class ApplicationErrorCodes
         public const string InvalidDecimalPlaces = "ApplicationErrorCodes.Currency.InvalidDecimalPlaces";
         public const string SymbolRequired = "ApplicationErrorCodes.Currency.SymbolRequired";
         public const string DuplicateCodeOrName = "ApplicationErrorCodes.Currency.DuplicateCodeOrName";
+        public const string CurrencyInUse = "ApplicationErrorCodes.Currency.CurrencyInUse";
     }
     public static class Auth
     {

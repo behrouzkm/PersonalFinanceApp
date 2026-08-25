@@ -107,7 +107,7 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
         {
             var monetaryAccount = monetaryAccountLookup.ById[payment.MonetaryAccountId];
 
-            ApplyPayment(expenditureDocument, monetaryAccount, monetaryAccount.LedgerAccount, request.DocumentDate,
+            await ApplyPayment(expenditureDocument, monetaryAccount, monetaryAccount.LedgerAccount, request.DocumentDate,
                     payment.Amount, payment.Description, _currentUser.UserId, cancellationToken);
 
         }
@@ -117,7 +117,7 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
         {
             var person = personLookup.ById[payment.PersonId];
 
-            ApplyPayment(expenditureDocument, person, person.LedgerAccount, request.DocumentDate,
+            await ApplyPayment(expenditureDocument, person, person.LedgerAccount, request.DocumentDate,
                     payment.Amount, payment.Description, _currentUser.UserId, cancellationToken);
         }
 

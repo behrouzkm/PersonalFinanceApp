@@ -27,6 +27,23 @@ public class DeleteCurrencyCommandHandler : IRequestHandler<DeleteCurrencyComman
                 ?? throw new NotFoundException(nameof(Currency), request.Id);
 
 
+        var currencyInUse = await _context.Tenants
+                .AnyAsync(r => r.DefaultCurrencyId == request.Id, cancellationToken);
+
+        currencyInUse |= await _context.MonetaryAccounts
+                .AnyAsync(r => r.CurrencyId == request.Id, cancellationToken);
+
+        currencyInUse |= await _context.Persons
+                .AnyAsync(r => r.CurrencyId == request.Id, cancellationToken);
+
+        currencyInUse |= await _context.AccountingDocuments
+                .AnyAsync(r => r.CurrencyId == request.Id, cancellationToken);
+
+        currencyInUse |= await _context.MoneyTransfers
+                .AnyAsync(r => r.CurrencyId == request.Id, cancellationToken);
+
+        if (currencyInUse)
+            throw new BusinessRuleException(ApplicationErrorCodes.Currency.CurrencyInUse, request.Id, currency.Name);
 
         _context.Currencies.Remove(currency);
 

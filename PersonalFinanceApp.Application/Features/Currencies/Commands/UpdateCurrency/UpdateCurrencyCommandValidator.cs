@@ -24,8 +24,7 @@ public class UpdateCurrencyCommandValidator : AbstractValidator<UpdateCurrencyCo
             .WithErrorCode(ApplicationErrorCodes.Currency.NameRequired);
 
         RuleFor(x => x.DecimalPlaces)
-            .InclusiveBetween(0, 2).WithErrorCode(ApplicationErrorCodes.Currency.InvalidDecimalPlaces)
-            .NotEmpty().WithErrorCode(ApplicationErrorCodes.Currency.DecimalRequired);
+            .Must(x => x <= 3).WithErrorCode(ApplicationErrorCodes.Currency.InvalidDecimalPlaces);
 
 
         RuleFor(x => x.Symbol)

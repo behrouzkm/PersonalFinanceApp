@@ -12,6 +12,7 @@ using PersonalFinanceApp.Application.Features.Currencies.Commands.UpdateCurrency
 using PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrencyById;
 using PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrenciesList;
 using PersonalFinanceApp.Domain.Entities;
+using PersonalFinanceApp.Application.Features.Common;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
@@ -22,7 +23,7 @@ public class CurrenciesController : BaseApiController
     }
 
     [HttpPost]
-    public async Task<ActionResult<Guid>> Create(CreateCurrencyCommand command, CancellationToken cancellationToken)
+    public async Task<ActionResult<byte>> Create(CreateCurrencyCommand command, CancellationToken cancellationToken)
     {
         var id = await _mediator.Send(command, cancellationToken);
 
@@ -33,7 +34,7 @@ public class CurrenciesController : BaseApiController
     public async Task<IActionResult> Update(byte id, UpdateCurrencyCommand command, CancellationToken cancellationToken)
     {
         if (id != command.Id)
-            return BadRequest("Route currencyId and currencyId must match.");
+            return BadRequest("Route id and command CurrencyId must match.");
 
         await _mediator.Send(command, cancellationToken);
         return NoContent();
@@ -52,7 +53,7 @@ public class CurrenciesController : BaseApiController
 
 
     [HttpGet("{id:byte}")]
-    public async Task<ActionResult<Currency>> GetById(byte id, CancellationToken cancellationToken)
+    public async Task<ActionResult<CurrencyDto>> GetById(byte id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetCurrencyByIdQuery
         {
@@ -63,7 +64,7 @@ public class CurrenciesController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<ActionResult<PaginatedList<Currency>>> GetList([FromQuery] GetCurrenciesListQuery query,
+    public async Task<ActionResult<PaginatedList<CurrencyDto>>> GetList([FromQuery] GetCurrenciesListQuery query,
                         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(query, cancellationToken);

@@ -11,7 +11,7 @@ using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrencyById;
 
-public class GetCurrencyByIdQueryHandler : IRequestHandler<GetCurrencyByIdQuery, Currency>
+public class GetCurrencyByIdQueryHandler : IRequestHandler<GetCurrencyByIdQuery, CurrencyDto>
 {
     private readonly IApplicationDbContext _context;
 
@@ -20,13 +20,20 @@ public class GetCurrencyByIdQueryHandler : IRequestHandler<GetCurrencyByIdQuery,
         _context = context;
     }
 
-    public async Task<Currency> Handle(GetCurrencyByIdQuery request, CancellationToken cancellationToken)
+    public async Task<CurrencyDto> Handle(GetCurrencyByIdQuery request, CancellationToken cancellationToken)
     {
         var currency = await _context.Currencies
                 .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Currency), request.Id);
 
-        return currency;
+        return new CurrencyDto
+        {
+            Id = currency.Id,
+            Name = currency.Name,
+            Code = currency.Code,
+            DecimalPlaces = currency.DecimalPlaces,
+            Symbol = currency.Symbol
+        };
 
     }
 }

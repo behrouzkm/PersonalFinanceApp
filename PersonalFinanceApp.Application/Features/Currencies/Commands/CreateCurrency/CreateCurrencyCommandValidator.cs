@@ -14,7 +14,8 @@ public class CreateCurrencyCommandValidator : AbstractValidator<CreateCurrencyCo
     {
         RuleFor(x => x.Code)
             .NotEmpty().WithErrorCode(ApplicationErrorCodes.Currency.CodeRequired)
-            .Length(3).WithErrorCode(ApplicationErrorCodes.Currency.InvalidCurrencyCode);
+            .Length(3).WithErrorCode(ApplicationErrorCodes.Currency.InvalidCurrencyCode)
+            .Matches("^[A-Z]{3}$").WithErrorCode(ApplicationErrorCodes.Currency.InvalidCurrencyCode);
 
 
         RuleFor(x => x.Name)
@@ -22,8 +23,7 @@ public class CreateCurrencyCommandValidator : AbstractValidator<CreateCurrencyCo
             .WithErrorCode(ApplicationErrorCodes.Currency.NameRequired);
 
         RuleFor(x => x.DecimalPlaces)
-            .InclusiveBetween(0, 2).WithErrorCode(ApplicationErrorCodes.Currency.InvalidDecimalPlaces)
-            .NotEmpty().WithErrorCode(ApplicationErrorCodes.Currency.DecimalRequired);
+            .Must(x => x <= 3).WithErrorCode(ApplicationErrorCodes.Currency.InvalidDecimalPlaces);
 
 
         RuleFor(x => x.Symbol)
