@@ -9,7 +9,7 @@ public class ExpenditureListItemDto
 {
     public Guid AccountingDocumentId { get; set; }
     public DateOnly DocumentDate { get; set; }
-    public byte CurrencyId { get; set; }
+    public int CurrencyId { get; set; }
     public string? Description { get; set; }
 
     // Sum of the expense (debit) lines - equal to the sum of payment (credit) entries

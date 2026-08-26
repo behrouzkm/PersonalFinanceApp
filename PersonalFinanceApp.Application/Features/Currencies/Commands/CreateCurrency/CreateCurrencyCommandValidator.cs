@@ -15,7 +15,7 @@ public class CreateCurrencyCommandValidator : AbstractValidator<CreateCurrencyCo
         RuleFor(x => x.Code)
             .NotEmpty().WithErrorCode(ApplicationErrorCodes.Currency.CodeRequired)
             .Length(3).WithErrorCode(ApplicationErrorCodes.Currency.InvalidCurrencyCode)
-            .Matches("^[A-Z]{3}$").WithErrorCode(ApplicationErrorCodes.Currency.InvalidCurrencyCode);
+            .Matches("^[a-zA-Z]{3}$").WithErrorCode(ApplicationErrorCodes.Currency.InvalidCurrencyCode);
 
 
         RuleFor(x => x.Name)

@@ -1,46 +1,49 @@
+using System.Reflection.Metadata;
 using PersonalFinanceApp.Domain.Errors;
 
 namespace PersonalFinanceApp.Domain.Entities;
 
 public class Currency
 {
-    public byte Id { get; private set; }
+    public int Id { get; private set; }
 
     public string Code { get; private set; } = string.Empty!;
 
     public string Name { get; private set; } = string.Empty!;
+
+    public bool IsActive { get; private set; }
+
+    public int DisplayOrder { get; private set; }
 
     public byte DecimalPlaces { get; private set; } = 2;
 
     public string Symbol { get; private set; } = string.Empty!;
 
 
+
+
     private Currency() { }
 
-    public Currency(byte id, string code, string name, byte decimalPlaces = 2, string symbol = "")
+    public Currency(string code, string name, bool isActive, int displayOrder, byte decimalPlaces = 2, string symbol = "")
     {
-        SetId(id);
         ChangeCode(code);
         ChangeName(name);
+        IsActive = isActive;
+        SetDisplayOrder(displayOrder);
         SetDecimalPlaces(decimalPlaces);
         ChangeSymbol(symbol);
     }
 
-    public void UpdateCurrency(string code, string name, byte decimalPlaces, string symbol)
+    public void UpdateCurrency(string code, string name, bool isActive, byte decimalPlaces, string symbol)
     {
         ChangeCode(code);
         ChangeName(name);
+        IsActive = isActive;
         SetDecimalPlaces(decimalPlaces);
         ChangeSymbol(symbol);
     }
 
-    private void SetId(byte id)
-    {
-        if (id == 0)
-            throw new DomainException(DomainErrors.Currency.InvalidId);
 
-        Id = id;
-    }
     public void ChangeName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -54,17 +57,29 @@ public class Currency
         if (string.IsNullOrWhiteSpace(code))
             throw new DomainException(DomainErrors.Currency.CodeRequired);
 
-        if (code.Length != 3 || !code.All(c => c is 'A' and <= 'Z'))
+        if (code.Length != 3 || !code.All(c => c is >= 'A' and <= 'Z' or >= 'a' and <= 'z'))
             throw new DomainException(DomainErrors.Currency.CodeMustBeThreeLetters);
 
         Code = code.Trim().ToUpperInvariant();
     }
 
+    public void Activate() => IsActive = true;
+
+    public void Deactivate() => IsActive = false;
+
+    public void SetDisplayOrder(int displayOrder) => DisplayOrder = displayOrder;
+
+    public void MoveUp() => DisplayOrder++;
+
+    public void MoveDown()
+    {
+        if (DisplayOrder > 0)
+            DisplayOrder--;
+    }
+
+
     public void SetDecimalPlaces(byte decimalPlaces)
     {
-        if (decimalPlaces < 0)
-            throw new DomainException(DomainErrors.Currency.DecimalPlacesInvalid);
-
         if (decimalPlaces > 3)
             throw new DomainException(DomainErrors.Currency.DecimalPlacesTooHigh);
 

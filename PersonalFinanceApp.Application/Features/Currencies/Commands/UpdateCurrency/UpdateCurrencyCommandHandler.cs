@@ -35,7 +35,7 @@ public class UpdateCurrencyCommandHandler : IRequestHandler<UpdateCurrencyComman
             throw new BusinessRuleException(ApplicationErrorCodes.Currency.DuplicateCodeOrName, request.Code, request.Name);
 
 
-        currency.UpdateCurrency(request.Code,request.Name,request.DecimalPlaces,request.Symbol);
+        currency.UpdateCurrency(request.Code,request.Name,request.IsActive, request.DecimalPlaces,request.Symbol);
 
         await _context.SaveChangesAsync(cancellationToken);
 

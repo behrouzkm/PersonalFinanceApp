@@ -13,6 +13,8 @@ using PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrencyById
 using PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrenciesList;
 using PersonalFinanceApp.Domain.Entities;
 using PersonalFinanceApp.Application.Features.Common;
+using PersonalFinanceApp.Application.Features.Currencies.Common;
+using PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrenciesOptions;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
@@ -22,49 +24,10 @@ public class CurrenciesController : BaseApiController
     {
     }
 
-    [HttpPost]
-    public async Task<ActionResult<byte>> Create(CreateCurrencyCommand command, CancellationToken cancellationToken)
-    {
-        var id = await _mediator.Send(command, cancellationToken);
 
-        return CreatedAtAction(nameof(GetById), new { id }, id);
-    }
-
-    [HttpPut("{id:byte}")]
-    public async Task<IActionResult> Update(byte id, UpdateCurrencyCommand command, CancellationToken cancellationToken)
-    {
-        if (id != command.Id)
-            return BadRequest("Route id and command CurrencyId must match.");
-
-        await _mediator.Send(command, cancellationToken);
-        return NoContent();
-    }
-
-    [HttpDelete("{id:byte}")]
-    public async Task<ActionResult> Delete(byte id, CancellationToken cancellationToken)
-    {
-        await _mediator.Send(new DeleteCurrencyCommand
-        {
-            Id = id
-        }, cancellationToken);
-
-        return NoContent();
-    }
-
-
-    [HttpGet("{id:byte}")]
-    public async Task<ActionResult<CurrencyDto>> GetById(byte id, CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(new GetCurrencyByIdQuery
-        {
-            Id = id
-        }, cancellationToken);
-
-        return Ok(result);
-    }
 
     [HttpGet]
-    public async Task<ActionResult<PaginatedList<CurrencyDto>>> GetList([FromQuery] GetCurrenciesListQuery query,
+    public async Task<ActionResult<List<CurrencyOptionDto>>> GetOptionList([FromQuery] GetCurrenciesOptionsQuery query,
                         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(query, cancellationToken);

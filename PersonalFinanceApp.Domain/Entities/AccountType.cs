@@ -8,7 +8,7 @@ namespace PersonalFinanceApp.Domain.Entities;
 public class AccountType
 {
 
-    public byte Id { get; private set; }
+    public int Id { get; private set; }
 
     public bool IsActive { get; private set; }
 

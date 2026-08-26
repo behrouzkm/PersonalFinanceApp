@@ -9,12 +9,12 @@ public class AccountTypeTranslation
 
 
     // Foreign key to the related account type
-    public byte AccountTypeId { get; private set; }
+    public int AccountTypeId { get; private set; }
     public AccountType AccountType { get; private set; } = null!;
 
 
     // Foreign key to the related language
-    public byte LanguageId { get; private set; }
+    public int LanguageId { get; private set; }
     public Language Language { get; private set; } = null!;
 
 

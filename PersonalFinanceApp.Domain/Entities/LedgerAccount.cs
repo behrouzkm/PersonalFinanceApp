@@ -5,7 +5,7 @@ namespace PersonalFinanceApp.Domain.Entities;
 
 public class LedgerAccount : BaseAuditableEntity
 {
-    public byte AccountTypeId { get; private set; }
+    public int AccountTypeId { get; private set; }
     public AccountType AccountType { get; private set; } = null!;
     public string Name { get; private set; } = string.Empty!;
 

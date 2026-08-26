@@ -8,6 +8,6 @@ namespace PersonalFinanceApp.Application.Features.Currencies.Commands.DeleteCurr
 
 public class DeleteCurrencyCommand : IRequest
 {
-    public byte Id { get; set; }
+    public int Id { get; set; }
 
 }

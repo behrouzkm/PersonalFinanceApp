@@ -11,7 +11,7 @@ public interface IFundSource
     Guid LedgerAccountId { get; }
     string DisplayName { get; }
 
-    byte CurrencyId { get; }
+    int CurrencyId { get; }
     DateOnly OpeningDate { get; }
     decimal InitialBalance { get; }
     decimal CurrentBalance { get; }

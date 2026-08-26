@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using PersonalFinanceApp.Application.Common.Models;
-using PersonalFinanceApp.Application.Features.Common;
+using PersonalFinanceApp.Application.Features.Currencies.Common;
 
 namespace PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrenciesList;
 

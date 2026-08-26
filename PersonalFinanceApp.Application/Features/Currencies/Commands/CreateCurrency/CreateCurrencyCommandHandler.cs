@@ -11,7 +11,7 @@ using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Application.Features.Currencies.Commands.CreateCurrency;
 
-public class CreateCurrencyCommandHandler : IRequestHandler<CreateCurrencyCommand, byte>
+public class CreateCurrencyCommandHandler : IRequestHandler<CreateCurrencyCommand, int>
 {
     private readonly IApplicationDbContext _context;
 
@@ -20,7 +20,7 @@ public class CreateCurrencyCommandHandler : IRequestHandler<CreateCurrencyComman
         _context = context;
     }
 
-    public async Task<byte> Handle(CreateCurrencyCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CreateCurrencyCommand request, CancellationToken cancellationToken)
     {
         var duplicateExist = await _context.Currencies
                 .AnyAsync(c => c.Code == request.Code || c.Name == request.Name, cancellationToken);
@@ -28,19 +28,20 @@ public class CreateCurrencyCommandHandler : IRequestHandler<CreateCurrencyComman
         if (duplicateExist)
             throw new BusinessRuleException(ApplicationErrorCodes.Currency.DuplicateCodeOrName, request.Code, request.Name);
 
-        var newId = await _context.Currencies.MaxAsync(c => c.Id, cancellationToken) + 1;
+        var maxDisplayOrder = await _context.Currencies.MaxAsync(c => (int?)c.DisplayOrder, cancellationToken) ?? 0;
 
         var currency = new Currency(
-            (byte)newId,
-            request.Code,
+             request.Code,
             request.Name,
+            request.IsActive,
+            maxDisplayOrder + 1,
             request.DecimalPlaces,
             request.Symbol);
 
         await _context.Currencies.AddAsync(currency, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return (byte)newId;
+        return currency.Id;
 
     }
 }

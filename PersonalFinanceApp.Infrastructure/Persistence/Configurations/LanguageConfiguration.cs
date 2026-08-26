@@ -15,9 +15,12 @@ public class LanguageConfiguration : IEntityTypeConfiguration<Language>
         builder.HasKey(l => l.Id);
         builder.Property(l => l.Id).ValueGeneratedOnAdd();
 
-        builder.Property(l => l.Code).IsRequired().HasMaxLength(10);
+        builder.Property(l => l.Code).IsRequired().HasMaxLength(2);
         builder.Property(l => l.Name).IsRequired().HasMaxLength(100);
+        builder.Property(l => l.DisplayOrder).IsRequired();
+
 
         builder.HasIndex(l => l.Code).IsUnique();
+        builder.HasIndex(l => l.DisplayOrder).IsUnique();
     }
 }

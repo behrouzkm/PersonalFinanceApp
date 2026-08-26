@@ -155,11 +155,11 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.AccountType", b =>
                 {
-                    b.Property<byte>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<byte>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Category")
                         .HasColumnType("int");
@@ -183,15 +183,15 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<byte>("AccountTypeId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("AccountTypeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<byte>("LanguageId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -220,8 +220,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte>("CurrencyId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -315,6 +315,74 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.ToTable("AccountingEntries");
                 });
 
+            modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.ApiAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActionName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ControllerName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("CorrelationId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long>("DurationMs")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("HttpMethod")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RequestPath")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("StatusCode")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CorrelationId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("Timestamp");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ApiAuditLogs");
+                });
+
             modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.Attachment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -375,16 +443,25 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.Currency", b =>
                 {
-                    b.Property<byte>("Id")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(3)
                         .HasColumnType("nvarchar(3)");
 
-                    b.Property<int>("DecimalPlaces")
+                    b.Property<byte>("DecimalPlaces")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -399,6 +476,9 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("DisplayOrder")
                         .IsUnique();
 
                     b.ToTable("Currencies");
@@ -419,8 +499,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.Property<int>("DocumentType")
                         .HasColumnType("int");
 
-                    b.Property<byte>("LanguageId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -439,16 +519,16 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.Language", b =>
                 {
-                    b.Property<byte>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<byte>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(2)
+                        .HasColumnType("nvarchar(2)");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
@@ -469,6 +549,9 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
+                    b.HasIndex("DisplayOrder")
+                        .IsUnique();
+
                     b.ToTable("Languages");
                 });
 
@@ -478,8 +561,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte>("AccountTypeId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("AccountTypeId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -543,8 +626,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<byte>("CurrencyId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("CurrentBalance")
                         .HasPrecision(18, 2)
@@ -610,8 +693,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte>("CurrencyId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -666,8 +749,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<byte>("CurrencyId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("CurrentBalance")
                         .HasPrecision(18, 2)
@@ -742,8 +825,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte>("LanguageId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("int");
 
                     b.Property<string>("TemplateKey")
                         .IsRequired()
@@ -766,11 +849,11 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte>("DefaultCurrencyId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("DefaultCurrencyId")
+                        .HasColumnType("int");
 
-                    b.Property<byte>("DefaultLanguageId")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("DefaultLanguageId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");

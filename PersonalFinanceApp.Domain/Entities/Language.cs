@@ -5,7 +5,7 @@ namespace PersonalFinanceApp.Domain.Entities;
 
 public class Language
 {
-    public byte Id { get; private set; }
+    public int Id { get; private set; }
 
     public string Code { get; private set; } = string.Empty!;
 
@@ -20,17 +20,9 @@ public class Language
 
     private Language() { }
 
-    public Language(string code, string name, bool isActive, int displayOrder, bool isRightToLeft = false)
+    public Language(byte id, string code, string name, bool isActive, int displayOrder, bool isRightToLeft = false)
     {
-        ChangeCode(code);
-        ChangeName(name);
-        IsActive = isActive;
-        SetDisplayOrder ( displayOrder);
-        SetRightToLeft(isRightToLeft);
-    }
-
-    public void UpdateLanguage(string code, string name, bool isActive, int displayOrder, bool isRightToLeft = false)
-    {
+        SetId(id);
         ChangeCode(code);
         ChangeName(name);
         IsActive = isActive;
@@ -38,7 +30,31 @@ public class Language
         SetRightToLeft(isRightToLeft);
     }
 
+    public void UpdateLanguage(string code, string name, bool isActive, bool isRightToLeft = false)
+    {
+        ChangeCode(code);
+        ChangeName(name);
+        IsActive = isActive;
+        SetRightToLeft(isRightToLeft);
+    }
+
+    private void SetId(byte id)
+    {
+        if (id == 0)
+            throw new DomainException(DomainErrors.Language.InvalidId);
+
+        Id = id;
+    }
+
     public void SetDisplayOrder(int displayOrder) => DisplayOrder = displayOrder;
+
+    public void MoveUp() => DisplayOrder++;
+
+    public void MoveDown()
+    {
+        if (DisplayOrder > 0)
+            DisplayOrder--;
+    }
 
     public void Activate() => IsActive = true;
 
@@ -59,6 +75,9 @@ public class Language
         if (string.IsNullOrWhiteSpace(code))
             throw new DomainException(DomainErrors.Language.CodeRequired);
 
-        Code = code.Trim().ToUpperInvariant();
+        if (code.Length != 2 || !code.All(c => c is >= 'A' and <= 'Z' or >= 'a' and <= 'z'))
+            throw new DomainException(DomainErrors.Language.CodeMustBeTwoLetters);
+
+        Code = code.Trim().ToLowerInvariant();
     }
 }

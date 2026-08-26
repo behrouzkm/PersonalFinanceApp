@@ -13,7 +13,7 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
     public DateOnly DocumentDate { get; private set; }
 
 
-    public byte CurrencyId { get; private set; }
+    public int CurrencyId { get; private set; }
     public Currency Currency { get; private set; } = null!;
 
 
@@ -54,7 +54,7 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
 
     // Call before posting to any MonetaryAccount or Person to enforce that the account's
     // native currency matches this document's currency.
-    public void EnsureCurrencyMatches(byte accountCurrencyId)
+    public void EnsureCurrencyMatches(int accountCurrencyId)
     {
         if (accountCurrencyId != CurrencyId)
             throw new DomainException(DomainErrors.AccountingDocument.CurrencyMismatch);
@@ -112,7 +112,7 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
         DocumentDate = documentDate;
     }
 
-    public void SetCurrencyId(byte currencyId)
+    public void SetCurrencyId(int currencyId)
     {
         if (currencyId == 0)
             throw new DomainException(DomainErrors.AccountingDocument.CurrencyRequired);

@@ -52,8 +52,10 @@ public static class DomainErrors
 
     public static class Language
     {
+        public const string InvalidId = "ErrorCodes.Language.InvalidId";
         public const string NameRequired = "ErrorCodes.Language.NameRequired";
         public const string CodeRequired = "ErrorCodes.Language.CodeRequired";
+        public const string CodeMustBeTwoLetters = "ErrorCodes.Language.CodeMustBeTwoLetters";
     }
 
     public static class Tenant

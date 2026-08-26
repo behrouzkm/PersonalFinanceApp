@@ -45,7 +45,17 @@ public class DeleteCurrencyCommandHandler : IRequestHandler<DeleteCurrencyComman
         if (currencyInUse)
             throw new BusinessRuleException(ApplicationErrorCodes.Currency.CurrencyInUse, request.Id, currency.Name);
 
+        var currentDisplayOrder = currency.DisplayOrder;
+
         _context.Currencies.Remove(currency);
+
+        var nextRecords = await _context.Currencies
+                .Where(r=>r.DisplayOrder>currentDisplayOrder)
+                .ToListAsync(cancellationToken);
+
+        foreach(var cur in nextRecords)
+            cur.MoveDown();
+
 
         await _context.SaveChangesAsync(cancellationToken);
 

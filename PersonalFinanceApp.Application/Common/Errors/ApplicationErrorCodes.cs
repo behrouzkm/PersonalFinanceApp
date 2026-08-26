@@ -26,7 +26,23 @@ public static class ApplicationErrorCodes
         public const string SymbolRequired = "ApplicationErrorCodes.Currency.SymbolRequired";
         public const string DuplicateCodeOrName = "ApplicationErrorCodes.Currency.DuplicateCodeOrName";
         public const string CurrencyInUse = "ApplicationErrorCodes.Currency.CurrencyInUse";
+        public const string InvalidDisplayOrder = "ApplicationErrorCodes.Currency.InvalidDisplayOrder";
     }
+
+    public static class Language
+    {
+        public const string IdRequired = "ApplicationErrorCodes.Language.IdRequired";
+        public const string CodeRequired = "ApplicationErrorCodes.Language.CodeRequired";
+        public const string InvalidLanguageCode = "ApplicationErrorCodes.Language.InvalidLanguageCode";
+        public const string NameRequired = "ApplicationErrorCodes.Language.NameRequired";
+        //public const string DecimalRequired = "ApplicationErrorCodes.Language.DecimalRequired";
+        //public const string InvalidDecimalPlaces = "ApplicationErrorCodes.Language.InvalidDecimalPlaces";
+        //public const string SymbolRequired = "ApplicationErrorCodes.Language.SymbolRequired";
+        public const string DuplicateCodeOrName = "ApplicationErrorCodes.Language.DuplicateCodeOrName";
+        public const string LanguageInUse = "ApplicationErrorCodes.Language.LanguageInUse";
+       public const string InvalidDisplayOrder = "ApplicationErrorCodes.Language.InvalidDisplayOrder";
+    }
+
     public static class Auth
     {
         public const string EmailRequired = "ErrorCodes.Auth.EmailRequired";

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Application.Common.Interfaces;
@@ -30,6 +31,8 @@ public interface IApplicationDbContext
     DbSet<SystemTemplate> SystemTemplates { get; }
     DbSet<ApiAuditLog> ApiAuditLogs {get;}
 
+
+    DatabaseFacade Database { get; }
 
     EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
 

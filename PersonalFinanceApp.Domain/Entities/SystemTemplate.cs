@@ -13,7 +13,7 @@ public class SystemTemplate
 
 
     // Foreign key to the related language
-    public byte LanguageId { get; private set; }
+    public int LanguageId { get; private set; }
     public Language Language { get; private set; } = null!;
 
 

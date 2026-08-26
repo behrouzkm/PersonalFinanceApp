@@ -9,16 +9,16 @@ public class Tenant
 
     public string Name { get; private set; } = string.Empty!;
 
-    public byte DefaultLanguageId { get; private set; }
+    public int DefaultLanguageId { get; private set; }
 
-    public byte DefaultCurrencyId { get; private set; }
+    public int DefaultCurrencyId { get; private set; }
 
     public bool IsActive { get; private set; }
 
 
     private Tenant() { }
 
-    public Tenant(string name, byte defaultLanguageId, byte defaultCurrencyId, bool isActive = true)
+    public Tenant(string name, int defaultLanguageId, int defaultCurrencyId, bool isActive = true)
     {
         ChangeName(name);
         SetDefaultLanguage(defaultLanguageId);
@@ -38,7 +38,7 @@ public class Tenant
 
     public void Activate() => IsActive = true;
 
-    public void SetDefaultLanguage(byte defaultLanguageId) => DefaultLanguageId = defaultLanguageId;
+    public void SetDefaultLanguage(int defaultLanguageId) => DefaultLanguageId = defaultLanguageId;
 
-    public void SetDefaultCurrency(byte defaultCurrencyId) => DefaultCurrencyId = defaultCurrencyId;
+    public void SetDefaultCurrency(int defaultCurrencyId) => DefaultCurrencyId = defaultCurrencyId;
 }

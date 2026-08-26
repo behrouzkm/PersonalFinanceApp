@@ -32,7 +32,7 @@ public class Person : BaseAuditableEntity, IFundSource
 
 
     // Foreign key to the related currency
-    public byte CurrencyId { get; private set; }
+    public int CurrencyId { get; private set; }
     public Currency Currency { get; private set; } = null!;
 
 
@@ -47,7 +47,7 @@ public class Person : BaseAuditableEntity, IFundSource
 
     private Person() { }
 
-    public Person(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId, int displayOrder,
+    public Person(PersonType personType, string displayName, Guid ledgerAccountId, int currencyId, int displayOrder,
                     DateOnly openingDate, decimal initialBalance, Guid tenantId, Guid createdBy, string? email = null, string? mobileNumber = null,
                     string? telNumber = null, string? description = null, decimal? creditLimit = null) :
                     base(tenantId, createdBy, description)
@@ -66,7 +66,7 @@ public class Person : BaseAuditableEntity, IFundSource
     }
 
 
-    public void UpdatePerson(PersonType personType, string displayName, Guid ledgerAccountId, byte currencyId,
+    public void UpdatePerson(PersonType personType, string displayName, Guid ledgerAccountId, int currencyId,
                                  decimal? creditLimit, int displayOrder, string? email,
                                 string? mobileNumber, string? telNumber, string? description)
     {
@@ -162,7 +162,7 @@ public class Person : BaseAuditableEntity, IFundSource
         LedgerAccountId = ledgerAccountId;
     }
 
-    public void SetCurrencyId(byte currencyId)
+    public void SetCurrencyId(int currencyId)
     {
         if (currencyId == 0)
             throw new DomainException(DomainErrors.Person.CurrencyRequired);

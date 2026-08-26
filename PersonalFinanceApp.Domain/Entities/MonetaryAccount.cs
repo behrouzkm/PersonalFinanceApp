@@ -21,7 +21,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
     public decimal? CreditLimit { get; private set; } // Optional credit limit for accounts that can go negative
 
     // Foreign key to the related currency
-    public byte CurrencyId { get; private set; }
+    public int CurrencyId { get; private set; }
     public Currency Currency { get; private set; } = null!;
 
     public int DisplayOrder { get; private set; }
@@ -34,7 +34,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
         CreditLimit = 0; // Default to 0 if not provided
     }
 
-    public MonetaryAccount(string displayName, Guid ledgerAccountId, byte currencyId, DateOnly openingDate,
+    public MonetaryAccount(string displayName, Guid ledgerAccountId, int currencyId, DateOnly openingDate,
                             decimal initialBalance, int displayOrder, Guid tenantId, Guid createdBy,
                             decimal creditLimit = 0, string? description = null) :
                                     base(tenantId, createdBy, description)
@@ -48,7 +48,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
         SetDisplayOrder(displayOrder);
     }
 
-    public void UpdateMonetaryAccount(string displayName, byte currencyId, int displayOrder,
+    public void UpdateMonetaryAccount(string displayName, int currencyId, int displayOrder,
                                     decimal creditLimit, string? description)
     {
         SetDisplayName(displayName);
@@ -76,7 +76,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
         LedgerAccountId = ledgerAccountId;
     }
 
-    public void SetCurrencyId(byte currencyId)
+    public void SetCurrencyId(int currencyId)
     {
         if (currencyId == 0)
             throw new DomainException(DomainErrors.MonetaryAccount.CurrencyRequired);
