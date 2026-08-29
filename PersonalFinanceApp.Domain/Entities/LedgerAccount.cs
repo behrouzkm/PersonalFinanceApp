@@ -25,10 +25,11 @@ public class LedgerAccount : BaseAuditableEntity
 
     private LedgerAccount() { }
 
-    public LedgerAccount(byte accountTypeId, string name, Guid tenantId, Guid createdBy, string? description = null)
+    public LedgerAccount(int accountTypeId, string name, Guid tenantId, Guid createdBy, string? description = null)
                             : base(tenantId, createdBy,description)
     {
-        ChangeAccountType(accountTypeId);
+        AccountTypeId = accountTypeId;
+        
         ChangeName(name);
 
         IsPostingAccount=true;
@@ -56,13 +57,13 @@ public class LedgerAccount : BaseAuditableEntity
         IsPostingAccount = true;
     }
 
-    public void ChangeAccountType(byte accountTypeId)
-    {
-        if (HasBeenUsedInEntries && AccountTypeId != accountTypeId)
-            throw new DomainException(DomainErrors.LedgerAccount.CannotModifyUsedAccount);
+    // public void ChangeAccountType(int accountTypeId)
+    // {
+    //     if (HasBeenUsedInEntries && AccountTypeId != accountTypeId)
+    //         throw new DomainException(DomainErrors.LedgerAccount.CannotModifyUsedAccount);
 
-        AccountTypeId = accountTypeId;
-    }
+
+    // }
 
     public void ChangeName(string newName)
     {

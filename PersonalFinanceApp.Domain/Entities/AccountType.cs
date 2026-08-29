@@ -10,7 +10,7 @@ public class AccountType
 
     public int Id { get; private set; }
 
-    public bool IsActive { get; private set; }
+    //public bool IsActive { get; private set; }
 
     public AccountCategory Category { get; private set; }
 
@@ -19,25 +19,30 @@ public class AccountType
 
     private AccountType() { }
 
-    public AccountType(bool isActive, AccountCategory category, NormalBalance normalBalance)
+    public AccountType(//bool isActive
+        AccountCategory category, NormalBalance normalBalance)
     {
-        IsActive = isActive;
-        SetCategory(category);
-        SetNormalBalance(normalBalance);
-    }
+        //IsActive = isActive;
 
-    public void Activate() => IsActive = true;
-
-    public void Deactivate() => IsActive = false;
-
-    public void SetNormalBalance(NormalBalance normalBalance)
-    {
         NormalBalance = normalBalance;
+        Category = category;
+
+        //SetCategory(category);
+        //SetNormalBalance(normalBalance);
     }
 
-    public void SetCategory(AccountCategory category)
-    {
-        Category = category;
-    }
+    // public void Activate() => IsActive = true;
+
+    // public void Deactivate() => IsActive = false;
+
+    // public void SetNormalBalance(NormalBalance normalBalance)
+    // {
+    //     NormalBalance = normalBalance;
+    // }
+
+    // public void SetCategory(AccountCategory category)
+    // {
+    //     Category = category;
+    // }
 
 }

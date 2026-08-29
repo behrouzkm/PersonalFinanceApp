@@ -8,7 +8,7 @@ namespace PersonalFinanceApp.Domain.Services;
 // A minimal, read-only view of one point on a fund source's chronological ledger -
 // deliberately not the full AccountingEntry entity, so this stays usable both for
 // real, already-persisted entries and for a not-yet-saved proposed entry alike.
-public interface IledgerEntryPoint
+public interface ILedgerEntryPoint
 {
     Guid EntryId { get; }
     DateOnly DocumentDate { get; }

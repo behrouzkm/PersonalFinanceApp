@@ -69,9 +69,9 @@ public class Currency
 
     public void SetDisplayOrder(int displayOrder) => DisplayOrder = displayOrder;
 
-    public void MoveUp() => DisplayOrder++;
+    public void IncrementDisplayOrder() => DisplayOrder++;
 
-    public void MoveDown()
+    public void DecrementDisplayOrder()
     {
         if (DisplayOrder > 0)
             DisplayOrder--;

@@ -7,9 +7,9 @@ using PersonalFinanceApp.Application.Common.Errors;
 
 namespace PersonalFinanceApp.Application.Features.Auth.Commands.CreateTenantUser;
 
-public class CreateTenantUserCommandValidation : AbstractValidator<CreateTenantUserCommand>
+public class CreateTenantUserCommandValidator : AbstractValidator<CreateTenantUserCommand>
 {
-    public CreateTenantUserCommandValidation()
+    public CreateTenantUserCommandValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithErrorCode(ApplicationErrorCodes.Auth.EmailRequired)

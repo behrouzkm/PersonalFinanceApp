@@ -10,7 +10,7 @@ public class CashAccount : MonetaryAccount
     private CashAccount() { }
 
 
-    public CashAccount(string name, Guid ledgerAccountId, byte currencyId,DateOnly openingDate, decimal initialBalance, int displayOrder,
+    public CashAccount(string name, Guid ledgerAccountId, int currencyId,DateOnly openingDate, decimal initialBalance, int displayOrder,
                             string location, Guid tenantId, Guid createdBy, bool isPhysical = true) :
                                 base(name, ledgerAccountId, currencyId, openingDate, initialBalance, displayOrder, tenantId, createdBy)
     {

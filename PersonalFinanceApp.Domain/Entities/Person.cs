@@ -26,6 +26,9 @@ public class Person : BaseAuditableEntity, IFundSource
     public DateOnly OpeningDate { get; private set; } = DateOnly.FromDateTime(DateTime.UtcNow);
     public decimal InitialBalance { get; private set; }
 
+    public Guid? OpeningAccountingDocumentId { get; private set; }
+    public AccountingDocument? OpeningAccountingDocument { get; private set; }
+
     public decimal CurrentBalance { get; private set; }
 
     public decimal? CreditLimit { get; private set; } // Optional credit limit for accounts that can go negative
@@ -49,8 +52,8 @@ public class Person : BaseAuditableEntity, IFundSource
 
     public Person(PersonType personType, string displayName, Guid ledgerAccountId, int currencyId, int displayOrder,
                     DateOnly openingDate, decimal initialBalance, Guid tenantId, Guid createdBy, string? email = null, string? mobileNumber = null,
-                    string? telNumber = null, string? description = null, decimal? creditLimit = null) :
-                    base(tenantId, createdBy, description)
+                    string? telNumber = null, string? description = null, decimal? creditLimit = null,
+                    Guid? openingAccountingDocumentId = null) : base(tenantId, createdBy, description)
     {
         SetPersonType(personType);
         SetDisplayName(displayName);
@@ -63,24 +66,33 @@ public class Person : BaseAuditableEntity, IFundSource
         SetEmail(email);
         SetMobileNumber(mobileNumber);
         SetTelNumber(telNumber);
+
+        OpeningAccountingDocumentId = openingAccountingDocumentId;
     }
 
 
-    public void UpdatePerson(PersonType personType, string displayName, Guid ledgerAccountId, int currencyId,
-                                 decimal? creditLimit, int displayOrder, string? email,
+    public void UpdateDetails(PersonType personType, string displayName, int currencyId, DateOnly openingDate,
+                                decimal initialBalance, Guid modifiedBy, decimal? creditLimit, string? email,
                                 string? mobileNumber, string? telNumber, string? description)
     {
         SetPersonType(personType);
         SetDisplayName(displayName);
-        SetLedgerAccountId(ledgerAccountId);
         SetCurrencyId(currencyId);
-         SetCreditLimit(creditLimit);
-        SetDisplayOrder(displayOrder);
+        SetOpeningDate(openingDate);
+        SetInitialBalance(initialBalance);
+        SetCreditLimit(creditLimit);
         SetEmail(email);
         SetMobileNumber(mobileNumber);
         SetTelNumber(telNumber);
-
         SetDescription(description);
+
+        UpdateAudit(modifiedBy);
+    }
+
+    public void SetOpeningAccountingDocumentId(Guid? openingAccountingDocumentId, Guid modifiedBy)
+    {
+        OpeningAccountingDocumentId = openingAccountingDocumentId;
+        UpdateAudit(modifiedBy);
     }
 
     public void SetPersonType(PersonType personType)
@@ -207,7 +219,6 @@ public class Person : BaseAuditableEntity, IFundSource
         InitialBalance = initialBalance;
         CurrentBalance = initialBalance; // Set current balance to initial balance when creating the person
     }
-
 
     public bool CanWithdraw(decimal amount)
     {

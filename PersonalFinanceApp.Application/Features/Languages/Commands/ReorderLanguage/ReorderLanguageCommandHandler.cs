@@ -54,23 +54,23 @@ public class ReorderLanguageCommandHandler : IRequestHandler<ReorderLanguageComm
             if (newPosition < oldPosition)
             {
                 var inRangeLanguages = await _context.Languages
-                    .Where(r => r.DisplayOrder >= oldPosition && r.DisplayOrder <= newPosition)
+                    .Where(r => r.DisplayOrder >= newPosition && r.DisplayOrder <oldPosition )
                     .ToListAsync(cancellationToken);
 
                 foreach (var item in inRangeLanguages)
                 {
-                    item.MoveUp();
+                    item.IncrementDisplayOrder();
                 }
             }
             else
             {
                 var inRangeLanguages = await _context.Languages
-                    .Where(r => r.DisplayOrder >= newPosition && r.DisplayOrder <= oldPosition)
+                    .Where(r => r.DisplayOrder > oldPosition && r.DisplayOrder <= newPosition)
                     .ToListAsync(cancellationToken);
 
                 foreach (var item in inRangeLanguages)
                 {
-                    item.MoveDown();
+                    item.DecrementDisplayOrder();
                 }
             }
 

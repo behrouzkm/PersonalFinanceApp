@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Entities;
+using PersonalFinanceApp.Domain.Enums;
 using PersonalFinanceApp.Infrastructure.Persistence;
 
 namespace PersonalFinanceApp.Infrastructure.Identity;
@@ -39,28 +41,28 @@ public class IdentityService : IIdentityService
     {
         var user = new ApplicationUser
         {
-            UserName=email,
-            Email=email,
-            FirstName=firstName,
-            LastName=lastName,
-            TenantId=tenantId
+            UserName = email,
+            Email = email,
+            FirstName = firstName,
+            LastName = lastName,
+            TenantId = tenantId
 
         };
 
-        var result = await _userManager.CreateAsync(user,password);
+        var result = await _userManager.CreateAsync(user, password);
 
-        if(!result.Succeeded)
+        if (!result.Succeeded)
         {
             return new IdentityRegistrationResult
             {
-                Succeeded=false,
-                Errors= result.Errors.Select(e=>e.Description).ToList()
+                Succeeded = false,
+                Errors = result.Errors.Select(e => e.Description).ToList()
             };
         }
 
         return new IdentityRegistrationResult
         {
-            Succeeded=true,
+            Succeeded = true,
             UserId = user.Id
         };
     }
@@ -122,6 +124,7 @@ public class IdentityService : IIdentityService
         _context.Tenants.Add(tenant);
         await _context.SaveChangesAsync(cancellationToken);
 
+
         var user = new ApplicationUser
         {
             UserName = email,
@@ -142,6 +145,42 @@ public class IdentityService : IIdentityService
                 Succeeded = false,
                 Errors = result.Errors.Select(s => s.Description).ToList()
             };
+        }
+
+        var accountTypes = await (
+            from accountType in _context.AccountTypes
+            join translation in _context.AccountTypeTranslations
+                on accountType.Id equals translation.AccountTypeId
+            where translation.LanguageId == defaultLanguageId
+            select new
+            {
+                accountType.Category,
+                accountType.Id,
+                translation.Name,
+                translation.Description
+            })
+          .ToDictionaryAsync(
+              x => x.Category,
+              x => new
+              {
+                  x.Id,
+                  x.Name,
+                  x.Description
+
+              },
+              cancellationToken);
+
+        // Create LedgerAccount roots
+        foreach (AccountCategory category in Enum.GetValues<AccountCategory>())
+        {
+            var ledgerAccount = new LedgerAccount(
+                accountTypes[category].Id,
+                accountTypes[category].Name,
+                tenant.Id,
+                user.Id,
+                accountTypes[category].Description);
+
+            await _context.LedgerAccounts.AddAsync(ledgerAccount);
         }
 
         await transaction.CommitAsync(cancellationToken);

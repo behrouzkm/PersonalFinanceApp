@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Application.Common.Models;
 using PersonalFinanceApp.Domain.Entities;
+using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.Application.Common.Services;
 
@@ -63,6 +66,23 @@ public class AccountingLookupService : IAccountingLookupService
             ById = accounts.ToDictionary(a => a.Id),
             ByLedgerAccountId = accounts.ToDictionary(a => a.LedgerAccountId)
         };
+    }
+
+    public async Task<LedgerAccount?> GetOpeningBalanceEquityLedgerAccount(AccountCategory accountCategory, CancellationToken cancellationToken)
+    {
+        var accountType = await _context.AccountTypes
+            .FirstOrDefaultAsync(r=>r.Category == accountCategory,cancellationToken);
+
+        if(accountType!= null)
+        {
+            var ledgerAccount = await _context.LedgerAccounts
+                .FirstOrDefaultAsync(r=>r.AccountTypeId == accountType.Id &&
+                    r.ParentId== null,cancellationToken);
+
+            return ledgerAccount;
+        }
+
+        return null;
     }
 
 }

@@ -25,13 +25,22 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
 
     private AccountingDocument() { }
 
-    public AccountingDocument(DocumentType documentType, DateOnly documentDate, byte currencyId,
+    public AccountingDocument(DocumentType documentType, DateOnly documentDate, int currencyId,
                                 Guid tenantId, Guid createdBy, string? description = null)
         : base(tenantId, createdBy, description)
     {
         SetDocumentType(documentType);
         SetDocumentDate(documentDate);
         SetCurrencyId(currencyId);
+    }
+
+    public void UpdateAccountingDocument(DateOnly documentDate, int currencyId, Guid modifiedBy, string? description)
+    {
+        SetDocumentDate(documentDate);
+        SetCurrencyId(currencyId);
+        SetDescription(description);
+
+        base.UpdateAudit(modifiedBy);
     }
 
     // We pass AccountCategory (Enum) instead of the whole LedgerAccount entity
@@ -43,7 +52,7 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
         _entries.Add(entry);
     }
 
-    public void RemoveEntry(AccountingEntry entry,Guid deletedBy)
+    public void RemoveEntry(AccountingEntry entry, Guid deletedBy)
     {
         if (entry is null)
             throw new DomainException(DomainErrors.AccountingDocument.EntryRequired);
@@ -98,21 +107,21 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
     // }
 
 
-    public void SetDocumentType(DocumentType documentType)
+    private void SetDocumentType(DocumentType documentType)
     {
         if (documentType == 0)
             throw new DomainException(DomainErrors.AccountingDocument.DocumentTypeRequired);
         DocumentType = documentType;
     }
 
-    public void SetDocumentDate(DateOnly documentDate)
+    private void SetDocumentDate(DateOnly documentDate)
     {
         if (documentDate > DateOnly.FromDateTime(DateTime.UtcNow))
             throw new DomainException(DomainErrors.AccountingDocument.DocumentDateCannotBeInFuture);
         DocumentDate = documentDate;
     }
 
-    public void SetCurrencyId(int currencyId)
+    private void SetCurrencyId(int currencyId)
     {
         if (currencyId == 0)
             throw new DomainException(DomainErrors.AccountingDocument.CurrencyRequired);

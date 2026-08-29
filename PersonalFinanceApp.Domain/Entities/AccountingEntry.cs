@@ -33,7 +33,7 @@ public class AccountingEntry : BaseAuditableEntity
     }
 
 
-    public void SetDocumentId(Guid documentId)
+    private void SetDocumentId(Guid documentId)
     {
         if (documentId == Guid.Empty)
             throw new DomainException(DomainErrors.AccountingEntry.DocumentRequired);

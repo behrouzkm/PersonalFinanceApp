@@ -41,9 +41,8 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
         _context.AccountingDocuments.Entry(document).Property(d => d.RowVersion).OriginalValue = request.RowVersion;
 
         // set header properties
-        document.SetDocumentDate(request.DocumentDate);
-        document.SetCurrencyId(request.CurrencyId);
-        document.SetDescription(request.Description);
+        document.UpdateAccountingDocument(request.DocumentDate, request.CurrencyId, _currentUser.UserId, request.Description);
+
 
         // load existing debit entries(deposits) and their ledger accounts
         var existingDebitEntries = document.Entries.Where(e => e.Debit > 0).ToList();

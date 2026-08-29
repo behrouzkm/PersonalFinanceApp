@@ -40,9 +40,7 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
 
 
         // update the document's header fields
-        document.SetDocumentDate(request.DocumentDate);
-        document.SetCurrencyId(request.CurrencyId);
-        document.SetDescription(request.Description);
+        document.UpdateAccountingDocument(request.DocumentDate, request.CurrencyId, _currentUser.UserId, request.Description);
 
 
         // load every money/person account that could be touched

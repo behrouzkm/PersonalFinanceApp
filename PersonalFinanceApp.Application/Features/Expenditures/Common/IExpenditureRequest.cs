@@ -11,7 +11,7 @@ namespace PersonalFinanceApp.Application.Features.Expenditures.Common;
 public interface IExpenditureRequest
 {
     DateOnly DocumentDate { get; }
-    byte CurrencyId { get; }
+    int CurrencyId { get; }
     string? Description { get; }
     List<AccountingEntryDto> ExpenditureLedgerAccountLines { get; }
     List<MonetaryAccountEntryDto> MonetaryAccountEntries { get; }

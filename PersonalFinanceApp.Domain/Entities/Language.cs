@@ -20,9 +20,8 @@ public class Language
 
     private Language() { }
 
-    public Language(byte id, string code, string name, bool isActive, int displayOrder, bool isRightToLeft = false)
+    public Language(string code, string name, bool isActive, int displayOrder, bool isRightToLeft = false)
     {
-        SetId(id);
         ChangeCode(code);
         ChangeName(name);
         IsActive = isActive;
@@ -38,19 +37,11 @@ public class Language
         SetRightToLeft(isRightToLeft);
     }
 
-    private void SetId(byte id)
-    {
-        if (id == 0)
-            throw new DomainException(DomainErrors.Language.InvalidId);
-
-        Id = id;
-    }
-
     public void SetDisplayOrder(int displayOrder) => DisplayOrder = displayOrder;
 
-    public void MoveUp() => DisplayOrder++;
+    public void IncrementDisplayOrder() => DisplayOrder++;
 
-    public void MoveDown()
+    public void DecrementDisplayOrder()
     {
         if (DisplayOrder > 0)
             DisplayOrder--;

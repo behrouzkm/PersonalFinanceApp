@@ -18,7 +18,7 @@ public class BankAccount : MonetaryAccount
 
     private BankAccount() { }
 
-    public BankAccount(string name, Guid ledgerAccountId, byte currencyId, DateOnly openingDate, decimal initialBalance, int displayOrder,
+    public BankAccount(string name, Guid ledgerAccountId, int currencyId, DateOnly openingDate, decimal initialBalance, int displayOrder,
                             Guid tenantId, Guid createdBy, string bankName, string branchName, BankAccountType bankAccountType,
                             string bankAccountNumber, string? iban = null) :
                                 base(name, ledgerAccountId, currencyId, openingDate, initialBalance, displayOrder, tenantId, createdBy)

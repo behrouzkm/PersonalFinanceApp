@@ -26,6 +26,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAccountingLookupService, AccountingLookupService>();
         services.AddScoped<ILedgerBalanceValidationService, LedgerBalanceValidationService>();
+        services.AddScoped<IOpeningBalanceService, OpeningBalanceService>();
 
         return services;
     }

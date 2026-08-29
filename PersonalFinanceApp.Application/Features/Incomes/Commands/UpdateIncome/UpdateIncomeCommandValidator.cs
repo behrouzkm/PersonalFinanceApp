@@ -8,10 +8,10 @@ using PersonalFinanceApp.Application.Features.Incomes.Common;
 
 namespace PersonalFinanceApp.Application.Features.Incomes.Commands.UpdateIncome;
 
-public class UpdateIncomeCommandValidationRule : AbstractValidator<UpdateIncomeCommand>
+public class UpdateIncomeCommandValidator : AbstractValidator<UpdateIncomeCommand>
 {
 
-    public UpdateIncomeCommandValidationRule()
+    public UpdateIncomeCommandValidator()
     {
         this.ApplySharedIncomeRules();
     }

@@ -54,23 +54,23 @@ public class ReorderCurrencyCommandHandler : IRequestHandler<ReorderCurrencyComm
             if (newPosition < oldPosition)
             {
                 var inRangeCurrencies = await _context.Currencies
-                    .Where(r => r.DisplayOrder >= oldPosition && r.DisplayOrder <= newPosition)
+                    .Where(r => r.DisplayOrder >= newPosition && r.DisplayOrder < oldPosition)
                     .ToListAsync(cancellationToken);
 
                 foreach (var item in inRangeCurrencies)
                 {
-                    item.MoveUp();
+                    item.IncrementDisplayOrder();
                 }
             }
             else
             {
                 var inRangeCurrencies = await _context.Currencies
-                    .Where(r => r.DisplayOrder >= newPosition && r.DisplayOrder <= oldPosition)
+                    .Where(r => r.DisplayOrder > oldPosition && r.DisplayOrder <= newPosition)
                     .ToListAsync(cancellationToken);
 
                 foreach (var item in inRangeCurrencies)
                 {
-                    item.MoveDown();
+                    item.DecrementDisplayOrder();
                 }
             }
 
@@ -85,8 +85,8 @@ public class ReorderCurrencyCommandHandler : IRequestHandler<ReorderCurrencyComm
         }
         catch
         {
-                await transaction.RollbackAsync(cancellationToken);
-                throw;
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
         }
 
     }

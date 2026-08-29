@@ -23,7 +23,7 @@ public class AccountTypeTranslation
 
     private AccountTypeTranslation() { }
 
-    public AccountTypeTranslation(byte accountTypeId, byte languageId, string name, string? description = null)
+    public AccountTypeTranslation(int accountTypeId, int languageId, string name, string? description = null)
     {
         SetAccountType(accountTypeId);
         SetLanguage(languageId);
@@ -32,7 +32,7 @@ public class AccountTypeTranslation
     }
 
 
-    public void UpdateAccountTypeTranslation(byte accountTypeId, byte languageId, string name, string? description = null)
+    public void UpdateAccountTypeTranslation(int accountTypeId, int languageId, string name, string? description = null)
     {
         SetAccountType(accountTypeId);
         SetLanguage(languageId);
@@ -40,9 +40,9 @@ public class AccountTypeTranslation
         SetDescription(description);
     }
 
-    public void SetAccountType(byte accountTypeId) => AccountTypeId = accountTypeId;
+    public void SetAccountType(int accountTypeId) => AccountTypeId = accountTypeId;
 
-    public void SetLanguage(byte languageId) => LanguageId = languageId;
+    public void SetLanguage(int languageId) => LanguageId = languageId;
 
     public void ChangeName(string name)
     {

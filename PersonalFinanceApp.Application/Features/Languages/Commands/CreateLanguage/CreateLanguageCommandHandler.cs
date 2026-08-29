@@ -11,7 +11,7 @@ using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Application.Features.Languages.Commands.CreateLanguage;
 
-public class CreateLanguageCommandHandler : IRequestHandler<CreateLanguageCommand, byte>
+public class CreateLanguageCommandHandler : IRequestHandler<CreateLanguageCommand, int>
 {
     private readonly IApplicationDbContext _context;
 
@@ -20,7 +20,7 @@ public class CreateLanguageCommandHandler : IRequestHandler<CreateLanguageComman
         _context = context;
     }
 
-    public async Task<byte> Handle(CreateLanguageCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CreateLanguageCommand request, CancellationToken cancellationToken)
     {
         var duplicateExist = await _context.Languages
                 .AnyAsync(c => c.Code == request.Code || c.Name == request.Name, cancellationToken);
@@ -28,20 +28,19 @@ public class CreateLanguageCommandHandler : IRequestHandler<CreateLanguageComman
         if (duplicateExist)
             throw new BusinessRuleException(ApplicationErrorCodes.Language.DuplicateCodeOrName, request.Code, request.Name);
 
-        var newId = await _context.Languages.MaxAsync(c => c.Id, cancellationToken) + 1;
+        var maxDisplayOrder = await _context.Languages.MaxAsync(c => (int?)c.DisplayOrder, cancellationToken) ?? 0;
 
-        var Language = new Language(
-            (byte)newId,
+        var language = new Language(
             request.Code,
             request.Name,
             request.IsActive,
-            (byte)newId,
+            maxDisplayOrder+1,
             request.IsRightToLeft);
 
-        await _context.Languages.AddAsync(Language, cancellationToken);
+        await _context.Languages.AddAsync(language, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return (byte)newId;
+        return language.Id;
 
     }
 }

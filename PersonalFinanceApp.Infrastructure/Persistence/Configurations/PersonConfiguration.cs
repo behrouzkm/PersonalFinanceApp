@@ -35,5 +35,13 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
             .WithMany()
             .HasForeignKey(p => p.CurrencyId)
             .OnDelete(DeleteBehavior.Restrict);
+
+
+        builder.HasOne(p => p.OpeningAccountingDocument)
+            .WithMany()
+            .HasForeignKey(p => p.OpeningAccountingDocumentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(p => p.LedgerAccountId).IsUnique();
     }
 }

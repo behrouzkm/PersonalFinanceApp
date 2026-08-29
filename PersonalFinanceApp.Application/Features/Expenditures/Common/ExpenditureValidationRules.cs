@@ -19,7 +19,7 @@ public static class ExpenditureValidationRules
 
         validator.RuleFor(x => x.CurrencyId)
             .NotEmpty()
-            .NotEqual((byte)0)
+            .NotEqual(0)
             .WithErrorCode(ApplicationErrorCodes.Expenditure.CurrencyRequired);
 
         validator.RuleFor(x => x.ExpenditureLedgerAccountLines)

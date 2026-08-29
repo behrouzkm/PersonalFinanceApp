@@ -11,7 +11,7 @@ namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.CreateEx
 public class CreateExpenditureCommand : IRequest<Guid>, IExpenditureRequest
 {
     public DateOnly DocumentDate { get; set; }
-    public byte CurrencyId { get; set; }
+    public int CurrencyId { get; set; }
 
 
     // What was it spent on, and how much for each item. Every line becomes a debit entry.

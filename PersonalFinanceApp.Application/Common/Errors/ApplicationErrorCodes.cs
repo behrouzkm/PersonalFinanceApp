@@ -40,7 +40,7 @@ public static class ApplicationErrorCodes
         //public const string SymbolRequired = "ApplicationErrorCodes.Language.SymbolRequired";
         public const string DuplicateCodeOrName = "ApplicationErrorCodes.Language.DuplicateCodeOrName";
         public const string LanguageInUse = "ApplicationErrorCodes.Language.LanguageInUse";
-       public const string InvalidDisplayOrder = "ApplicationErrorCodes.Language.InvalidDisplayOrder";
+        public const string InvalidDisplayOrder = "ApplicationErrorCodes.Language.InvalidDisplayOrder";
     }
 
     public static class Auth
@@ -107,4 +107,30 @@ public static class ApplicationErrorCodes
         public const string RowVersionRequired = "ErrorCodes.Income.RowVersionRequired";
         public const string EntryNotFoundOnDocument = "ErrorCodes.Income.EntryNotFoundOnDocument";
     }
+
+    public static class FundSource
+    {
+        internal static string InitialDebtExceedsCreditLimit= "ErrorCodes.FundSource.InitialDebtExceedsCreditLimit";
+        internal static string InvalidParentLedgerAccount= "ErrorCodes.FundSource.InvalidParentLedgerAccount";
+        internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.FundSource.InvalidOpeningAccountEquityLedgerAccount";
+        internal static string OpeningDateCannotBeAfterExistingTransactions= "ErrorCodes.FundSource.OpeningDateCannotBeAfterExistingTransactions";
+    }
+
+    public static class Person
+    {
+        public const string PersonIdRequired = "ErrorCodes.Person.PersonIdRequired";
+        public const string DisplayNameRequired = "ErrorCodes.Person.DisplayNameRequired";
+        public static string CurrencyRequired = "ErrorCodes.Person.CurrencyRequired";
+        public static string InvalidCreditLimit = "ErrorCodes.Person.InvalidCreditLimit";
+        public static string InvalidParentLedgerId = "ErrorCodes.Person.InvalidParentLedgerId";
+        public static string InvalidEmailAddress = "ErrorCodes.Person.InvalidEmailAddress";
+        public static string MobileNumberIsTooLong = "ErrorCodes.Person.MobileNumberIsTooLong";
+        public static string TelNumberIsTooLong = "ErrorCodes.Person.TelNumberIsTooLong";
+        public static string EmailAddressIsTooLong = "ErrorCodes.Person.EmailAddressIsTooLong";
+        public static string OpeningDateRequired = "ErrorCodes.Person.OpeningDateRequired";
+        public static string OpeningDateInFuture = "ErrorCodes.Person.OpeningDateInFuture";
+        internal static string InvalidParentLedgerAccount = "ErrorCodes.Person.InvalidParentLedgerAccount";
+        internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.Person.InvalidOpeningAccountEquityLedgerAccount";
+        internal static string OpeningDateCannotBeAfterExistingTransactions= "ErrorCodes.Person.OpeningDateCannotBeAfterExistingTransactions";
+     }
 }

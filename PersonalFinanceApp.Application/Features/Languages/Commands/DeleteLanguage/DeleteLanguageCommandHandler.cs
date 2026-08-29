@@ -27,11 +27,16 @@ public class DeleteLanguageCommandHandler : IRequestHandler<DeleteLanguageComman
                 ?? throw new NotFoundException(nameof(Language), request.Id);
 
 
-        var LanguageInUse = await _context.Tenants
+        var languageInUse = await _context.Tenants
                 .AnyAsync(r => r.DefaultLanguageId == request.Id, cancellationToken);
 
+        languageInUse |= await _context.AccountTypeTranslations
+                .AnyAsync(r => r.LanguageId == request.Id, cancellationToken);
 
-        if (LanguageInUse)
+        languageInUse |= await _context.DocumentTypeTranslations
+                .AnyAsync(r => r.LanguageId == request.Id, cancellationToken);
+
+        if (languageInUse)
             throw new BusinessRuleException(ApplicationErrorCodes.Language.LanguageInUse, request.Id, language.Name);
 
         var currentDisplayOrder = language.DisplayOrder;
@@ -39,11 +44,11 @@ public class DeleteLanguageCommandHandler : IRequestHandler<DeleteLanguageComman
         _context.Languages.Remove(language);
 
         var nextRecords = await _context.Languages
-                .Where(r=>r.DisplayOrder>currentDisplayOrder)
+                .Where(r => r.DisplayOrder > currentDisplayOrder)
                 .ToListAsync(cancellationToken);
 
-        foreach(var lang in nextRecords)
-            lang.MoveDown();
+        foreach (var lang in nextRecords)
+            lang.DecrementDisplayOrder();
 
 
         await _context.SaveChangesAsync(cancellationToken);

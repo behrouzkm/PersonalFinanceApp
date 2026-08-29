@@ -15,7 +15,7 @@ namespace PersonalFinanceApp.Domain.Services;
 public static class LedgerEntryOrdering
 {
     public static IOrderedEnumerable<T> OrderChronologically<T>(this IEnumerable<T> entries)
-                    where T : IledgerEntryPoint
+                    where T : ILedgerEntryPoint
                 => entries
                     .OrderBy(o => o.DocumentDate)
                     .ThenByDescending(o => o.Debit > 0)

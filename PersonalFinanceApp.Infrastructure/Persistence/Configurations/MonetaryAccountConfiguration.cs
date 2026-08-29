@@ -18,22 +18,25 @@ public class MonetaryAccountConfiguration : IEntityTypeConfiguration<MonetaryAcc
     {
         builder.UseTpcMappingStrategy();
 
-        builder.HasKey(m=>m.Id);
+        builder.HasKey(m => m.Id);
 
-        builder.Property(m=>m.DisplayName).IsRequired().HasMaxLength(200);
+        builder.Property(m => m.DisplayName).IsRequired().HasMaxLength(200);
         builder.Property(m => m.InitialBalance).HasPrecision(18, 2);
         builder.Property(m => m.CurrentBalance).HasPrecision(18, 2);
-        builder.Property(m=>m.CreditLimit).HasPrecision(18,2);
+        builder.Property(m => m.CreditLimit).HasPrecision(18, 2);
 
-        builder.HasOne(m=>m.LedgerAccount)
+        builder.HasOne(m => m.LedgerAccount)
             .WithMany()
-            .HasForeignKey(m=>m.LedgerAccountId)
+            .HasForeignKey(m => m.LedgerAccountId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(m=>m.Currency)
+        builder.HasOne(m => m.Currency)
             .WithMany()
-            .HasForeignKey(m=>m.CurrencyId)
+            .HasForeignKey(m => m.CurrencyId)
             .OnDelete(DeleteBehavior.Restrict);
+
+
+        builder.HasIndex(m => m.LedgerAccountId).IsUnique();
 
     }
 }

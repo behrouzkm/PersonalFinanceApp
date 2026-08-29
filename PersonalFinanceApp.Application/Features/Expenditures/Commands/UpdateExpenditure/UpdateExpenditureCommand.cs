@@ -18,7 +18,7 @@ public class UpdateExpenditureCommand : IRequest, IExpenditureRequest
     public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
     public DateOnly DocumentDate { get; set; }
-    public byte CurrencyId { get; set; }
+    public int CurrencyId { get; set; }
 
     // What was it spent on, and how much for each item. Every line becomes a debit entry.
     public List<AccountingEntryDto> ExpenditureLedgerAccountLines { get; set; } = new();

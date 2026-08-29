@@ -10,13 +10,13 @@ namespace PersonalFinanceApp.Domain.Services;
 public class LedgerBalanceValidator
 {
     public void ValidateChronologicalBalance(IFundSource fundSource,
-                                            IReadOnlyCollection<IledgerEntryPoint> proposedEntrySet)
+                                            IReadOnlyCollection<ILedgerEntryPoint> proposedEntrySet)
     {
         if (proposedEntrySet.Any(e => e.DocumentDate < fundSource.OpeningDate))
             throw new DomainException(DomainErrors.AccountingDocument.DocumentDateCannotBeBeforeFundSourceOpeningDate);
 
         var floor = fundSource.CreditLimit.HasValue ? -fundSource.CreditLimit.Value : decimal.MinValue;
-        var runningBalance = fundSource.InitialBalance;
+        decimal runningBalance= 0m;// = fundSource.InitialBalance;
 
         foreach (var entry in proposedEntrySet.OrderChronologically())
         {

@@ -15,9 +15,9 @@ public class UpdateLanguageCommandValidator : AbstractValidator<UpdateLanguageCo
 
 
         RuleFor(x => x.Code)
-            .NotEmpty().WithErrorCode(ApplicationErrorCodes.Currency.CodeRequired)
-            .Length(2).WithErrorCode(ApplicationErrorCodes.Currency.InvalidCurrencyCode)
-            .Matches("^[a-zA-Z]{3}$").WithErrorCode(ApplicationErrorCodes.Currency.InvalidCurrencyCode);
+            .NotEmpty().WithErrorCode(ApplicationErrorCodes.Language.CodeRequired)
+            .Length(2).WithErrorCode(ApplicationErrorCodes.Language.InvalidLanguageCode)
+            .Matches("^[a-zA-Z]{2}$").WithErrorCode(ApplicationErrorCodes.Language.InvalidLanguageCode);
 
 
         RuleFor(x => x.Name)

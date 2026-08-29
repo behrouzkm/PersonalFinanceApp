@@ -51,6 +51,7 @@ public class LedgerBalanceValidationService : ILedgerBalanceValidationService
                 .Where(r => r.LedgerAccountId == fundSource.LedgerAccountId)
                 .Select(s => new LedgerEntryPoint
                 {
+                    EntryId = s.Id,
                     DocumentDate = s.Document.DocumentDate,
                     CreatedAt = s.CreatedAt,
                     Debit = s.Debit,
@@ -66,7 +67,7 @@ public class LedgerBalanceValidationService : ILedgerBalanceValidationService
         return entries;
     }
 
-    private sealed class LedgerEntryPoint : IledgerEntryPoint
+    private sealed class LedgerEntryPoint : ILedgerEntryPoint
     {
         public Guid EntryId { get; set; }
 

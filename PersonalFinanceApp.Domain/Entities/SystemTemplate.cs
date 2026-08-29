@@ -19,21 +19,21 @@ public class SystemTemplate
 
     private SystemTemplate() { }
 
-    public SystemTemplate(string templateKey, string jsonData, byte languageId)
+    public SystemTemplate(string templateKey, string jsonData, int languageId)
     {
         SetTemplateKey(templateKey);
         SetJsonData(jsonData);
         SetLanguage(languageId);
     }
 
-    public void UpdateSystemTemplate(string templateKey, string jsonData, byte languageId)
+    public void UpdateSystemTemplate(string templateKey, string jsonData, int languageId)
     {
         SetTemplateKey(templateKey);
         SetJsonData(jsonData);
         SetLanguage(languageId);
     }
 
-    public void SetLanguage(byte languageId) => LanguageId = languageId;
+    public void SetLanguage(int languageId) => LanguageId = languageId;
 
     public void SetTemplateKey(string templateKey)
     {

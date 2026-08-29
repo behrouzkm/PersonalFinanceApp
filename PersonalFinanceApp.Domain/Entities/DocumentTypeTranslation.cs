@@ -24,7 +24,7 @@ public class DocumentTypeTranslation
 
     private DocumentTypeTranslation() { }
 
-    public DocumentTypeTranslation(DocumentType documentType, byte languageId, string name, string? description = null)
+    public DocumentTypeTranslation(DocumentType documentType, int languageId, string name, string? description = null)
     {
         SetDocumentType(documentType);
         SetLanguage(languageId);
@@ -32,7 +32,7 @@ public class DocumentTypeTranslation
         SetDescription(description);
     }
 
-    public void UpdateDocumentTypeTranslation(DocumentType documentType, byte languageId, string name, string? description = null)
+    public void UpdateDocumentTypeTranslation(DocumentType documentType, int languageId, string name, string? description = null)
     {
         SetDocumentType(documentType);
         SetLanguage(languageId);
@@ -40,7 +40,7 @@ public class DocumentTypeTranslation
         SetDescription(description);
     }
 
-    public void SetLanguage(byte languageId) => LanguageId = languageId;
+    public void SetLanguage(int languageId) => LanguageId = languageId;
 
     public void SetDocumentType(DocumentType documentType) => DocumentType = documentType;
 

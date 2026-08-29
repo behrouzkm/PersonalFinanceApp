@@ -17,5 +17,8 @@ public class AccountTypeConfiguration : IEntityTypeConfiguration<AccountType>
 
         builder.Property(a => a.Category).HasConversion<int>();
         builder.Property(a => a.NormalBalance).HasConversion<int>();
+
+
+        builder.HasIndex(a => a.Category).IsUnique();
     }
 }
