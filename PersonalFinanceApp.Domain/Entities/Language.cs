@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using PersonalFinanceApp.Domain.Errors;
+using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Domain.Entities;
 
-public class Language
+public class Language : IReorderable
 {
     public int Id { get; private set; }
 
@@ -37,7 +38,13 @@ public class Language
         SetRightToLeft(isRightToLeft);
     }
 
-    public void SetDisplayOrder(int displayOrder) => DisplayOrder = displayOrder;
+    public void SetDisplayOrder(int displayOrder)
+    {
+        if (displayOrder < 0)
+            throw new DomainException(DomainErrors.Language.DisplayOrderCannotBeNegative);
+
+        DisplayOrder = displayOrder;
+    }
 
     public void IncrementDisplayOrder() => DisplayOrder++;
 

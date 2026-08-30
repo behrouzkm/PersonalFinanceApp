@@ -56,6 +56,8 @@ public static class DomainErrors
         public const string NameRequired = "ErrorCodes.Language.NameRequired";
         public const string CodeRequired = "ErrorCodes.Language.CodeRequired";
         public const string CodeMustBeTwoLetters = "ErrorCodes.Language.CodeMustBeTwoLetters";
+        internal static string DisplayOrderCannotBeNegative = "ErrorCodes.Language.DisplayOrderCannotBeNegative";
+
     }
 
     public static class Tenant
@@ -73,6 +75,7 @@ public static class DomainErrors
         public const string DecimalPlacesInvalid = "ErrorCodes.Currency.DecimalPlacesInvalid";
         public const string SymbolRequired = "ErrorCodes.Currency.SymbolRequired";
         public const string DecimalPlacesTooHigh = "ErrorCodes.Currency.DecimalPlacesTooHigh";
+        internal static string DisplayOrderCannotBeNegative= "ErrorCodes.Currency.DisplayOrderCannotBeNegative";
     }
 
     public static class MonetaryAccount

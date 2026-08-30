@@ -30,9 +30,9 @@ public class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, G
     public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
     {
         var (ledgerAccount, openingDocId) = await _openingBalanceService.CreateAsync(
-        request.ParentLedgerId, AccountCategory.PersonAccount, DocumentType.Person,
-        request.DisplayName, request.OpeningDate, request.CurrencyId,
-        request.InitialBalance, request.CreditLimit, request.Description, cancellationToken);
+            request.ParentLedgerId, AccountCategory.PersonAccount, DocumentType.Person,
+            request.DisplayName, request.OpeningDate, request.CurrencyId,
+            request.InitialBalance, request.CreditLimit, request.Description, cancellationToken);
 
         var maxDisplayOrder = await _context.Persons.MaxAsync(c => (int?)c.DisplayOrder, cancellationToken) ?? 0;
 

@@ -110,10 +110,11 @@ public static class ApplicationErrorCodes
 
     public static class FundSource
     {
-        internal static string InitialDebtExceedsCreditLimit= "ErrorCodes.FundSource.InitialDebtExceedsCreditLimit";
-        internal static string InvalidParentLedgerAccount= "ErrorCodes.FundSource.InvalidParentLedgerAccount";
+        internal static string InitialDebtExceedsCreditLimit = "ErrorCodes.FundSource.InitialDebtExceedsCreditLimit";
+        internal static string InvalidParentLedgerAccount = "ErrorCodes.FundSource.InvalidParentLedgerAccount";
         internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.FundSource.InvalidOpeningAccountEquityLedgerAccount";
-        internal static string OpeningDateCannotBeAfterExistingTransactions= "ErrorCodes.FundSource.OpeningDateCannotBeAfterExistingTransactions";
+        internal static string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.FundSource.OpeningDateCannotBeAfterExistingTransactions";
+        internal static string CannotChangeCurrencyWithExistingTransactions = "ErrorCodes.FundSource.CannotChangeCurrencyWithExistingTransactions";
     }
 
     public static class Person
@@ -131,6 +132,8 @@ public static class ApplicationErrorCodes
         public static string OpeningDateInFuture = "ErrorCodes.Person.OpeningDateInFuture";
         internal static string InvalidParentLedgerAccount = "ErrorCodes.Person.InvalidParentLedgerAccount";
         internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.Person.InvalidOpeningAccountEquityLedgerAccount";
-        internal static string OpeningDateCannotBeAfterExistingTransactions= "ErrorCodes.Person.OpeningDateCannotBeAfterExistingTransactions";
-     }
+        internal static string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.Person.OpeningDateCannotBeAfterExistingTransactions";
+        internal static string CannotDeleteWithAccountingHistory= "ErrorCodes.Person.CannotDeleteWithAccountingHistory";
+        internal static string InvalidDisplayOrder= "ErrorCodes.Person.InvalidDisplayOrder";
+    }
 }

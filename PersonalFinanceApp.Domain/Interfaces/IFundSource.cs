@@ -20,5 +20,5 @@ public interface IFundSource
     bool CanWithdraw(decimal amount);
     void AdjustBalance(decimal amount);
 
-    void SetInitialBalance(decimal initialBalance);
+    //void SetInitialBalance(decimal initialBalance);
 }

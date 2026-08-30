@@ -4,7 +4,7 @@ using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Domain.Entities;
 
-public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
+public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReorderable
 {
     public string DisplayName { get; private set; } = string.Empty;
 
@@ -123,6 +123,14 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
         DisplayOrder = displayOrder;
     }
 
+    public void IncrementDisplayOrder() => DisplayOrder++;
+
+    public void DecrementDisplayOrder()
+    {
+        if (DisplayOrder > 0)
+            DisplayOrder--;
+    }
+
     public bool CanWithdraw(decimal amount)
     {
         return amount <= CurrentBalance + CreditLimit.GetValueOrDefault(0);
@@ -136,5 +144,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource
 
         CurrentBalance = newBalance;
     }
+
+
 
 }

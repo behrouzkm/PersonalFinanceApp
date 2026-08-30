@@ -83,7 +83,8 @@ public class OpeningBalanceService : IOpeningBalanceService
     }
 
     public async Task<Guid?> ReconcileAsync(
-        IFundSource fundSource, Guid? existingOpeningDocumentId, decimal oldInitialBalance,
+        IFundSource fundSource, Guid? existingOpeningDocumentId,
+        decimal oldInitialBalance, decimal? oldCreditLimit, int oldCurrencyId,
         AccountCategory category, DocumentType documentType, string? description,
         CancellationToken cancellationToken)
     {
@@ -93,6 +94,20 @@ public class OpeningBalanceService : IOpeningBalanceService
         if (fundSource.CreditLimit.HasValue && newInitialBalance < 0
             && fundSource.CreditLimit.Value < Math.Abs(newInitialBalance))
             throw new BusinessRuleException(ApplicationErrorCodes.FundSource.InitialDebtExceedsCreditLimit);
+
+        // Guard: currency is only mutable while the ledger account has no real
+        // history beyond its own opening document — same principle as
+        // LedgerAccount.HasBeenUsedInEntries.
+        if (fundSource.CurrencyId != oldCurrencyId)
+        {
+            var hasNonOpeningEntries = await _context.AccountingEntries.AnyAsync(e =>
+                e.LedgerAccountId == fundSource.LedgerAccountId &&
+                (existingOpeningDocumentId == null || e.AccountingDocumentId != existingOpeningDocumentId.Value),
+                cancellationToken);
+
+            if (hasNonOpeningEntries)
+                throw new BusinessRuleException(ApplicationErrorCodes.FundSource.CannotChangeCurrencyWithExistingTransactions);
+        }
 
         if (existingOpeningDocumentId is null && newInitialBalance == 0)
             return null;
@@ -124,7 +139,6 @@ public class OpeningBalanceService : IOpeningBalanceService
 
             _context.AccountingDocuments.Add(doc);
 
-            // New entry — validate the proposed state even though there's no prior row to replace.
             await _ledgerBalance.ValidateAsync(
                 fundSource, fundSource.OpeningDate, debit, credit, replacingEntryId: null, cancellationToken);
 
@@ -156,16 +170,18 @@ public class OpeningBalanceService : IOpeningBalanceService
         if (headerChanged)
             existingDoc.UpdateAccountingDocument(fundSource.OpeningDate, fundSource.CurrencyId, _currentUser.UserId, description);
 
-        // Always matched by LedgerAccountId — never inferred from which side has Debit > 0.
         var fundSourceEntry = existingDoc.Entries.FirstOrDefault(e => e.LedgerAccountId == fundSource.LedgerAccountId)
             ?? throw new BusinessRuleException(ApplicationErrorCodes.FundSource.InvalidOpeningAccountEquityLedgerAccount);
+
+        var balanceDecreased = newInitialBalance < oldInitialBalance;
+        var creditLimitChanged = fundSource.CreditLimit != oldCreditLimit;
 
         if (newInitialBalance != 0 && newInitialBalance != oldInitialBalance)
         {
             var amount = Math.Abs(newInitialBalance);
             var (debit, credit) = newInitialBalance > 0 ? (amount, 0m) : (0m, amount);
 
-            if (newInitialBalance < oldInitialBalance)
+            if (balanceDecreased)
                 await _ledgerBalance.ValidateAsync(
                     fundSource, fundSource.OpeningDate, debit, credit, fundSourceEntry.Id, cancellationToken);
 
@@ -185,6 +201,14 @@ public class OpeningBalanceService : IOpeningBalanceService
             await _ledgerBalance.ValidateRemovalAsync(fundSource, fundSourceEntry.Id, cancellationToken);
             _context.AccountingDocuments.Remove(existingDoc);
             return null;
+        }
+        else if (creditLimitChanged)
+        {
+            // InitialBalance unchanged, entries untouched — but a shrinking CreditLimit
+            // still needs the full chronological walk, not just SetCreditLimit's snapshot check.
+            await _ledgerBalance.ValidateAsync(
+                fundSource, fundSource.OpeningDate, fundSourceEntry.Debit, fundSourceEntry.Credit,
+                fundSourceEntry.Id, cancellationToken);
         }
 
         return existingDoc.Id;

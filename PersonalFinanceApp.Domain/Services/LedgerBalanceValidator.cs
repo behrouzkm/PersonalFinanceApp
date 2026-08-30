@@ -16,7 +16,7 @@ public class LedgerBalanceValidator
             throw new DomainException(DomainErrors.AccountingDocument.DocumentDateCannotBeBeforeFundSourceOpeningDate);
 
         var floor = fundSource.CreditLimit.HasValue ? -fundSource.CreditLimit.Value : decimal.MinValue;
-        decimal runningBalance= 0m;// = fundSource.InitialBalance;
+        decimal runningBalance= 0m;
 
         foreach (var entry in proposedEntrySet.OrderChronologically())
         {

@@ -10,7 +10,7 @@ using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Domain.Entities;
 
-public class Person : BaseAuditableEntity, IFundSource
+public class Person : BaseAuditableEntity, IFundSource, IReorderable
 {
 
 
@@ -55,7 +55,7 @@ public class Person : BaseAuditableEntity, IFundSource
                     string? telNumber = null, string? description = null, decimal? creditLimit = null,
                     Guid? openingAccountingDocumentId = null) : base(tenantId, createdBy, description)
     {
-        SetPersonType(personType);
+        PersonType = personType;
         SetDisplayName(displayName);
         SetOpeningDate(openingDate);
         SetLedgerAccountId(ledgerAccountId);
@@ -75,16 +75,18 @@ public class Person : BaseAuditableEntity, IFundSource
                                 decimal initialBalance, Guid modifiedBy, decimal? creditLimit, string? email,
                                 string? mobileNumber, string? telNumber, string? description)
     {
-        SetPersonType(personType);
+        PersonType = personType;
         SetDisplayName(displayName);
         SetCurrencyId(currencyId);
         SetOpeningDate(openingDate);
-        SetInitialBalance(initialBalance);
-        SetCreditLimit(creditLimit);
+
         SetEmail(email);
         SetMobileNumber(mobileNumber);
         SetTelNumber(telNumber);
         SetDescription(description);
+
+        SetCreditLimit(creditLimit);
+        UpdateInitialBalance(initialBalance);
 
         UpdateAudit(modifiedBy);
     }
@@ -95,13 +97,8 @@ public class Person : BaseAuditableEntity, IFundSource
         UpdateAudit(modifiedBy);
     }
 
-    public void SetPersonType(PersonType personType)
-    {
-        PersonType = personType;
-    }
 
-
-    public void SetDisplayName(string displayName)
+    private void SetDisplayName(string displayName)
     {
         if (string.IsNullOrWhiteSpace(displayName))
             throw new DomainException(DomainErrors.Person.DisplayNameRequired);
@@ -110,7 +107,7 @@ public class Person : BaseAuditableEntity, IFundSource
     }
 
 
-    public void SetEmail(string? email)
+    private void SetEmail(string? email)
     {
         if (!string.IsNullOrWhiteSpace(email) && !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             throw new DomainException(DomainErrors.Person.InvalidEmailFormat);
@@ -118,7 +115,7 @@ public class Person : BaseAuditableEntity, IFundSource
         Email = email?.Trim().ToLower();
     }
 
-    public void SetMobileNumber(string? mobileNumber)
+    private void SetMobileNumber(string? mobileNumber)
     {
         if (string.IsNullOrWhiteSpace(mobileNumber))
         {
@@ -142,7 +139,7 @@ public class Person : BaseAuditableEntity, IFundSource
         MobileNumber = digitsOnly;
     }
 
-    public void SetTelNumber(string? telNumber)
+    private void SetTelNumber(string? telNumber)
     {
         if (string.IsNullOrWhiteSpace(telNumber))
         {
@@ -166,7 +163,7 @@ public class Person : BaseAuditableEntity, IFundSource
         TelNumber = digitsOnly;
     }
 
-    public void SetLedgerAccountId(Guid ledgerAccountId)
+    private void SetLedgerAccountId(Guid ledgerAccountId)
     {
         if (ledgerAccountId == Guid.Empty)
             throw new DomainException(DomainErrors.Person.LedgerAccountRequired);
@@ -174,7 +171,7 @@ public class Person : BaseAuditableEntity, IFundSource
         LedgerAccountId = ledgerAccountId;
     }
 
-    public void SetCurrencyId(int currencyId)
+    private void SetCurrencyId(int currencyId)
     {
         if (currencyId == 0)
             throw new DomainException(DomainErrors.Person.CurrencyRequired);
@@ -191,7 +188,15 @@ public class Person : BaseAuditableEntity, IFundSource
         DisplayOrder = displayOrder;
     }
 
-    public void SetCreditLimit(decimal? creditLimit)
+    public void IncrementDisplayOrder() => DisplayOrder++;
+
+    public void DecrementDisplayOrder()
+    {
+        if (DisplayOrder > 0)
+            DisplayOrder--;
+    }
+
+    private void SetCreditLimit(decimal? creditLimit)
     {
         if (creditLimit.HasValue && creditLimit.Value < 0)
             throw new DomainException(DomainErrors.Person.CreditLimitCannotBeNegative);
@@ -202,7 +207,7 @@ public class Person : BaseAuditableEntity, IFundSource
         CreditLimit = creditLimit;
     }
 
-    public void SetOpeningDate(DateOnly openingDate)
+    private void SetOpeningDate(DateOnly openingDate)
     {
         if (openingDate > DateOnly.FromDateTime(DateTime.UtcNow))
             throw new DomainException(DomainErrors.Person.OpeningDateCannotBeInFuture);
@@ -210,14 +215,22 @@ public class Person : BaseAuditableEntity, IFundSource
         OpeningDate = openingDate;
     }
 
-    public void SetInitialBalance(decimal initialBalance)
+    // Constructor keeps calling this — no history yet, so overwrite is correct.
+    private void SetInitialBalance(decimal initialBalance)
     {
-
-        if (initialBalance < CreditLimit.GetValueOrDefault(0) * -1) // Ensure initial balance is not less than negative credit limit
+        if (initialBalance < CreditLimit.GetValueOrDefault(0) * -1)
             throw new DomainException(DomainErrors.Person.InitialBalanceCannotBeLessThanCreditLimit);
 
         InitialBalance = initialBalance;
-        CurrentBalance = initialBalance; // Set current balance to initial balance when creating the person
+        CurrentBalance = initialBalance;
+    }
+
+    // UpdateDetails calls this instead — preserves everything AdjustBalance has accrued.
+    private void UpdateInitialBalance(decimal newInitialBalance)
+    {
+        var delta = newInitialBalance - InitialBalance;
+        InitialBalance = newInitialBalance;
+        CurrentBalance += delta;
     }
 
     public bool CanWithdraw(decimal amount)

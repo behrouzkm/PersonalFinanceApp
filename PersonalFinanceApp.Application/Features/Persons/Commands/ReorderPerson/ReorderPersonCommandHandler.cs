@@ -9,18 +9,18 @@ using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Entities;
 
-namespace PersonalFinanceApp.Application.Features.Languages.Commands.ReorderLanguage;
+namespace PersonalFinanceApp.Application.Features.Persons.Commands.ReorderPerson;
 
-public class ReorderLanguageCommandHandler : IRequestHandler<ReorderLanguageCommand>
+public class ReorderPersonCommandHandler : IRequestHandler<ReorderPersonCommand>
 {
     private readonly IReorderService _reorderService;
 
-    public ReorderLanguageCommandHandler(IReorderService reorderService)
+    public ReorderPersonCommandHandler(IReorderService reorderService)
     {
         _reorderService = reorderService;
     }
 
-    public async Task Handle(ReorderLanguageCommand request, CancellationToken cancellationToken)
-    => await _reorderService.ReorderAsync<Language>(
+    public async Task Handle(ReorderPersonCommand request, CancellationToken cancellationToken)
+    => await _reorderService.ReorderAsync<Person>(
         p => p.Id == request.Id, request.Id, request.NewDisplayOrder, cancellationToken);
 }

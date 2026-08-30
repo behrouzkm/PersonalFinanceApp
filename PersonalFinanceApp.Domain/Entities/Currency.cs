@@ -1,9 +1,10 @@
 using System.Reflection.Metadata;
 using PersonalFinanceApp.Domain.Errors;
+using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Domain.Entities;
 
-public class Currency
+public class Currency : IReorderable
 {
     public int Id { get; private set; }
 
@@ -67,7 +68,13 @@ public class Currency
 
     public void Deactivate() => IsActive = false;
 
-    public void SetDisplayOrder(int displayOrder) => DisplayOrder = displayOrder;
+    public void SetDisplayOrder(int displayOrder)
+    {
+        if (displayOrder < 0)
+            throw new DomainException(DomainErrors.Currency.DisplayOrderCannotBeNegative);
+
+        DisplayOrder = displayOrder;
+    }
 
     public void IncrementDisplayOrder() => DisplayOrder++;
 
