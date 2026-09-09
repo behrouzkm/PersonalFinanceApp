@@ -17,7 +17,7 @@ public class RegisterCommand : IRequest<Guid>
     public string TenantName { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public byte DefaultLanguageId { get; set; }
-    public byte DefaultCurrencyId { get; set; }
+    public int DefaultLanguageId { get; set; }
+    public int DefaultCurrencyId { get; set; }
 
 }

@@ -67,7 +67,7 @@ public class BankAccountController : AttachableApiController
         return NoContent();
     }
 
-    [HttpPatch("{id:int}/display-order")]
+    [HttpPatch("{id:guid}/display-order")]
     public async Task<IActionResult> Reorder(Guid id, [FromBody] ReorderBankAccountCommand command,
                     CancellationToken cancellationToken)
     {
@@ -101,7 +101,7 @@ public class BankAccountController : AttachableApiController
         return Ok(result);
     }
 
-    [HttpGet]
+    [HttpGet("options")]
     public async Task<ActionResult<List<BankAccountOptionDto>>> GetOptionList([FromQuery] GetBankAccountsOptionsQuery query,
                 CancellationToken cancellationToken)
     {

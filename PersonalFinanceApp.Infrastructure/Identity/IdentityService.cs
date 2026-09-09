@@ -109,8 +109,8 @@ public class IdentityService : IIdentityService
             string tenantName,
             string firstName,
             string lastName,
-            byte defaultLanguageId,
-            byte defaultCurrencyId,
+            int defaultLanguageId,
+            int defaultCurrencyId,
             CancellationToken cancellationToken)
     {
 
@@ -119,76 +119,86 @@ public class IdentityService : IIdentityService
         // or neither is persisted.
         await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
 
-        var tenant = new Tenant(tenantName, defaultLanguageId, defaultCurrencyId);
-
-        _context.Tenants.Add(tenant);
-        await _context.SaveChangesAsync(cancellationToken);
-
-
-        var user = new ApplicationUser
+        try
         {
-            UserName = email,
-            Email = email,
-            TenantId = tenant.Id,
-            FirstName = firstName,
-            LastName = lastName
-        };
+            var tenant = new Tenant(tenantName, defaultLanguageId, defaultCurrencyId);
 
-        var result = await _userManager.CreateAsync(user, password);
+            _context.Tenants.Add(tenant);
+            await _context.SaveChangesAsync(cancellationToken);
 
-        if (!result.Succeeded)
-        {
-            await transaction.RollbackAsync(cancellationToken);
+
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                TenantId = tenant.Id,
+                FirstName = firstName,
+                LastName = lastName
+            };
+
+            var result = await _userManager.CreateAsync(user, password);
+
+            if (!result.Succeeded)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+
+                return new IdentityRegistrationResult
+                {
+                    Succeeded = false,
+                    Errors = result.Errors.Select(s => s.Description).ToList()
+                };
+            }
+
+            var accountTypes = await (
+                from accountType in _context.AccountTypes
+                join translation in _context.AccountTypeTranslations
+                    on accountType.Id equals translation.AccountTypeId
+                where translation.LanguageId == defaultLanguageId
+                select new
+                {
+                    accountType.Category,
+                    accountType.Id,
+                    translation.Name,
+                    translation.Description
+                })
+              .ToDictionaryAsync(
+                  x => x.Category,
+                  x => new
+                  {
+                      x.Id,
+                      x.Name,
+                      x.Description
+
+                  },
+                  cancellationToken);
+
+
+            // Create LedgerAccount roots
+            foreach (AccountCategory category in Enum.GetValues<AccountCategory>())
+            {
+                var ledgerAccount = new LedgerAccount(
+                    accountTypes[category].Id,
+                    accountTypes[category].Name,
+                    tenant.Id,
+                    user.Id,
+                    accountTypes[category].Description);
+
+                await _context.LedgerAccounts.AddAsync(ledgerAccount);
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
 
             return new IdentityRegistrationResult
             {
-                Succeeded = false,
-                Errors = result.Errors.Select(s => s.Description).ToList()
+                Succeeded = true,
+                UserId = user.Id
             };
         }
-
-        var accountTypes = await (
-            from accountType in _context.AccountTypes
-            join translation in _context.AccountTypeTranslations
-                on accountType.Id equals translation.AccountTypeId
-            where translation.LanguageId == defaultLanguageId
-            select new
-            {
-                accountType.Category,
-                accountType.Id,
-                translation.Name,
-                translation.Description
-            })
-          .ToDictionaryAsync(
-              x => x.Category,
-              x => new
-              {
-                  x.Id,
-                  x.Name,
-                  x.Description
-
-              },
-              cancellationToken);
-
-        // Create LedgerAccount roots
-        foreach (AccountCategory category in Enum.GetValues<AccountCategory>())
+        catch
         {
-            var ledgerAccount = new LedgerAccount(
-                accountTypes[category].Id,
-                accountTypes[category].Name,
-                tenant.Id,
-                user.Id,
-                accountTypes[category].Description);
-
-            await _context.LedgerAccounts.AddAsync(ledgerAccount);
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
         }
-
-        await transaction.CommitAsync(cancellationToken);
-
-        return new IdentityRegistrationResult
-        {
-            Succeeded = true,
-            UserId = user.Id
-        };
     }
 }

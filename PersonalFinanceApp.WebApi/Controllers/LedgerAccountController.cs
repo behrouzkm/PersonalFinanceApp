@@ -66,7 +66,7 @@ public class LedgerAccountController : AttachableApiController
         return NoContent();
     }
 
-    [HttpPatch("{id:int}/display-order")]
+    [HttpPatch("{id:guid}/display-order")]
     public async Task<IActionResult> Reorder(Guid id, [FromBody] ReorderLedgerAccountCommand command,
                     CancellationToken cancellationToken)
     {
@@ -100,7 +100,7 @@ public class LedgerAccountController : AttachableApiController
         return Ok(result);
     }
 
-    [HttpGet]
+    [HttpGet("options")]
     public async Task<ActionResult<List<LedgerAccountOptionDto>>> GetOptionList([FromQuery] GetLedgerAccountsOptionsQuery query,
                 CancellationToken cancellationToken)
     {

@@ -13,8 +13,8 @@ public interface IIdentityService
         string tenantName,
         string firstName,
         string lastName,
-        byte defaultLanguageId,
-        byte defaultCurrencyId,
+        int defaultLanguageId,
+        int defaultCurrencyId,
         CancellationToken cancellationToken
     );
 

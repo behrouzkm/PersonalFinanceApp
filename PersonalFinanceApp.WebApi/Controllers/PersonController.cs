@@ -67,8 +67,8 @@ public class PersonController : AttachableApiController
 
         return NoContent();
     }
-    
-    [HttpPatch("{id:int}/display-order")]
+
+    [HttpPatch("{id:guid}/display-order")]
     public async Task<IActionResult> Reorder(Guid id, [FromBody] ReorderPersonCommand command,
                         CancellationToken cancellationToken)
     {
@@ -102,7 +102,7 @@ public class PersonController : AttachableApiController
         return Ok(result);
     }
 
-    [HttpGet]
+    [HttpGet("options")]
     public async Task<ActionResult<List<PersonOptionDto>>> GetOptionList([FromQuery] GetPersonsOptionsQuery query,
                     CancellationToken cancellationToken)
     {

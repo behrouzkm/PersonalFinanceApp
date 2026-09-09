@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using AutoMapper;
 using MediatR;
 using PersonalFinanceApp.Application.Common.Behaviors;
 using System.Reflection;
@@ -31,8 +30,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
-        services.AddScoped<IReorderService, ReorderService>();
-        services.AddScoped<IReorderService, ReorderService>();
+
 
         return services;
     }
