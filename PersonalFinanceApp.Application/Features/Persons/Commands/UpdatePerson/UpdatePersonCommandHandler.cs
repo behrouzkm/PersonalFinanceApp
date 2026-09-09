@@ -35,6 +35,8 @@ public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand>
         .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken)
         ?? throw new NotFoundException(nameof(Person), request.Id);
 
+        _context.Entry(person).Property(d => d.RowVersion).OriginalValue = request.RowVersion;
+
         var oldInitialBalance = person.InitialBalance;
         var oldCreditLimit = person.CreditLimit;
         var oldCurrencyId = person.CurrencyId;
@@ -48,10 +50,10 @@ public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand>
             request.Email, request.MobileNumber, request.TelNumber, request.Description);
 
         var openingDocId = await _openingBalanceService.ReconcileAsync(
-            person, existingOpeningDocId, oldInitialBalance,oldCreditLimit, oldCurrencyId,
-            AccountCategory.PersonAccount, DocumentType.Person, request.Description, cancellationToken);
+            person, existingOpeningDocId, oldInitialBalance, oldCreditLimit, oldCurrencyId,
+            AccountCategory.PersonAccount, request.Description, cancellationToken);
 
-        person.SetOpeningAccountingDocumentId(openingDocId, _currentUser.UserId);
+        person.UpdateOpeningAccountingDocumentId(openingDocId, _currentUser.UserId);
 
         await _context.SaveChangesAsync(cancellationToken);
     }

@@ -1,0 +1,44 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
+using FluentValidation;
+using PersonalFinanceApp.Application.Common.Errors;
+
+
+namespace PersonalFinanceApp.Application.Features.MoneyTransfers.Commands.CreateMoneyTransfer;
+
+public class CreateMoneyTransferCommandValidator : AbstractValidator<CreateMoneyTransferCommand>
+{
+
+    public CreateMoneyTransferCommandValidator()
+    {
+        RuleFor(x => x.TransferDate)
+            .NotEmpty().WithErrorCode(ApplicationErrorCodes.MoneyTransfer.TransferDateRequired)
+            .Must(date => date <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.TransferDateInFuture);
+
+        RuleFor(x => x.CurrencyId)
+            .NotEqual(0)
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.CurrencyRequired);
+
+        RuleFor(x => x)
+            .Must(x => x.FromMonetaryAccountId != x.ToMonetaryAccountId)
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.SourceAndDestinationMustDiffer);
+
+        RuleFor(x => x.FromMonetaryAccountId)
+            .NotEqual(Guid.Empty)
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.FromMonetaryAccountIdRequired);
+
+        RuleFor(x => x.ToMonetaryAccountId)
+            .NotEqual(Guid.Empty)
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.ToMonetaryAccountIdRequired);
+
+        RuleFor(x => x.Amount)
+            .GreaterThan(0)
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.TransferAmountMustBePositive);
+    }
+
+}

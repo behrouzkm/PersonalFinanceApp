@@ -13,11 +13,11 @@ public class DeletePersonCommandValidator : AbstractValidator<DeletePersonComman
     public DeletePersonCommandValidator()
     {
 
-        RuleFor(p => p.Id)
+        RuleFor(p => p.PersonId)
             .NotEmpty()
             .NotEqual(Guid.Empty)
             .WithErrorCode(ApplicationErrorCodes.Person.PersonIdRequired);
 
-        
+
     }
 }

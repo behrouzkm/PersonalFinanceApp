@@ -11,7 +11,7 @@ namespace PersonalFinanceApp.Application.Features.Persons.Queries.GetPersonsList
 
 // One flexible query with optional filters, rather than a separate query per filter
 // axis - covers listing, date-range reporting, and account/person-based views at once.
-public class GetPersonsListQuery : IRequest<PaginatedList<PersonDto>>
+public class GetPersonsListQuery : IRequest<PaginatedList<PersonListItemDto>>
 {
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 20;

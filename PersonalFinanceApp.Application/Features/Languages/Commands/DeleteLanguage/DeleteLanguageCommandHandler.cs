@@ -14,10 +14,12 @@ namespace PersonalFinanceApp.Application.Features.Languages.Commands.DeleteLangu
 public class DeleteLanguageCommandHandler : IRequestHandler<DeleteLanguageCommand>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IReorderService _reorderService;
 
-    public DeleteLanguageCommandHandler(IApplicationDbContext context)
+    public DeleteLanguageCommandHandler(IApplicationDbContext context,IReorderService reorderService )
     {
         _context = context;
+        _reorderService=reorderService;
     }
 
     public async Task Handle(DeleteLanguageCommand request, CancellationToken cancellationToken)
@@ -39,19 +41,23 @@ public class DeleteLanguageCommandHandler : IRequestHandler<DeleteLanguageComman
         if (languageInUse)
             throw new BusinessRuleException(ApplicationErrorCodes.Language.LanguageInUse, request.Id, language.Name);
 
-        var currentDisplayOrder = language.DisplayOrder;
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            // Phase 1: the row must actually be gone before anything shifts into its slot.
+            _context.Languages.Remove(language);
+            await _context.SaveChangesAsync(cancellationToken);
 
-        _context.Languages.Remove(language);
+            // Phase 2: now the slot is genuinely vacant.
+            await _reorderService.CloseGapAsync(language, cancellationToken, null);
+            await _context.SaveChangesAsync(cancellationToken);
 
-        var nextRecords = await _context.Languages
-                .Where(r => r.DisplayOrder > currentDisplayOrder)
-                .ToListAsync(cancellationToken);
-
-        foreach (var lang in nextRecords)
-            lang.DecrementDisplayOrder();
-
-
-        await _context.SaveChangesAsync(cancellationToken);
-
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 }

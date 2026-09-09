@@ -8,5 +8,5 @@ namespace PersonalFinanceApp.Application.Features.Expenditures.Queries.GetExpend
 
 public class GetExpenditureByIdQuery : IRequest<ExpenditureDetailsDto>
 {
-    public Guid AccountingDocumentId {get;set;}
+    public Guid ExpenditureAccountingDocumentId {get;set;}
 }

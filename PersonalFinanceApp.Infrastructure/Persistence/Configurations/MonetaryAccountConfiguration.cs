@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PersonalFinanceApp.Domain.Common.Constants;
 using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence.Configurations;
@@ -20,10 +21,12 @@ public class MonetaryAccountConfiguration : IEntityTypeConfiguration<MonetaryAcc
 
         builder.HasKey(m => m.Id);
 
-        builder.Property(m => m.DisplayName).IsRequired().HasMaxLength(200);
-        builder.Property(m => m.InitialBalance).HasPrecision(18, 2);
-        builder.Property(m => m.CurrentBalance).HasPrecision(18, 2);
-        builder.Property(m => m.CreditLimit).HasPrecision(18, 2);
+        builder.Property(p => p.RowVersion).IsRowVersion();
+
+        builder.Property(m => m.DisplayName).IsRequired().HasMaxLength(FieldLengths.Name);
+        builder.Property(m => m.InitialBalance).HasPrecision(DecimalPrecision.Precision, DecimalPrecision.MonetaryAmountScale);
+        builder.Property(m => m.CurrentBalance).HasPrecision(DecimalPrecision.Precision, DecimalPrecision.MonetaryAmountScale);
+        builder.Property(m => m.CreditLimit).HasPrecision(DecimalPrecision.Precision, DecimalPrecision.MonetaryAmountScale);
 
         builder.HasOne(m => m.LedgerAccount)
             .WithMany()
@@ -37,6 +40,8 @@ public class MonetaryAccountConfiguration : IEntityTypeConfiguration<MonetaryAcc
 
 
         builder.HasIndex(m => m.LedgerAccountId).IsUnique();
+        builder.HasIndex(m => new { m.TenantId, m.DisplayOrder }).IsUnique().HasFilter("[IsDeleted] = 0");
+
 
     }
 }

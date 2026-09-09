@@ -13,6 +13,16 @@ public static class ApplicationErrorCodes
         public const string ValidationFailed = "ErrorCodes.Common.ValidationFailed";
         public const string ConcurrencyConflict = "ErrorCodes.Common.ConcurrencyConflict";
         public const string UnexpectedError = "ErrorCodes.Common.UnexpectedError";
+        public const string DuplicateValueConflict = "ErrorCodes.Common.DuplicateValueConflict";
+
+    }
+
+    public static class Attachment
+    {
+        public const string OwnerIdRequired = "ErrorCodes.Attachment.OwnerIdRequired";
+        public const string FileNameRequired = "ErrorCodes.Attachment.FileNameRequired";
+        public const string UnsupportedContentType = "ErrorCodes.Attachment.UnsupportedContentType";
+        public const string FileTooLarge = "ErrorCodes.Attachment.FileTooLarge";
     }
 
     public static class Currency
@@ -108,6 +118,49 @@ public static class ApplicationErrorCodes
         public const string EntryNotFoundOnDocument = "ErrorCodes.Income.EntryNotFoundOnDocument";
     }
 
+    public static class MoneyTransfer
+    {
+        public const string TransferDocumentIdRequired = "ErrorCodes.MoneyTransfer.TransferDocumentIdRequired";
+        public static string CurrencyRequired = "ErrorCodes.MoneyTransfer.CurrencyRequired";
+        public static string SourceDestinationCurrencyMismatch = "ErrorCodes.MoneyTransfer.SourceDestinationCurrencyMismatch";
+        public static string TransferDateRequired = "ErrorCodes.MoneyTransfer.TransferDateRequired";
+        public static string TransferDateInFuture = "ErrorCodes.MoneyTransfer.TransferDateInFuture";
+        public static string FromMonetaryAccountIdRequired = "ErrorCodes.MoneyTransfer.FromMonetaryAccountIdRequired";
+        public static string ToMonetaryAccountIdRequired = "ErrorCodes.MoneyTransfer.ToMonetaryAccountIdRequired";
+        public static string SourceAndDestinationMustDiffer = "ErrorCodes.MoneyTransfer.SourceAndDestinationMustDiffer";
+        public static string TransferAmountMustBePositive = "ErrorCodes.MoneyTransfer.TransferAmountMustBePositive";
+        public static string InsufficientBalance = "ErrorCodes.MoneyTransfer.InsufficientBalance";
+        public static string RowVersionRequired = "ErrorCodes.MoneyTransfer.RowVersionRequired";
+        public static string CreditEntryNotFound = "ErrorCodes.MoneyTransfer.CreditEntryNotFound";
+        public static string DebitEntryNotFound = "ErrorCodes.MoneyTransfer.DebitEntryNotFound";
+        public static string FromMonetaryAccountNotFound = "ErrorCodes.MoneyTransfer.FromMonetaryAccountNotFound";
+        public static string ToMonetaryAccountNotFound = "ErrorCodes.MoneyTransfer.ToMonetaryAccountNotFound";
+        public static string FromLaterThanToDate = "ErrorCodes.MoneyTransfer.FromLaterThanToDate";
+    }
+
+    public static class CurrencyExchange
+    {
+        public const string DocumentIdRequired = "ErrorCodes.CurrencyExchange.DocumentIdRequired";
+        public const string ClearingEntryNotFound = "ErrorCodes.CurrencyExchange.ClearingEntryNotFound";
+        public static string FundSourceEntryNotFound = "ErrorCodes.CurrencyExchange.FundSourceEntryNotFound";
+        public static string SameCurrencyExchangeNotAllowed = "ErrorCodes.CurrencyExchange.SameCurrencyExchangeNotAllowed";
+        public static string ExchangeDateRequired = "ErrorCodes.CurrencyExchange.ExchangeDateRequired";
+        public static string ExchangeDateInFuture = "ErrorCodes.CurrencyExchange.ExchangeDateInFuture";
+        internal static string FromLedgerAccountRequired = "ErrorCodes.CurrencyExchange.FromLedgerAccountRequired";
+        internal static string ToLedgerAccountRequired = "ErrorCodes.CurrencyExchange.ToLedgerAccountRequired";
+        internal static string SourceAndDestinationMustDiffer = "ErrorCodes.CurrencyExchange.SourceAndDestinationMustDiffer";
+        internal static string AmountRateMismatch = "ErrorCodes.CurrencyExchange.AmountRateMismatch";
+        internal static string FromAmountMustBePositive = "ErrorCodes.CurrencyExchange.FromAmountMustBePositive";
+        internal static string ToAmountMustBePositive = "ErrorCodes.CurrencyExchange.ToAmountMustBePositive";
+        internal static string ExchangeRateMustBePositive = "ErrorCodes.CurrencyExchange.ExchangeRateMustBePositive";
+        internal static string InsufficientBalance = "ErrorCodes.CurrencyExchange.InsufficientBalance";
+        internal static string RowVersionRequired = "ErrorCodes.CurrencyExchange.RowVersionRequired";
+        internal static string CreditEntryNotFound = "ErrorCodes.CurrencyExchange.CreditEntryNotFound";
+        internal static string DebitEntryNotFound = "ErrorCodes.CurrencyExchange.DebitEntryNotFound";
+        internal static string FromMonetaryAccountNotFound = "ErrorCodes.CurrencyExchange.FromMonetaryAccountNotFound";
+        internal static string ToMonetaryAccountNotFound = "ErrorCodes.CurrencyExchange.ToMonetaryAccountNotFound";
+    }
+
     public static class FundSource
     {
         internal static string InitialDebtExceedsCreditLimit = "ErrorCodes.FundSource.InitialDebtExceedsCreditLimit";
@@ -133,7 +186,59 @@ public static class ApplicationErrorCodes
         internal static string InvalidParentLedgerAccount = "ErrorCodes.Person.InvalidParentLedgerAccount";
         internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.Person.InvalidOpeningAccountEquityLedgerAccount";
         internal static string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.Person.OpeningDateCannotBeAfterExistingTransactions";
-        internal static string CannotDeleteWithAccountingHistory= "ErrorCodes.Person.CannotDeleteWithAccountingHistory";
-        internal static string InvalidDisplayOrder= "ErrorCodes.Person.InvalidDisplayOrder";
+        internal static string CannotDeleteWithAccountingHistory = "ErrorCodes.Person.CannotDeleteWithAccountingHistory";
+        internal static string InvalidDisplayOrder = "ErrorCodes.Person.InvalidDisplayOrder";
+    }
+
+
+    public static class BankAccount
+    {
+        public const string BankAccountIdRequired = "ErrorCodes.BankAccount.BankAccountIdRequired";
+        public const string DisplayNameRequired = "ErrorCodes.BankAccount.DisplayNameRequired";
+        public static string CurrencyRequired = "ErrorCodes.BankAccount.CurrencyRequired";
+        public static string CreditLimitMustBePositive = "ErrorCodes.BankAccount.CreditLimitMustBePositive";
+        public static string InvalidParentLedgerId = "ErrorCodes.BankAccount.InvalidParentLedgerId";
+        public static string InvalidBankName = "ErrorCodes.BankAccount.InvalidBankName";
+        public static string InvalidBankAccountNo = "ErrorCodes.BankAccount.InvalidBankAccountNo";
+        public static string TelNumberIsTooLong = "ErrorCodes.BankAccount.TelNumberIsTooLong";
+        public static string OpeningDateRequired = "ErrorCodes.BankAccount.OpeningDateRequired";
+        public static string OpeningDateInFuture = "ErrorCodes.BankAccount.OpeningDateInFuture";
+        internal static string InvalidParentLedgerAccount = "ErrorCodes.BankAccount.InvalidParentLedgerAccount";
+        internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.BankAccount.InvalidOpeningAccountEquityLedgerAccount";
+        internal static string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.BankAccount.OpeningDateCannotBeAfterExistingTransactions";
+        internal static string CannotDeleteWithAccountingHistory = "ErrorCodes.BankAccount.CannotDeleteWithAccountingHistory";
+        internal static string InvalidDisplayOrder = "ErrorCodes.BankAccount.InvalidDisplayOrder";
+    }
+
+    public static class CashAccount
+    {
+        public const string CashAccountIdRequired = "ErrorCodes.CashAccount.CashAccountIdRequired";
+        public const string DisplayNameRequired = "ErrorCodes.CashAccount.DisplayNameRequired";
+        public const string LocationRequired = "ErrorCodes.CashAccount.LocationRequired";
+        public static string CurrencyRequired = "ErrorCodes.CashAccount.CurrencyRequired";
+        public static string CreditLimitMustBePositive = "ErrorCodes.CashAccount.CreditLimitMustBePositive";
+        public static string InvalidParentLedgerId = "ErrorCodes.CashAccount.InvalidParentLedgerId";
+        public static string InvalidCashName = "ErrorCodes.CashAccount.InvalidCashName";
+        public static string InvalidCashAccountNo = "ErrorCodes.CashAccount.InvalidCashAccountNo";
+        public static string TelNumberIsTooLong = "ErrorCodes.CashAccount.TelNumberIsTooLong";
+        public static string OpeningDateRequired = "ErrorCodes.CashAccount.OpeningDateRequired";
+        public static string OpeningDateInFuture = "ErrorCodes.CashAccount.OpeningDateInFuture";
+        internal static string InvalidParentLedgerAccount = "ErrorCodes.CashAccount.InvalidParentLedgerAccount";
+        internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.CashAccount.InvalidOpeningAccountEquityLedgerAccount";
+        internal static string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.CashAccount.OpeningDateCannotBeAfterExistingTransactions";
+        internal static string CannotDeleteWithAccountingHistory = "ErrorCodes.CashAccount.CannotDeleteWithAccountingHistory";
+        internal static string InvalidDisplayOrder = "ErrorCodes.CashAccount.InvalidDisplayOrder";
+    }
+
+    public static class LedgerAccount
+    {
+        public const string LedgerAccountIdRequired = "ErrorCodes.LedgerAccount.LedgerAccountIdRequired";
+        public const string NameRequired = "ErrorCodes.LedgerAccount.NameRequired";
+        public static string InvalidParentLedgerId = "ErrorCodes.LedgerAccount.InvalidParentLedgerId";
+        internal static string InvalidParentLedgerAccount = "ErrorCodes.LedgerAccount.InvalidParentLedgerAccount";
+        internal static string CannotDeleteWithAccountingHistory = "ErrorCodes.LedgerAccount.CannotDeleteWithAccountingHistory";
+        internal static string InvalidDisplayOrder = "ErrorCodes.LedgerAccount.InvalidDisplayOrder";
+        internal static string InvalidAccountTypeId = "ErrorCodes.LedgerAccount.InvalidAccountTypeId";
+        internal static string CannotDeleteDirectly = "ErrorCodes.LedgerAccount.InvalidAccountTypeId";
     }
 }

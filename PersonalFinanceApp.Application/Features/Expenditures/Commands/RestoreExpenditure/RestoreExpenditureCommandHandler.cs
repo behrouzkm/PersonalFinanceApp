@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Entities;
+using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.RestoreExpenditure;
 
@@ -15,14 +16,18 @@ public class RestoreExpenditureCommandHandler : IRequestHandler<RestoreExpenditu
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IAttachmentService _attachmentService;
 
     public RestoreExpenditureCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-                ILedgerBalanceValidationService ledgerValidator)
+        ILedgerBalanceValidationService ledgerValidator, IAttachmentService attachmentService)
     {
         _context = context;
         _currentUser = currentUser;
         _ledgerValidator = ledgerValidator;
+        _attachmentService = attachmentService;
     }
+
+
     public async Task Handle(RestoreExpenditureCommand request, CancellationToken cancellationToken)
     {
         var document = await _context.AccountingDocuments
@@ -51,18 +56,21 @@ public class RestoreExpenditureCommandHandler : IRequestHandler<RestoreExpenditu
             if (monetaryAccounts.TryGetValue(entry.LedgerAccountId, out var account))
             {
                 await _ledgerValidator.ValidateAsync(account, document.DocumentDate, 0, entry.Credit,
-                    replacingEntryId: document.Id, cancellationToken);
+                    replacingEntryId: entry.Id, cancellationToken);
 
                 account.AdjustBalance(-entry.Credit);
             }
             else if (persons.TryGetValue(entry.LedgerAccountId, out var person))
             {
                 await _ledgerValidator.ValidateAsync(person, document.DocumentDate, 0, entry.Credit,
-                    replacingEntryId: document.Id, cancellationToken);
+                    replacingEntryId: entry.Id, cancellationToken);
 
                 person.AdjustBalance(-entry.Credit);
             }
         }
+
+        await _attachmentService.RestoreAllForOwnerAsync(
+            AttachmentOwnerType.AccountingDocument, document.Id, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
     }

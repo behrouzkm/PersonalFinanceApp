@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -12,8 +13,6 @@ namespace PersonalFinanceApp.Domain.Entities;
 
 public class Person : BaseAuditableEntity, IFundSource, IReorderable
 {
-
-
     public PersonType PersonType { get; private set; } = PersonType.Individual;
 
     public string DisplayName { get; private set; } = string.Empty!;
@@ -48,12 +47,27 @@ public class Person : BaseAuditableEntity, IFundSource, IReorderable
     public string? TelNumber { get; private set; }
 
 
+    [Timestamp]
+    public byte[] RowVersion { get; set; } = default!;
+
     private Person() { }
 
-    public Person(PersonType personType, string displayName, Guid ledgerAccountId, int currencyId, int displayOrder,
-                    DateOnly openingDate, decimal initialBalance, Guid tenantId, Guid createdBy, string? email = null, string? mobileNumber = null,
-                    string? telNumber = null, string? description = null, decimal? creditLimit = null,
-                    Guid? openingAccountingDocumentId = null) : base(tenantId, createdBy, description)
+    public Person(
+        PersonType personType,
+        string displayName,
+        Guid ledgerAccountId,
+        int currencyId,
+        int displayOrder,
+        DateOnly openingDate,
+        decimal initialBalance,
+        Guid tenantId,
+        Guid createdBy,
+        string? email = null,
+        string? mobileNumber = null,
+        string? telNumber = null,
+        string? description = null,
+        decimal? creditLimit = null,
+        Guid? openingAccountingDocumentId = null) : base(tenantId, createdBy, description)
     {
         PersonType = personType;
         SetDisplayName(displayName);
@@ -71,9 +85,18 @@ public class Person : BaseAuditableEntity, IFundSource, IReorderable
     }
 
 
-    public void UpdateDetails(PersonType personType, string displayName, int currencyId, DateOnly openingDate,
-                                decimal initialBalance, Guid modifiedBy, decimal? creditLimit, string? email,
-                                string? mobileNumber, string? telNumber, string? description)
+    public void UpdateDetails(
+        PersonType personType,
+        string displayName,
+        int currencyId,
+        DateOnly openingDate,
+        decimal initialBalance,
+        Guid modifiedBy,
+        decimal? creditLimit,
+        string? email,
+        string? mobileNumber,
+        string? telNumber,
+        string? description)
     {
         PersonType = personType;
         SetDisplayName(displayName);
@@ -91,7 +114,7 @@ public class Person : BaseAuditableEntity, IFundSource, IReorderable
         UpdateAudit(modifiedBy);
     }
 
-    public void SetOpeningAccountingDocumentId(Guid? openingAccountingDocumentId, Guid modifiedBy)
+    public void UpdateOpeningAccountingDocumentId(Guid? openingAccountingDocumentId, Guid modifiedBy)
     {
         OpeningAccountingDocumentId = openingAccountingDocumentId;
         UpdateAudit(modifiedBy);
@@ -188,16 +211,10 @@ public class Person : BaseAuditableEntity, IFundSource, IReorderable
         DisplayOrder = displayOrder;
     }
 
-    public void IncrementDisplayOrder() => DisplayOrder++;
-
-    public void DecrementDisplayOrder()
-    {
-        if (DisplayOrder > 0)
-            DisplayOrder--;
-    }
 
     private void SetCreditLimit(decimal? creditLimit)
     {
+
         if (creditLimit.HasValue && creditLimit.Value < 0)
             throw new DomainException(DomainErrors.Person.CreditLimitCannotBeNegative);
 

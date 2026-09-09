@@ -27,7 +27,7 @@ public class AccountTypeTranslation
     {
         SetAccountType(accountTypeId);
         SetLanguage(languageId);
-        ChangeName(name);
+        SetName(name);
         SetDescription(description);
     }
 
@@ -36,15 +36,15 @@ public class AccountTypeTranslation
     {
         SetAccountType(accountTypeId);
         SetLanguage(languageId);
-        ChangeName(name);
+        SetName(name);
         SetDescription(description);
     }
 
-    public void SetAccountType(int accountTypeId) => AccountTypeId = accountTypeId;
+    private void SetAccountType(int accountTypeId) => AccountTypeId = accountTypeId;
 
-    public void SetLanguage(int languageId) => LanguageId = languageId;
+    private void SetLanguage(int languageId) => LanguageId = languageId;
 
-    public void ChangeName(string name)
+    private void SetName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException(DomainErrors.LedgerAccount.NameRequired);
@@ -52,7 +52,7 @@ public class AccountTypeTranslation
         Name = name.Trim();
     }
 
-    public void SetDescription(string? description)
+    private void SetDescription(string? description)
     {
         Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
     }

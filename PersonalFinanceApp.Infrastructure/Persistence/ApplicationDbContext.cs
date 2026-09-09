@@ -33,7 +33,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<Currency> Currencies => Set<Currency>();
     public DbSet<DocumentTypeTranslation> DocumentTypeTranslations => Set<DocumentTypeTranslation>();
     public DbSet<Language> Languages => Set<Language>();
-    public DbSet<MoneyTransfer> MoneyTransfers => Set<MoneyTransfer>();
+    public DbSet<CurrencyExchange> CurrencyExchanges => Set<CurrencyExchange>();
     public DbSet<Person> Persons => Set<Person>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<SystemTemplate> SystemTemplates => Set<SystemTemplate>();

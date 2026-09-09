@@ -7,11 +7,11 @@ using PersonalFinanceApp.Application.Common.Errors;
 
 namespace PersonalFinanceApp.Application.Features.Persons.Queries.GetPersonById;
 
-public class GetPersonByIdQueryValidator:AbstractValidator<GetPersonByIdQuery>
+public class GetPersonByIdQueryValidator : AbstractValidator<GetPersonByIdQuery>
 {
     public GetPersonByIdQueryValidator()
     {
-        RuleFor(p => p.Id)
+        RuleFor(p => p.PersonId)
             .NotEmpty()
             .NotEqual(Guid.Empty)
             .WithErrorCode(ApplicationErrorCodes.Person.PersonIdRequired);

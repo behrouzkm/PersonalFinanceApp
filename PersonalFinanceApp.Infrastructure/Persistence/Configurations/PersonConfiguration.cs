@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PersonalFinanceApp.Domain.Common.Constants;
 using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence.Configurations;
@@ -14,12 +15,14 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
     {
         builder.HasKey(p => p.Id);
 
-        builder.Property(p => p.PersonType).HasConversion<int>();
-        builder.Property(p => p.DisplayName).IsRequired().HasMaxLength(200);
+        builder.Property(p => p.RowVersion).IsRowVersion();
 
-        builder.Property(p => p.InitialBalance).HasPrecision(18, 2);
-        builder.Property(p => p.CurrentBalance).HasPrecision(18, 2);
-        builder.Property(p => p.CreditLimit).HasPrecision(18, 2);
+        builder.Property(p => p.PersonType).HasConversion<int>();
+        builder.Property(p => p.DisplayName).IsRequired().HasMaxLength(FieldLengths.Name);
+
+        builder.Property(p => p.InitialBalance).HasPrecision(DecimalPrecision.Precision, DecimalPrecision.MonetaryAmountScale);
+        builder.Property(p => p.CurrentBalance).HasPrecision(DecimalPrecision.Precision, DecimalPrecision.MonetaryAmountScale);
+        builder.Property(p => p.CreditLimit).HasPrecision(DecimalPrecision.Precision, DecimalPrecision.MonetaryAmountScale);
 
         builder.Property(p => p.Email).HasMaxLength(320);
         builder.Property(p => p.MobileNumber).HasMaxLength(20);
@@ -43,5 +46,6 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(p => p.LedgerAccountId).IsUnique();
+        builder.HasIndex(p => new { p.TenantId, p.DisplayOrder }).IsUnique().HasFilter("[IsDeleted] = 0");
     }
 }

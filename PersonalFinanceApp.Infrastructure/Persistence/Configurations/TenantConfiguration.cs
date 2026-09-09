@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PersonalFinanceApp.Domain.Common.Constants;
 using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence.Configurations;
@@ -13,7 +14,7 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
     public void Configure(EntityTypeBuilder<Tenant> builder)
     {
         builder.HasKey(t=>t.Id);
-        builder.Property(t=>t.Name).IsRequired().HasMaxLength(200);
+        builder.Property(t=>t.Name).IsRequired().HasMaxLength(FieldLengths.Name);
 
         // Tenant is the root of multi-tenancy - it does not itself belong to a tenant,
         // so (correctly) it is not BaseAuditableEntity and gets no query filter.

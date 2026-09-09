@@ -48,7 +48,8 @@ public class GetIncomesListQueryHandler : IRequestHandler<GetIncomesListQuery, P
                 DocumentDate = d.DocumentDate,
                 CurrencyId = d.CurrencyId,
                 Description = d.Description,
-                TotalAmount = d.Entries.Where(e => !e.IsDeleted && e.Credit > 0).Sum(e => e.Credit)
+                TotalAmount = d.Entries.Where(e => !e.IsDeleted && e.Credit > 0).Sum(e => e.Credit),
+                AttachmentCount = _context.Attachments.Count(a=>a.AccountingDocumentId == d.Id)
             });
 
         return await PaginatedList<IncomeListItemDto>.CreateAsync(

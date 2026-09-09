@@ -12,7 +12,7 @@ public interface IOpeningBalanceService
 {
     /// Create-time: ledger account under a category parent + optional opening document.
     Task<(LedgerAccount LedgerAccount, Guid? OpeningDocumentId)> CreateAsync(
-           Guid parentLedgerAccountId, AccountCategory category, DocumentType documentType,
+           Guid parentLedgerAccountId, AccountCategory category,
            string displayName, DateOnly openingDate, int currencyId,
            decimal initialBalance, decimal? creditLimit, string? description,
            CancellationToken cancellationToken);
@@ -24,7 +24,7 @@ public interface IOpeningBalanceService
     Task<Guid?> ReconcileAsync(
         IFundSource fundSource, Guid? existingOpeningDocumentId,
         decimal oldInitialBalance, decimal? oldCreditLimit, int oldCurrencyId,
-        AccountCategory category, DocumentType documentType, string? description,
+        AccountCategory category, string? description,
         CancellationToken cancellationToken);
 
 }

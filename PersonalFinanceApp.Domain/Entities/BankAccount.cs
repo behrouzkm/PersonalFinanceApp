@@ -18,10 +18,25 @@ public class BankAccount : MonetaryAccount
 
     private BankAccount() { }
 
-    public BankAccount(string name, Guid ledgerAccountId, int currencyId, DateOnly openingDate, decimal initialBalance, int displayOrder,
-                            Guid tenantId, Guid createdBy, string bankName, string branchName, BankAccountType bankAccountType,
-                            string bankAccountNumber, string? iban = null) :
-                                base(name, ledgerAccountId, currencyId, openingDate, initialBalance, displayOrder, tenantId, createdBy)
+    public BankAccount(
+        string displayName,
+        Guid ledgerAccountId,
+        int currencyId,
+        DateOnly openingDate,
+        decimal initialBalance,
+        int displayOrder,
+        Guid tenantId,
+        Guid createdBy,
+        string bankName,
+        string? branchName,
+        BankAccountType bankAccountType,
+        string bankAccountNumber,
+        string? iban = null,
+        string? description = null,
+        decimal creditLimit = 0,
+        Guid? openingAccountingDocumentId = null) :
+                        base(displayName, ledgerAccountId, currencyId, openingDate, initialBalance,
+                            displayOrder, tenantId, createdBy, creditLimit, description, openingAccountingDocumentId)
     {
         SetBankName(bankName);
         SetBranchName(branchName);
@@ -30,16 +45,39 @@ public class BankAccount : MonetaryAccount
         SetIban(iban);
     }
 
-    public void UpdateBankAccount(string bankName, string branchName, string bankAccountNumber, string? iban = null, BankAccountType? bankAccountType = null)
+    public void UpdateBankAccount(
+       string displayName,
+        int currencyId,
+        DateOnly openingDate,
+        decimal initialBalance,
+         string bankName,
+        string? branchName,
+        string bankAccountNumber,
+         Guid modifiedBy,
+        decimal creditLimit,
+        string? iban = null,
+        string? description = null,
+        BankAccountType? bankAccountType = null)
     {
+
         SetBankName(bankName);
         SetBranchName(branchName);
         SetBankAccountNumber(bankAccountNumber);
         SetIban(iban);
-        if (bankAccountType.HasValue) BankAccountType = bankAccountType.Value;
+        if (bankAccountType.HasValue)
+            BankAccountType = bankAccountType.Value;
+
+        UpdateMonetaryAccount(
+            displayName,
+            currencyId,
+            openingDate,
+            initialBalance,
+            modifiedBy,
+            creditLimit,
+            description);
     }
 
-    public void SetBankName(string name)
+    private void SetBankName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException(DomainErrors.BankAccount.BankNameRequired);
@@ -47,12 +85,12 @@ public class BankAccount : MonetaryAccount
         BankName = name.Trim();
     }
 
-    public void SetBranchName(string name)
+    private void SetBranchName(string? name)
     {
         BranchName = string.IsNullOrWhiteSpace(name) ? null : name.Trim();
     }
 
-    public void SetBankAccountNumber(string number)
+    private void SetBankAccountNumber(string number)
     {
         if (string.IsNullOrWhiteSpace(number))
             throw new DomainException(DomainErrors.BankAccount.BankAccountNumberRequired);
@@ -60,7 +98,7 @@ public class BankAccount : MonetaryAccount
         BankAccountNumber = number.Trim();
     }
 
-    public void SetIban(string? iban)
+    private void SetIban(string? iban)
     {
         IBAN = string.IsNullOrWhiteSpace(iban) ? null : iban.Trim();
     }

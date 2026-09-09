@@ -25,9 +25,9 @@ public class GetExpenditureByIdQueryHandler : IRequestHandler<GetExpenditureById
     {
         var document = await _context.AccountingDocuments
                 .Include(i => i.Entries)
-                .FirstOrDefaultAsync(d => d.Id == request.AccountingDocumentId
+                .FirstOrDefaultAsync(d => d.Id == request.ExpenditureAccountingDocumentId
                     && d.DocumentType == Domain.Enums.DocumentType.Expenditure, cancellationToken)
-            ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
+            ?? throw new NotFoundException(nameof(AccountingDocument), request.ExpenditureAccountingDocumentId);
 
 
         var activeEntries = document.Entries.ToList();

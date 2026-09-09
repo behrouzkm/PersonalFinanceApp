@@ -33,9 +33,9 @@ public class SystemTemplate
         SetLanguage(languageId);
     }
 
-    public void SetLanguage(int languageId) => LanguageId = languageId;
+    private void SetLanguage(int languageId) => LanguageId = languageId;
 
-    public void SetTemplateKey(string templateKey)
+    private void SetTemplateKey(string templateKey)
     {
         if (string.IsNullOrWhiteSpace(templateKey))
             throw new DomainException(DomainErrors.SystemTemplate.TemplateKeyRequired);
@@ -43,7 +43,7 @@ public class SystemTemplate
         TemplateKey = templateKey.Trim();
     }
 
-    public void SetJsonData(string jsonData)
+    private void SetJsonData(string jsonData)
     {
         if (string.IsNullOrWhiteSpace(jsonData))
             throw new DomainException(DomainErrors.SystemTemplate.JsonDataRequired);

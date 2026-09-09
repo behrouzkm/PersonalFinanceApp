@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PersonalFinanceApp.Domain.Common.Constants;
 using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence.Configurations;
@@ -17,8 +18,8 @@ public class DocumentTypeTranslationConfiguration : IEntityTypeConfiguration<Doc
 
         builder.Property(d => d.DocumentType).HasConversion<int>();
 
-        builder.Property(d => d.Name).IsRequired().HasMaxLength(200);
-        builder.Property(d => d.Description).HasMaxLength(500);
+        builder.Property(d => d.Name).IsRequired().HasMaxLength(FieldLengths.Name);
+        builder.Property(d => d.Description).HasMaxLength(FieldLengths.Description);
 
         builder.HasOne(d => d.Language)
             .WithMany()

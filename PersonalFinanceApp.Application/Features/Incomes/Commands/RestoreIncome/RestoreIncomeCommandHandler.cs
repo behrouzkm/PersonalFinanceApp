@@ -17,13 +17,15 @@ public class RestoreIncomeCommandHandler : IRequestHandler<RestoreIncomeCommand>
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly ILedgerBalanceValidationService _ledgerBalanceValidation;
+    private readonly IAttachmentService _attachmentService;
 
     public RestoreIncomeCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-                    ILedgerBalanceValidationService ledgerBalanceValidation)
+        ILedgerBalanceValidationService ledgerBalanceValidation, IAttachmentService attachmentService)
     {
         _context = context;
         _currentUser = currentUser;
         _ledgerBalanceValidation = ledgerBalanceValidation;
+        _attachmentService = attachmentService;
     }
 
     public async Task Handle(RestoreIncomeCommand request, CancellationToken cancellationToken)
@@ -51,11 +53,14 @@ public class RestoreIncomeCommandHandler : IRequestHandler<RestoreIncomeCommand>
             {
                 // just for validation of documentDate and monetaryAccounts openingDate
                 await _ledgerBalanceValidation.ValidateAsync(monetaryAccount, document.DocumentDate,
-                    entry.Debit, 0, replacingEntryId: request.AccountingDocumentId, cancellationToken);
+                  entry.Debit, 0, replacingEntryId: entry.Id, cancellationToken);
 
                 monetaryAccount.AdjustBalance(entry.Debit);
             }
         }
+
+        await _attachmentService.RestoreAllForOwnerAsync(
+            AttachmentOwnerType.AccountingDocument, document.Id, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
     }

@@ -11,10 +11,12 @@ namespace PersonalFinanceApp.Application.Features.Incomes.Queries.GetIncomeById;
 public class GetIncomeByIdQueryHandler : IRequestHandler<GetIncomeByIdQuery, IncomeDetailsDto>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IAttachmentService _attachmentService;
 
-    public GetIncomeByIdQueryHandler(IApplicationDbContext context)
+    public GetIncomeByIdQueryHandler(IApplicationDbContext context, IAttachmentService attachmentService)
     {
         _context = context;
+        _attachmentService = attachmentService;
     }
 
     public async Task<IncomeDetailsDto> Handle(GetIncomeByIdQuery request, CancellationToken cancellationToken)
@@ -32,13 +34,18 @@ public class GetIncomeByIdQueryHandler : IRequestHandler<GetIncomeByIdQuery, Inc
             .Where(m => ledgerAccountIds.Contains(m.LedgerAccountId))
             .ToDictionaryAsync(m => m.LedgerAccountId, cancellationToken);
 
+        var attachments = await _attachmentService.GetForOwnerAsync(
+            AttachmentOwnerType.AccountingDocument, document.Id, cancellationToken);
+
+
         var dto = new IncomeDetailsDto
         {
             AccountingDocumentId = document.Id,
             RowVersion = document.RowVersion,
             DocumentDate = document.DocumentDate,
             CurrencyId = document.CurrencyId,
-            Description = document.Description
+            Description = document.Description,
+            Attachments = attachments
         };
 
         foreach (var entry in activeEntries)

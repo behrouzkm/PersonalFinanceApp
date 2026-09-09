@@ -28,7 +28,7 @@ public class DocumentTypeTranslation
     {
         SetDocumentType(documentType);
         SetLanguage(languageId);
-        ChangeName(name);
+        SetName(name);
         SetDescription(description);
     }
 
@@ -36,15 +36,15 @@ public class DocumentTypeTranslation
     {
         SetDocumentType(documentType);
         SetLanguage(languageId);
-        ChangeName(name);
+        SetName(name);
         SetDescription(description);
     }
 
-    public void SetLanguage(int languageId) => LanguageId = languageId;
+    private void SetLanguage(int languageId) => LanguageId = languageId;
 
-    public void SetDocumentType(DocumentType documentType) => DocumentType = documentType;
+    private void SetDocumentType(DocumentType documentType) => DocumentType = documentType;
 
-    public void ChangeName(string name)
+    private void SetName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException(DomainErrors.DocumentType.NameRequired);
@@ -52,7 +52,7 @@ public class DocumentTypeTranslation
         Name = name.Trim();
     }
 
-    public void SetDescription(string? description)
+    private void SetDescription(string? description)
     {
         Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
     }

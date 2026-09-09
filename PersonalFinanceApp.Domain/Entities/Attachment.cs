@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using PersonalFinanceApp.Domain.Common;
 using PersonalFinanceApp.Domain.Enums;
 using PersonalFinanceApp.Domain.Errors;
@@ -6,50 +7,75 @@ namespace PersonalFinanceApp.Domain.Entities;
 
 public class Attachment : BaseAuditableEntity
 {
-    public Guid ReferenceId { get; private set; }
-    public AttachmentReferenceType ReferenceType { get; private set; }
+    public Guid? AccountingDocumentId { get; private set; }
+    public AccountingDocument? AccountingDocument { get; private set; }
 
-    public string FileName { get; private set; } = string.Empty;
-    public string FilePath { get; private set; } = string.Empty;
-    public string ContentType { get; private set; } = string.Empty;
-    public long FileSize { get; private set; }
+    public Guid? PersonId { get; private set; }
+    public Person? Person { get; private set; }
+
+    public Guid? MonetaryAccountId { get; private set; }
+    public MonetaryAccount? MonetaryAccount { get; private set; }
+
+    public Guid? CurrencyExchangeId { get; private set; }
+    public CurrencyExchange? CurrencyExchange { get; private set; }
+
+    public string FileName { get; private set; } = null!;
+    public string ContentType { get; private set; } = null!;
+    public long FileSizeBytes { get; private set; }
+    public string StorageKey { get; private set; } = null!;
+
+    // Derived, not persisted — convenience for DTO mapping and query branching,
+    // computed from whichever FK is actually set rather than stored redundantly.
+    [NotMapped]
+    public AttachmentOwnerType OwnerType => this switch
+    {
+        { AccountingDocumentId: not null } => AttachmentOwnerType.AccountingDocument,
+        { PersonId: not null } => AttachmentOwnerType.Person,
+        { MonetaryAccountId: not null } => AttachmentOwnerType.MonetaryAccount,
+        { CurrencyExchangeId: not null } => AttachmentOwnerType.CurrencyExchange,
+        _ => throw new DomainException(DomainErrors.Attachment.NoOwnerAssigned)
+    };
 
 
     private Attachment() { }
 
 
-    public Attachment(AttachmentReferenceType referenceType, string fileName, string filePath,
-                        string contentType, long fileSize, Guid tenantId, Guid createdBy, string? description = null)
-                        : base(tenantId, createdBy, description)
+    private Attachment(string fileName, string contentType, long fileSizeBytes, string storageKey,
+        Guid tenantId, Guid createdBy) : base(tenantId, createdBy)
     {
-        SetReferenceType(referenceType);
         SetFileName(fileName);
-        SetFilePath(filePath);
+        SetFileSize(fileSizeBytes);
         SetContentType(contentType);
-        SetFileSize(fileSize);
+
+        StorageKey = storageKey;
     }
 
-    public void SetReferenceType(AttachmentReferenceType referenceType)
-    {
-        ReferenceType = referenceType;
-    }
+    public static Attachment ForAccountingDocument(Guid documentId, string fileName, string contentType,
+        long fileSizeBytes, string storageKey, Guid tenantId, Guid createdBy) =>
+        new(fileName, contentType, fileSizeBytes, storageKey, tenantId, createdBy) { AccountingDocumentId = documentId };
 
-    public void SetFileName(string name)
+    public static Attachment ForPerson(Guid personId, string fileName, string contentType,
+        long fileSizeBytes, string storageKey, Guid tenantId, Guid createdBy) =>
+        new(fileName, contentType, fileSizeBytes, storageKey, tenantId, createdBy) { PersonId = personId };
+
+    public static Attachment ForMonetaryAccount(Guid monetaryAccountId, string fileName, string contentType,
+        long fileSizeBytes, string storageKey, Guid tenantId, Guid createdBy) =>
+        new(fileName, contentType, fileSizeBytes, storageKey, tenantId, createdBy) { MonetaryAccountId = monetaryAccountId };
+
+    public static Attachment ForCurrencyExchange(Guid currencyExchangeId, string fileName, string contentType,
+        long fileSizeBytes, string storageKey, Guid tenantId, Guid createdBy) =>
+        new(fileName, contentType, fileSizeBytes, storageKey, tenantId, createdBy) { CurrencyExchangeId = currencyExchangeId };
+
+
+    private void SetFileName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException(DomainErrors.Attachment.FileNameRequired);
 
         FileName = name.Trim();
     }
-    public void SetFilePath(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path))
-            throw new DomainException(DomainErrors.Attachment.FilePathRequired);
 
-        FilePath = path.Trim();
-    }
-
-    public void SetContentType(string contentType)
+    private void SetContentType(string contentType)
     {
         if (string.IsNullOrWhiteSpace(contentType))
             throw new DomainException(DomainErrors.Attachment.FileContentRequired);
@@ -57,12 +83,12 @@ public class Attachment : BaseAuditableEntity
         ContentType = contentType.Trim();
     }
 
-    public void SetFileSize(long size)
+    private void SetFileSize(long fileSizeBytes)
     {
-        if (size <= 0)
-            throw new DomainException(DomainErrors.Attachment.FileContentRequired);
+        if (fileSizeBytes <= 0)
+            throw new DomainException(DomainErrors.Attachment.FileSizeMustBePositive);
 
-        FileSize = size;
+        FileSizeBytes = fileSizeBytes;
     }
 
 }

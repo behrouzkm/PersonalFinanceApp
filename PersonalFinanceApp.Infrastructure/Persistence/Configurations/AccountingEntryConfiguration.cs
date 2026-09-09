@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PersonalFinanceApp.Domain.Common.Constants;
 using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence.Configurations;
@@ -14,9 +15,9 @@ public class AccountingEntryConfiguration : IEntityTypeConfiguration<AccountingE
     {
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.Debit).HasPrecision(18, 2);
-        builder.Property(e => e.Credit).HasPrecision(18, 2);
-        builder.Property(e => e.Description).HasMaxLength(500);
+        builder.Property(e => e.Debit).HasPrecision(DecimalPrecision.Precision, DecimalPrecision.MonetaryAmountScale);
+        builder.Property(e => e.Credit).HasPrecision(DecimalPrecision.Precision, DecimalPrecision.MonetaryAmountScale);
+        builder.Property(e => e.Description).HasMaxLength(FieldLengths.Description);
 
 
         // Restrict, not Cascade - deleting a LedgerAccount must never cascade-delete
@@ -27,8 +28,8 @@ public class AccountingEntryConfiguration : IEntityTypeConfiguration<AccountingE
             .HasForeignKey(e => e.LedgerAccountId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(e => e.LedgerAccountId);
-        builder.HasIndex(e => new { e.TenantId, e.IsDeleted });
+
+        builder.HasIndex(e => new { e.TenantId,e.LedgerAccountId, e.IsDeleted });
 
     }
 }

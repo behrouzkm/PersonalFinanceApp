@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Entities;
+using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.Application.Features.Incomes.Commands.DeleteIncome;
 
@@ -14,18 +15,22 @@ public class DeleteIncomeCommandHandler : IRequestHandler<DeleteIncomeCommand>
 {
     public readonly IApplicationDbContext _context;
     public readonly ICurrentUserService _currentUser;
+    private readonly IAttachmentService _attachmentService;
 
-    public DeleteIncomeCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService)
+    public DeleteIncomeCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService,
+        IAttachmentService attachmentService)
     {
         _context = context;
         _currentUser = currentUserService;
+        _attachmentService = attachmentService;
     }
+
     public async Task Handle(DeleteIncomeCommand request, CancellationToken cancellationToken)
     {
         var document = await _context.AccountingDocuments
-            .Include(d => d.Entries)
-            .FirstOrDefaultAsync(d => d.Id == request.AccountingDocumentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
+               .Include(d => d.Entries)
+               .FirstOrDefaultAsync(d => d.Id == request.AccountingDocumentId, cancellationToken)
+               ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
 
         // row version check for concurrency control
         _context.Entry(document).Property(d => d.RowVersion).OriginalValue = request.RowVersion;
@@ -48,6 +53,9 @@ public class DeleteIncomeCommandHandler : IRequestHandler<DeleteIncomeCommand>
 
         // soft delete the document and its entries
         document.SoftDelete(_currentUser.UserId);
+
+        await _attachmentService.SoftDeleteAllForOwnerAsync(
+           AttachmentOwnerType.AccountingDocument, document.Id, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
     }

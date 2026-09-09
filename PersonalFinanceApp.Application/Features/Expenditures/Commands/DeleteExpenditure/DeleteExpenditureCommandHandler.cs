@@ -7,19 +7,24 @@ using Microsoft.EntityFrameworkCore;
 using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Entities;
+using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.DeleteExpenditure;
 
 public class DeleteExpenditureCommandHandler : IRequestHandler<DeleteExpenditureCommand>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ICurrentUserService _currentUser;
+    public readonly IApplicationDbContext _context;
+    public readonly ICurrentUserService _currentUser;
+    private readonly IAttachmentService _attachmentService;
 
-    public DeleteExpenditureCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser)
+    public DeleteExpenditureCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService,
+        IAttachmentService attachmentService)
     {
         _context = context;
-        _currentUser = currentUser;
+        _currentUser = currentUserService;
+        _attachmentService = attachmentService;
     }
+
     public async Task Handle(DeleteExpenditureCommand request, CancellationToken cancellationToken)
     {
         var document = await _context.AccountingDocuments
@@ -56,6 +61,9 @@ public class DeleteExpenditureCommandHandler : IRequestHandler<DeleteExpenditure
 
         // soft delete the document and its entries
         document.SoftDelete(_currentUser.UserId);
+
+        await _attachmentService.SoftDeleteAllForOwnerAsync(
+            AttachmentOwnerType.AccountingDocument, document.Id, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
 

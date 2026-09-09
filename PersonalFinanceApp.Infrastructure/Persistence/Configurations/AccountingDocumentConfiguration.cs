@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PersonalFinanceApp.Domain.Common.Constants;
 using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence.Configurations;
@@ -19,7 +20,7 @@ public class AccountingDocumentConfiguration : IEntityTypeConfiguration<Accounti
 
         builder.Property(d=>d.DocumentDate).IsRequired();
         builder.Property(d =>d.CurrencyId).IsRequired();
-        builder.Property(d =>d.Description).HasMaxLength(500);
+        builder.Property(d =>d.Description).HasMaxLength(FieldLengths.Description);
 
         builder.Property(d =>d.RowVersion).IsRowVersion();
 

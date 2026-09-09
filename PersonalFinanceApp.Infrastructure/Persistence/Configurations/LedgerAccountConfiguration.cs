@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PersonalFinanceApp.Domain.Common.Constants;
 using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence.Configurations;
@@ -14,7 +15,9 @@ public class LedgerAccountConfiguration : IEntityTypeConfiguration<LedgerAccount
     {
         builder.HasKey(a => a.Id);
 
-        builder.Property(a => a.Name).IsRequired().HasMaxLength(200);
+        //builder.Property(a => a.RowVersion).IsRowVersion();
+
+        builder.Property(a => a.Name).IsRequired().HasMaxLength(FieldLengths.Name);
 
         //Self-referencing
         builder.HasOne(a => a.Parent)
@@ -32,5 +35,6 @@ public class LedgerAccountConfiguration : IEntityTypeConfiguration<LedgerAccount
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(a => new { a.TenantId, a.ParentId });
+        builder.HasIndex(a => new { a.TenantId, a.ParentId, a.DisplayOrder }).IsUnique().HasFilter("[IsDeleted] = 0");
     }
 }

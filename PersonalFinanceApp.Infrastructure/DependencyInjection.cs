@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PersonalFinanceApp.Application.Common.Interfaces;
+using PersonalFinanceApp.Application.Common.Options;
 using PersonalFinanceApp.Infrastructure.Identity;
 using PersonalFinanceApp.Infrastructure.Persistence;
 using PersonalFinanceApp.Infrastructure.Services;
@@ -51,6 +52,8 @@ public static class DependencyInjection
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IIdentityService, IdentityService>();
+
+        services.Configure<AttachmentOptions>(configuration.GetSection(AttachmentOptions.SectionName));
 
         services.AddAuthentication(options =>
             {

@@ -1,24 +1,29 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Application.Common.Models;
 using PersonalFinanceApp.Domain.Entities;
 using PersonalFinanceApp.Domain.Enums;
+using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Application.Common.Services;
 
 public class AccountingLookupService : IAccountingLookupService
 {
     private readonly IApplicationDbContext _context;
+    private readonly ICurrentUserService _userService;
 
-    public AccountingLookupService(IApplicationDbContext context)
+    public AccountingLookupService(IApplicationDbContext context, ICurrentUserService userService)
     {
         _context = context;
+        _userService = userService;
     }
 
     public async Task<Dictionary<Guid, LedgerAccount>> GetLedgerAccountsAsync(IEnumerable<Guid> ledgerAccountsIds,
@@ -71,13 +76,13 @@ public class AccountingLookupService : IAccountingLookupService
     public async Task<LedgerAccount?> GetOpeningBalanceEquityLedgerAccount(AccountCategory accountCategory, CancellationToken cancellationToken)
     {
         var accountType = await _context.AccountTypes
-            .FirstOrDefaultAsync(r=>r.Category == accountCategory,cancellationToken);
+            .FirstOrDefaultAsync(r => r.Category == accountCategory, cancellationToken);
 
-        if(accountType!= null)
+        if (accountType != null)
         {
             var ledgerAccount = await _context.LedgerAccounts
-                .FirstOrDefaultAsync(r=>r.AccountTypeId == accountType.Id &&
-                    r.ParentId== null,cancellationToken);
+                .FirstOrDefaultAsync(r => r.AccountTypeId == accountType.Id &&
+                    r.ParentId == null, cancellationToken);
 
             return ledgerAccount;
         }
@@ -85,4 +90,55 @@ public class AccountingLookupService : IAccountingLookupService
         return null;
     }
 
+    public async Task<(IFundSource FundSource, LedgerAccount LedgerAccount)> GetFundSourceByLedgerAccountIdAsync(Guid ledgerAccountId, CancellationToken cancellationToken)
+    {
+        var ledgerAccount = await _context.LedgerAccounts
+                .Include(l => l.AccountType)
+                .FirstOrDefaultAsync(r => r.Id == ledgerAccountId, cancellationToken)
+                ?? throw new NotFoundException(nameof(LedgerAccount), ledgerAccountId);
+
+        if (ledgerAccount.AccountType.Category == AccountCategory.PersonAccount)
+        {
+            var personAccount = await _context.Persons
+                    .FirstOrDefaultAsync(p => p.LedgerAccountId == ledgerAccountId, cancellationToken)
+                    ?? throw new NotFoundException(nameof(Person), ledgerAccountId);
+
+            return (personAccount, ledgerAccount);
+        }
+        else if (ledgerAccount.AccountType.Category == AccountCategory.BankAccount ||
+                    ledgerAccount.AccountType.Category == AccountCategory.CashAccount)
+        {
+            var monetaryAccount = await _context.MonetaryAccounts
+                    .FirstOrDefaultAsync(r => r.LedgerAccountId == ledgerAccountId, cancellationToken)
+                    ?? throw new NotFoundException(nameof(MonetaryAccount), ledgerAccountId);
+
+            return (monetaryAccount, ledgerAccount);
+        }
+
+        throw new NotFoundException(nameof(IFundSource), ledgerAccountId);
+    }
+
+    public async Task<LedgerAccount> GetOrCreateCurrencyExchangeClearingLedgerAccountAsync(int currencyId, CancellationToken cancellationToken)
+    {
+        var ledgerAccount = await _context.LedgerAccounts
+                .FirstOrDefaultAsync(r => r.CurrencyId == currencyId, cancellationToken);
+
+        if (ledgerAccount is null)
+        {
+            var accountType = await _context.AccountTypes
+                .FirstOrDefaultAsync(r => r.Category == AccountCategory.CurrencyExchangeClearing, cancellationToken)
+                ?? throw new NotFoundException(nameof(AccountType), AccountCategory.CurrencyExchangeClearing);
+
+            var currency = await _context.Currencies
+                .FirstOrDefaultAsync(r => r.Id == currencyId, cancellationToken)
+                ?? throw new NotFoundException(nameof(Currency), currencyId);
+
+            ledgerAccount = new LedgerAccount(accountType.Id, currency.Name, _userService.TenantId, _userService.UserId);
+
+            _context.LedgerAccounts.Add(ledgerAccount);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return ledgerAccount;
+    }
 }

@@ -23,8 +23,8 @@ public class Language : IReorderable
 
     public Language(string code, string name, bool isActive, int displayOrder, bool isRightToLeft = false)
     {
-        ChangeCode(code);
-        ChangeName(name);
+        SetCode(code);
+        SetName(name);
         IsActive = isActive;
         SetDisplayOrder(displayOrder);
         SetRightToLeft(isRightToLeft);
@@ -32,8 +32,8 @@ public class Language : IReorderable
 
     public void UpdateLanguage(string code, string name, bool isActive, bool isRightToLeft = false)
     {
-        ChangeCode(code);
-        ChangeName(name);
+        SetCode(code);
+        SetName(name);
         IsActive = isActive;
         SetRightToLeft(isRightToLeft);
     }
@@ -46,21 +46,14 @@ public class Language : IReorderable
         DisplayOrder = displayOrder;
     }
 
-    public void IncrementDisplayOrder() => DisplayOrder++;
-
-    public void DecrementDisplayOrder()
-    {
-        if (DisplayOrder > 0)
-            DisplayOrder--;
-    }
 
     public void Activate() => IsActive = true;
 
     public void Deactivate() => IsActive = false;
 
-    public void SetRightToLeft(bool isRightToLeft) => IsRightToLeft = isRightToLeft;
+    private void SetRightToLeft(bool isRightToLeft) => IsRightToLeft = isRightToLeft;
 
-    public void ChangeName(string name)
+    private void SetName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException(DomainErrors.Language.NameRequired);
@@ -68,7 +61,7 @@ public class Language : IReorderable
         Name = name.Trim();
     }
 
-    public void ChangeCode(string code)
+    private void SetCode(string code)
     {
         if (string.IsNullOrWhiteSpace(code))
             throw new DomainException(DomainErrors.Language.CodeRequired);

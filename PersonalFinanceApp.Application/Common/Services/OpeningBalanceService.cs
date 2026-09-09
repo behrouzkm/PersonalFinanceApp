@@ -33,7 +33,7 @@ public class OpeningBalanceService : IOpeningBalanceService
 
 
     public async Task<(LedgerAccount, Guid?)> CreateAsync(
-        Guid parentLedgerAccountId, AccountCategory category, DocumentType documentType,
+        Guid parentLedgerAccountId, AccountCategory category,
         string displayName, DateOnly openingDate, int currencyId,
         decimal initialBalance, decimal? creditLimit, string? description,
         CancellationToken cancellationToken)
@@ -66,7 +66,7 @@ public class OpeningBalanceService : IOpeningBalanceService
                 ?? throw new BusinessRuleException(ApplicationErrorCodes.FundSource.InvalidOpeningAccountEquityLedgerAccount);
 
             var doc = new AccountingDocument(
-                documentType | DocumentType.OpeningBalance,
+                DocumentType.OpeningBalance,
                 openingDate, currencyId, _currentUser.TenantId, _currentUser.UserId, description);
 
             var amount = Math.Abs(initialBalance);
@@ -74,6 +74,9 @@ public class OpeningBalanceService : IOpeningBalanceService
 
             doc.AddEntry(ledgerAccount.Id, debit, credit, description, _currentUser.UserId);
             doc.AddEntry(equityAccount.Id, credit, debit, description, _currentUser.UserId);
+
+            ledgerAccount.MarkAsUsed();
+            equityAccount.MarkAsUsed();
 
             _context.AccountingDocuments.Add(doc);
             openingDocId = doc.Id;
@@ -85,8 +88,7 @@ public class OpeningBalanceService : IOpeningBalanceService
     public async Task<Guid?> ReconcileAsync(
         IFundSource fundSource, Guid? existingOpeningDocumentId,
         decimal oldInitialBalance, decimal? oldCreditLimit, int oldCurrencyId,
-        AccountCategory category, DocumentType documentType, string? description,
-        CancellationToken cancellationToken)
+        AccountCategory category, string? description, CancellationToken cancellationToken)
     {
         // fundSource already reflects the NEW InitialBalance/CreditLimit/OpeningDate/CurrencyId.
         var newInitialBalance = fundSource.InitialBalance;
@@ -128,14 +130,25 @@ public class OpeningBalanceService : IOpeningBalanceService
                 ?? throw new BusinessRuleException(ApplicationErrorCodes.FundSource.InvalidOpeningAccountEquityLedgerAccount);
 
             var doc = new AccountingDocument(
-                documentType | DocumentType.OpeningBalance,
-                fundSource.OpeningDate, fundSource.CurrencyId, _currentUser.TenantId, _currentUser.UserId, description);
+                DocumentType.OpeningBalance,
+                fundSource.OpeningDate,
+                fundSource.CurrencyId,
+                _currentUser.TenantId,
+                _currentUser.UserId,
+                description);
 
             var amount = Math.Abs(newInitialBalance);
             var (debit, credit) = newInitialBalance > 0 ? (amount, 0m) : (0m, amount);
 
             doc.AddEntry(fundSource.LedgerAccountId, debit, credit, description, _currentUser.UserId);
             doc.AddEntry(equityAccount.Id, credit, debit, description, _currentUser.UserId);
+
+            var ledgerAccount = await _context.LedgerAccounts
+                .FirstOrDefaultAsync(r => r.Id == fundSource.LedgerAccountId, cancellationToken)
+                ?? throw new NotFoundException(nameof(LedgerAccount), fundSource.LedgerAccountId);
+
+            ledgerAccount.MarkAsUsed();
+            equityAccount.MarkAsUsed();
 
             _context.AccountingDocuments.Add(doc);
 

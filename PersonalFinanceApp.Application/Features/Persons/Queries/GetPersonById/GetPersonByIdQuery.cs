@@ -6,5 +6,5 @@ namespace PersonalFinanceApp.Application.Features.Persons.Queries.GetPersonById;
 
 public class GetPersonByIdQuery : IRequest<PersonDto>
 {
-    public Guid Id {get;set;}
+    public Guid PersonId { get; set; }
 }

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using PersonalFinanceApp.Domain.Common;
 using PersonalFinanceApp.Domain.Errors;
 using PersonalFinanceApp.Domain.Interfaces;
@@ -16,6 +17,10 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
 
     public decimal InitialBalance { get; private set; }
 
+
+    public Guid? OpeningAccountingDocumentId { get; private set; }
+    public AccountingDocument? OpeningAccountingDocument { get; private set; }
+
     public decimal CurrentBalance { get; private set; }
 
     public decimal? CreditLimit { get; private set; } // Optional credit limit for accounts that can go negative
@@ -27,6 +32,9 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
     public int DisplayOrder { get; private set; }
 
 
+    [Timestamp]
+    public byte[] RowVersion { get; set; } = default!;
+
 
 
     protected MonetaryAccount()
@@ -34,10 +42,18 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
         CreditLimit = 0; // Default to 0 if not provided
     }
 
-    public MonetaryAccount(string displayName, Guid ledgerAccountId, int currencyId, DateOnly openingDate,
-                            decimal initialBalance, int displayOrder, Guid tenantId, Guid createdBy,
-                            decimal creditLimit = 0, string? description = null) :
-                                    base(tenantId, createdBy, description)
+    protected MonetaryAccount(
+        string displayName,
+        Guid ledgerAccountId,
+        int currencyId,
+        DateOnly openingDate,
+        decimal initialBalance,
+        int displayOrder,
+        Guid tenantId,
+        Guid createdBy,
+        decimal creditLimit = 0,
+        string? description = null,
+        Guid? openingAccountingDocumentId = null) : base(tenantId, createdBy, description)
     {
         SetDisplayName(displayName);
         SetLedgerAccountId(ledgerAccountId);
@@ -46,21 +62,38 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
         SetCreditLimit(creditLimit);
         SetInitialBalance(initialBalance);
         SetDisplayOrder(displayOrder);
+
+        OpeningAccountingDocumentId = openingAccountingDocumentId;
     }
 
-    public void UpdateMonetaryAccount(string displayName, int currencyId, int displayOrder,
-                                    decimal creditLimit, string? description)
+    protected void UpdateMonetaryAccount(
+        string displayName,
+        int currencyId,
+        DateOnly openingDate,
+        decimal initialBalance,
+        Guid modifiedBy,
+        decimal creditLimit,
+        string? description)
     {
         SetDisplayName(displayName);
         SetCurrencyId(currencyId);
+        SetOpeningDate(openingDate);
+
         SetCreditLimit(creditLimit);
-        SetDisplayOrder(displayOrder);
+        UpdateInitialBalance(initialBalance);
 
         SetDescription(description);
 
+        UpdateAudit(modifiedBy);
     }
 
-    public void SetDisplayName(string displayName)
+    public void UpdateOpeningAccountingDocumentId(Guid? openingAccountingDocumentId, Guid modifiedBy)
+    {
+        OpeningAccountingDocumentId = openingAccountingDocumentId;
+        UpdateAudit(modifiedBy);
+    }
+
+    private void SetDisplayName(string displayName)
     {
         if (string.IsNullOrWhiteSpace(displayName))
             throw new DomainException(DomainErrors.MonetaryAccount.DisplayNameRequired);
@@ -68,7 +101,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
         DisplayName = displayName.Trim();
     }
 
-    public void SetLedgerAccountId(Guid ledgerAccountId)
+    private void SetLedgerAccountId(Guid ledgerAccountId)
     {
         if (ledgerAccountId == Guid.Empty)
             throw new DomainException(DomainErrors.MonetaryAccount.LedgerAccountRequired);
@@ -76,7 +109,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
         LedgerAccountId = ledgerAccountId;
     }
 
-    public void SetCurrencyId(int currencyId)
+    private void SetCurrencyId(int currencyId)
     {
         if (currencyId == 0)
             throw new DomainException(DomainErrors.MonetaryAccount.CurrencyRequired);
@@ -84,7 +117,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
         CurrencyId = currencyId;
     }
 
-    public void SetCreditLimit(decimal? creditLimit)
+    private void SetCreditLimit(decimal? creditLimit)
     {
         if (creditLimit.HasValue == false)
             creditLimit = 0; // Default to 0 if not provided
@@ -99,20 +132,28 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
         CreditLimit = creditLimit;
     }
 
-    public void SetOpeningDate(DateOnly openingDate)
+    private void SetOpeningDate(DateOnly openingDate)
     {
         if (openingDate > DateOnly.FromDateTime(DateTime.UtcNow))
             throw new DomainException(DomainErrors.MonetaryAccount.OpeningDateCannotBeInFuture);
 
         OpeningDate = openingDate;
     }
-    public void SetInitialBalance(decimal initialBalance)
+    private void SetInitialBalance(decimal initialBalance)
     {
-        if (initialBalance < CreditLimit.GetValueOrDefault(0) * -1) // Ensure initial balance is not less than negative credit limit
+        if (initialBalance < CreditLimit * -1) // Ensure initial balance is not less than negative credit limit
             throw new DomainException(DomainErrors.MonetaryAccount.InitialBalanceCannotBeLessThanCreditLimit);
 
         InitialBalance = initialBalance;
         CurrentBalance = initialBalance; // Set current balance to initial balance when creating the account
+    }
+
+    // UpdateDetails calls this instead — preserves everything AdjustBalance has accrued.
+    private void UpdateInitialBalance(decimal newInitialBalance)
+    {
+        var delta = newInitialBalance - InitialBalance;
+        InitialBalance = newInitialBalance;
+        CurrentBalance += delta;
     }
 
     public void SetDisplayOrder(int displayOrder)
@@ -123,23 +164,16 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
         DisplayOrder = displayOrder;
     }
 
-    public void IncrementDisplayOrder() => DisplayOrder++;
-
-    public void DecrementDisplayOrder()
-    {
-        if (DisplayOrder > 0)
-            DisplayOrder--;
-    }
 
     public bool CanWithdraw(decimal amount)
     {
-        return amount <= CurrentBalance + CreditLimit.GetValueOrDefault(0);
+        return amount <= CurrentBalance + CreditLimit;
     }
 
     public void AdjustBalance(decimal amount)
     {
         decimal newBalance = CurrentBalance + amount;
-        if (newBalance < CreditLimit.GetValueOrDefault(0) * -1) // Ensure current balance does not go below negative credit limit
+        if (newBalance < CreditLimit * -1) // Ensure current balance does not go below negative credit limit
             throw new DomainException(DomainErrors.MonetaryAccount.CurrentBalanceCannotBeLessThanCreditLimit);
 
         CurrentBalance = newBalance;

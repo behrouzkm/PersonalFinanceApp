@@ -27,25 +27,25 @@ public class Currency : IReorderable
 
     public Currency(string code, string name, bool isActive, int displayOrder, byte decimalPlaces = 2, string symbol = "")
     {
-        ChangeCode(code);
-        ChangeName(name);
+        SetCode(code);
+        SetName(name);
         IsActive = isActive;
         SetDisplayOrder(displayOrder);
         SetDecimalPlaces(decimalPlaces);
-        ChangeSymbol(symbol);
+        SetSymbol(symbol);
     }
 
     public void UpdateCurrency(string code, string name, bool isActive, byte decimalPlaces, string symbol)
     {
-        ChangeCode(code);
-        ChangeName(name);
+        SetCode(code);
+        SetName(name);
         IsActive = isActive;
         SetDecimalPlaces(decimalPlaces);
-        ChangeSymbol(symbol);
+        SetSymbol(symbol);
     }
 
 
-    public void ChangeName(string name)
+    private void SetName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException(DomainErrors.Currency.NameRequired);
@@ -53,7 +53,7 @@ public class Currency : IReorderable
         Name = name.Trim();
     }
 
-    public void ChangeCode(string code)
+    private void SetCode(string code)
     {
         if (string.IsNullOrWhiteSpace(code))
             throw new DomainException(DomainErrors.Currency.CodeRequired);
@@ -76,16 +76,7 @@ public class Currency : IReorderable
         DisplayOrder = displayOrder;
     }
 
-    public void IncrementDisplayOrder() => DisplayOrder++;
-
-    public void DecrementDisplayOrder()
-    {
-        if (DisplayOrder > 0)
-            DisplayOrder--;
-    }
-
-
-    public void SetDecimalPlaces(byte decimalPlaces)
+    private void SetDecimalPlaces(byte decimalPlaces)
     {
         if (decimalPlaces > 3)
             throw new DomainException(DomainErrors.Currency.DecimalPlacesTooHigh);
@@ -93,7 +84,7 @@ public class Currency : IReorderable
         DecimalPlaces = decimalPlaces;
     }
 
-    public void ChangeSymbol(string symbol)
+    private void SetSymbol(string symbol)
     {
         if (string.IsNullOrWhiteSpace(symbol))
             throw new DomainException(DomainErrors.Currency.SymbolRequired);

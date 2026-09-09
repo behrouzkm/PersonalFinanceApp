@@ -9,7 +9,7 @@ namespace PersonalFinanceApp.Application.Features.Persons.Commands.UpdatePerson;
 
 public class UpdatePersonCommand : IRequest
 {
-    public Guid Id {get;set;}
+    public Guid Id { get; set; }
     public PersonType PersonType { get; set; }
     public string DisplayName { get; set; } = string.Empty;
     public DateOnly OpeningDate { get; set; }
@@ -20,4 +20,8 @@ public class UpdatePersonCommand : IRequest
     public string? MobileNumber { get; set; }
     public string? TelNumber { get; set; }
     public string? Description { get; set; }
+
+    // The RowVersion the client last read.
+    // Used to detect if someone else edited this document in the meantime.
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

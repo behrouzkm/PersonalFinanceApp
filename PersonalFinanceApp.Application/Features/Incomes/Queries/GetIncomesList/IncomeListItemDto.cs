@@ -7,4 +7,5 @@ public class IncomeListItemDto
     public int CurrencyId { get; set; }
     public string? Description { get; set; }
     public decimal TotalAmount { get; set; }
+    public int AttachmentCount { get; set; }
 }

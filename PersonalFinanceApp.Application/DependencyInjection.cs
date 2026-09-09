@@ -21,12 +21,18 @@ public static class DependencyInjection
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
         services.AddValidatorsFromAssembly(assembly);
-        services.AddAutoMapper(cfg => cfg.AddMaps(assembly));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
         services.AddScoped<IAccountingLookupService, AccountingLookupService>();
         services.AddScoped<ILedgerBalanceValidationService, LedgerBalanceValidationService>();
         services.AddScoped<IOpeningBalanceService, OpeningBalanceService>();
+        services.AddScoped<IReorderService, ReorderService>();
+
+
+        services.AddScoped<IAttachmentService, AttachmentService>();
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
+        services.AddScoped<IReorderService, ReorderService>();
+        services.AddScoped<IReorderService, ReorderService>();
 
         return services;
     }

@@ -10,16 +10,50 @@ public class CashAccount : MonetaryAccount
     private CashAccount() { }
 
 
-    public CashAccount(string name, Guid ledgerAccountId, int currencyId,DateOnly openingDate, decimal initialBalance, int displayOrder,
-                            string location, Guid tenantId, Guid createdBy, bool isPhysical = true) :
-                                base(name, ledgerAccountId, currencyId, openingDate, initialBalance, displayOrder, tenantId, createdBy)
+    public CashAccount(
+        string displayName,
+        Guid ledgerAccountId,
+        int currencyId,
+        DateOnly openingDate,
+        decimal initialBalance,
+        int displayOrder,
+        string location,
+        Guid tenantId,
+        Guid createdBy,
+        bool isPhysical = true,
+        string? description = null,
+        Guid? openingAccountingDocumentId = null) :
+                        base(displayName, ledgerAccountId, currencyId, openingDate, initialBalance,
+                            displayOrder, tenantId, createdBy, 0, description, openingAccountingDocumentId)
     {
         ChangeLocation(location);
         SetIsPhysical(isPhysical);
     }
 
+    public void UpdateCashAccount(
+        string displayName,
+        int currencyId,
+        DateOnly openingDate,
+        decimal initialBalance,
+        Guid modifiedBy,
+        string location,
+        bool isPhysical,
+        string? description = null)
+    {
+        ChangeLocation(location);
+        SetIsPhysical(isPhysical);
 
-    public void ChangeLocation(string newLocation)
+        UpdateMonetaryAccount(
+            displayName,
+            currencyId,
+            openingDate,
+            initialBalance,
+            modifiedBy,
+            0,
+            description);
+    }
+
+    private void ChangeLocation(string newLocation)
     {
         if (string.IsNullOrWhiteSpace(newLocation))
             throw new DomainException(DomainErrors.CashAccount.LocationRequired);
@@ -27,7 +61,7 @@ public class CashAccount : MonetaryAccount
         Location = newLocation.Trim();
     }
 
-    public void SetIsPhysical(bool isPhysical)
+    private void SetIsPhysical(bool isPhysical)
     {
         IsPhysical = isPhysical;
     }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PersonalFinanceApp.Domain.Common.Constants;
 using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence.Configurations;
@@ -15,8 +16,8 @@ public class AccountTypeTranslationConfiguration : IEntityTypeConfiguration<Acco
         builder.HasKey(a => a.Id);
         builder.Property(a => a.Id).ValueGeneratedOnAdd();
 
-        builder.Property(a => a.Name).IsRequired().HasMaxLength(200);
-        builder.Property(a => a.Description).HasMaxLength(500);
+        builder.Property(a => a.Name).IsRequired().HasMaxLength(FieldLengths.Name);
+        builder.Property(a => a.Description).HasMaxLength(FieldLengths.Description);
 
         builder.HasOne(a => a.AccountType)
             .WithMany()

@@ -8,5 +8,6 @@ public enum AccountCategory : byte
     PersonAccount = 3,
     BankAccount = 4,
     CashAccount = 5,
-    OpeningBalanceEquity = 6
+    OpeningBalanceEquity = 6,
+    CurrencyExchangeClearing=7
 }

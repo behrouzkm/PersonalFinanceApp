@@ -20,13 +20,13 @@ public class Tenant
 
     public Tenant(string name, int defaultLanguageId, int defaultCurrencyId, bool isActive = true)
     {
-        ChangeName(name);
+        SetName(name);
         SetDefaultLanguage(defaultLanguageId);
         SetDefaultCurrency(defaultCurrencyId);
         IsActive = isActive;
     }
 
-    public void ChangeName(string newName)
+    private void SetName(string newName)
     {
         if (string.IsNullOrWhiteSpace(newName))
             throw new DomainException(DomainErrors.Tenant.NameRequired);
@@ -38,7 +38,7 @@ public class Tenant
 
     public void Activate() => IsActive = true;
 
-    public void SetDefaultLanguage(int defaultLanguageId) => DefaultLanguageId = defaultLanguageId;
+    private void SetDefaultLanguage(int defaultLanguageId) => DefaultLanguageId = defaultLanguageId;
 
-    public void SetDefaultCurrency(int defaultCurrencyId) => DefaultCurrencyId = defaultCurrencyId;
+    private void SetDefaultCurrency(int defaultCurrencyId) => DefaultCurrencyId = defaultCurrencyId;
 }

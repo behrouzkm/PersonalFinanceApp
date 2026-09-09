@@ -1,0 +1,76 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using PersonalFinanceApp.Application.Common.Interfaces;
+using PersonalFinanceApp.Application.Common.Models;
+using PersonalFinanceApp.Application.Features.MoneyTransfers.Common;
+using PersonalFinanceApp.Domain.Enums;
+
+namespace PersonalFinanceApp.Application.Features.MoneyTransfers.Queries.GetMoneyTransfersList;
+
+public class GetMoneyTransfersListQueryHandler : IRequestHandler<GetMoneyTransfersListQuery, PaginatedList<MoneyTransferListItemDto>>
+{
+    private readonly IApplicationDbContext _context;
+
+    public GetMoneyTransfersListQueryHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<PaginatedList<MoneyTransferListItemDto>> Handle(GetMoneyTransfersListQuery request,
+                        CancellationToken cancellationToken)
+    {
+        var query = _context.AccountingDocuments
+            .Where(d => d.DocumentType == DocumentType.MoneyTransfer);
+
+        if (request.FromDate.HasValue)
+            query = query.Where(d => d.DocumentDate >= request.FromDate);
+
+        if (request.ToDate.HasValue)
+            query = query.Where(d => d.DocumentDate <= request.ToDate);
+
+        if (request.LedgerAccountId.HasValue)
+            query = query.Where(d => d.Entries.Any(e => e.LedgerAccountId == request.LedgerAccountId.Value));
+
+        if (request.MonetaryAccountId.HasValue)
+        {
+            var ledgerAccountId = await _context.MonetaryAccounts
+                .Where(m => m.Id == request.MonetaryAccountId.Value)
+                .Select(m => (Guid?)m.LedgerAccountId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            query = query.Where(d => d.Entries.Any(e => e.LedgerAccountId == ledgerAccountId));
+        }
+
+        if (request.PersonId.HasValue)
+        {
+            var ledgerAccountId = await _context.Persons
+                .Where(p => p.Id == request.PersonId.Value)
+                .Select(p => (Guid?)p.LedgerAccountId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            query = query.Where(d => d.Entries.Any(e => e.LedgerAccountId == ledgerAccountId));
+        }
+
+        var projected = query
+            .OrderByDescending(d => d.DocumentDate)
+            .ThenByDescending(d => d.CreatedAt)
+            .Select(d => new MoneyTransferListItemDto
+            {
+                AccountingDocumentId = d.Id,
+                TransferDate = d.DocumentDate,
+                CurrencyId = d.CurrencyId,
+                Description = d.Description,
+                Amount = d.Entries.First(r => r.Debit > 0).Debit,
+                FromLedgerAccountId = d.Entries.First(r => r.Credit > 0).LedgerAccountId,
+                ToLedgerAccountId = d.Entries.First(r => r.Debit > 0).LedgerAccountId,
+                AttachmentCount = _context.Attachments.Count(a => a.AccountingDocumentId == d.Id)
+            });
+
+        return await PaginatedList<MoneyTransferListItemDto>.CreateAsync(projected, request.PageNumber,
+                        request.PageSize, cancellationToken);
+    }
+}

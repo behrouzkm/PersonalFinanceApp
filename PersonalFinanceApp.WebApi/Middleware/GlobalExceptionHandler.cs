@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using PersonalFinanceApp.Application.Common.Errors;
 using PersonalFinanceApp.Application.Common.Exceptions;
@@ -54,6 +55,13 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         DbUpdateConcurrencyException => (
             StatusCodes.Status409Conflict,
             new { errorCode = ApplicationErrorCodes.Common.ConcurrencyConflict, parameters = Array.Empty<object>(), correlationId }),
+
+        // SQL Server 2601/2627 = unique index/constraint violation. Distinct from
+        // DbUpdateConcurrencyException (RowVersion mismatch) - this is a genuine
+        // duplicate value, most commonly a DisplayOrder collision on create.
+        DbUpdateException { InnerException: SqlException { Number: 2601 or 2627 } } => (
+            StatusCodes.Status409Conflict,
+            new { errorCode = ApplicationErrorCodes.Common.DuplicateValueConflict, parameters = Array.Empty<object>(), correlationId }),
 
         _ => (
             StatusCodes.Status500InternalServerError,

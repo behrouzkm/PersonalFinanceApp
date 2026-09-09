@@ -7,7 +7,7 @@ using PersonalFinanceApp.Application.Features.Persons.Common;
 
 namespace PersonalFinanceApp.Application.Features.Persons.Queries.GetPersonsList;
 
-public class GetPersonsListQueryHandler : IRequestHandler<GetPersonsListQuery, PaginatedList<PersonDto>>
+public class GetPersonsListQueryHandler : IRequestHandler<GetPersonsListQuery, PaginatedList<PersonListItemDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -16,34 +16,35 @@ public class GetPersonsListQueryHandler : IRequestHandler<GetPersonsListQuery, P
         _context = context;
     }
 
-    public async Task<PaginatedList<PersonDto>> Handle(GetPersonsListQuery request,
+    public async Task<PaginatedList<PersonListItemDto>> Handle(GetPersonsListQuery request,
                         CancellationToken cancellationToken)
     {
         var query = _context.Persons.Include(r=>r.Currency);
 
         var projection = query
             .OrderBy(o => o.DisplayOrder)
-            .Select(r => new PersonDto
+            .Select(p => new PersonListItemDto
             {
-                Id = r.Id,
-                PersonType = r.PersonType,
-                DisplayName = r.DisplayName,
-                LedgerAccountId = r.LedgerAccountId,
-                OpeningDate = r.OpeningDate,
-                InitialBalance = r.InitialBalance,
-                CurrentBalance = r.CurrentBalance,
-                CreditLimit = r.CreditLimit,
-                OpeningAccountingDocumentId = r.OpeningAccountingDocumentId,
-                CurrencyId = r.CurrencyId,
-                CurrencyName = r.Currency.Name,
-                CurrencySymbol = r.Currency.Symbol,
-                DisplayOrder = r.DisplayOrder,
-                Email = r.Email,
-                MobileNumber = r.MobileNumber,
-                TelNumber = r.TelNumber
+                Id = p.Id,
+                PersonType = p.PersonType,
+                DisplayName = p.DisplayName,
+                LedgerAccountId = p.LedgerAccountId,
+                OpeningDate = p.OpeningDate,
+                InitialBalance = p.InitialBalance,
+                CurrentBalance = p.CurrentBalance,
+                CreditLimit = p.CreditLimit,
+                OpeningAccountingDocumentId = p.OpeningAccountingDocumentId,
+                CurrencyId = p.CurrencyId,
+                CurrencyName = p.Currency.Name,
+                CurrencySymbol = p.Currency.Symbol,
+                DisplayOrder = p.DisplayOrder,
+                Email = p.Email,
+                MobileNumber = p.MobileNumber,
+                TelNumber = p.TelNumber,
+                AttachmentCount = _context.Attachments.Count(a =>  a.PersonId == p.Id)
             });
 
-        return await PaginatedList<PersonDto>.CreateAsync(projection, request.PageNumber,
+        return await PaginatedList<PersonListItemDto>.CreateAsync(projection, request.PageNumber,
                        request.PageSize, cancellationToken);
     }
 }

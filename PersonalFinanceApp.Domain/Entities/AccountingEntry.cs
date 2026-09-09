@@ -17,7 +17,7 @@ public class AccountingEntry : BaseAuditableEntity
 
     private AccountingEntry() { }
 
-    internal AccountingEntry(Guid accountingDocumentId, Guid ledgerAccountId, decimal debit, decimal credit,
+    public AccountingEntry(Guid accountingDocumentId, Guid ledgerAccountId, decimal debit, decimal credit,
                             string? description,Guid tenantId, Guid createdBy) : base(tenantId,createdBy,description)
     {
         SetDocumentId(accountingDocumentId);
@@ -40,7 +40,7 @@ public class AccountingEntry : BaseAuditableEntity
         AccountingDocumentId = documentId;
     }
 
-    public void SetLedgerAccountId(Guid ledgerAccountId)
+    private void SetLedgerAccountId(Guid ledgerAccountId)
     {
         if (ledgerAccountId == Guid.Empty)
             throw new DomainException(DomainErrors.AccountingEntry.LedgerAccountRequired);

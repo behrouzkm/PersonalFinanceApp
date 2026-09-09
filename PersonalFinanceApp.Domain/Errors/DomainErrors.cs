@@ -26,8 +26,8 @@ public static class DomainErrors
 
     public static class Attachment
     {
-        // public const string ReferenceTypeRequired = "ErrorCodes.Attachment.ReferenceTypeRequired";
-        // public const string ReferenceIdRequired = "ErrorCodes.Attachment.ReferenceIdRequired";
+        public const string NoOwnerAssigned = "ErrorCodes.Attachment.NoOwnerAssigned";
+        public const string FileSizeMustBePositive = "ErrorCodes.Attachment.FileSizeMustBePositive";
         public const string FileNameRequired = "ErrorCodes.Attachment.FileNameRequired";
         public const string FilePathRequired = "ErrorCodes.Attachment.FilePathRequired";
         public const string FileContentRequired = "ErrorCodes.Attachment.FileContentRequired";
@@ -75,7 +75,7 @@ public static class DomainErrors
         public const string DecimalPlacesInvalid = "ErrorCodes.Currency.DecimalPlacesInvalid";
         public const string SymbolRequired = "ErrorCodes.Currency.SymbolRequired";
         public const string DecimalPlacesTooHigh = "ErrorCodes.Currency.DecimalPlacesTooHigh";
-        internal static string DisplayOrderCannotBeNegative= "ErrorCodes.Currency.DisplayOrderCannotBeNegative";
+        internal static string DisplayOrderCannotBeNegative = "ErrorCodes.Currency.DisplayOrderCannotBeNegative";
     }
 
     public static class MonetaryAccount
@@ -123,13 +123,12 @@ public static class DomainErrors
         public const string DebitAndCreditCannotBothBeZero = "ErrorCodes.AccountingEntry.DebitAndCreditCannotBothBeZero";
     }
 
-    public static class MoneyTransfer
+    public static class CurrencyExchange
     {
-        public const string AmountMustBePositive = "ErrorCodes.MoneyTransfer.AmountMustBePositive";
-        public const string MoneyTransferDateCannotBeInFuture = "ErrorCodes.MoneyTransfer.MoneyTransferDateCannotBeInFuture";
-        public const string FromMonetaryAccountRequired = "ErrorCodes.MoneyTransfer.FromMonetaryAccountRequired";
-        public const string ToMonetaryAccountRequired = "ErrorCodes.MoneyTransfer.ToMonetaryAccountRequired";
-        public const string SameAccount = "ErrorCodes.MoneyTransfer.SameAccount";
+        public const string ExchangeRateMustBePositive = "ErrorCodes.CurrencyExchange.ExchangeRateMustBePositive";
+        public const string FromDocumentIdRequired = "ErrorCodes.CurrencyExchange.FromDocumentIdRequired";
+        public const string ToDocumentIdRequired = "ErrorCodes.CurrencyExchange.ToDocumentIdRequired";
+        public const string FromAndToAccountCantBeSame = "ErrorCodes.CurrencyExchange.FromAndToAccountCantBeSame";
 
     }
 

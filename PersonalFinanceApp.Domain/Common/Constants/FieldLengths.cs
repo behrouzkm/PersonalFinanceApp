@@ -9,7 +9,7 @@ public static class FieldLengths
 {
     public const int CurrencyCode = 3;
 
-    public const int LanguageCode = 10;
+    public const int LanguageCode = 2;
 
     public const int Name = 100;
 

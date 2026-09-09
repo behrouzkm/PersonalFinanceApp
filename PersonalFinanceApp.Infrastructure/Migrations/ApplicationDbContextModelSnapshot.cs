@@ -161,6 +161,9 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("CanDeleteDirectly")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
@@ -195,8 +198,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -278,12 +281,12 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Credit")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<decimal>("Debit")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -310,7 +313,7 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
                     b.HasIndex("LedgerAccountId");
 
-                    b.HasIndex("TenantId", "IsDeleted");
+                    b.HasIndex("TenantId", "LedgerAccountId", "IsDeleted");
 
                     b.ToTable("AccountingEntries");
                 });
@@ -389,6 +392,9 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AccountingDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -400,20 +406,18 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CurrencyExchangeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FileName")
                         .IsRequired()
-                        .HasMaxLength(260)
-                        .HasColumnType("nvarchar(260)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<long>("FileSize")
+                    b.Property<long>("FileSizeBytes")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsDeleted")
@@ -425,20 +429,34 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ReferenceId")
+                    b.Property<Guid?>("MonetaryAccountId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("ReferenceType")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReferenceType", "ReferenceId");
+                    b.HasIndex("AccountingDocumentId");
 
-                    b.ToTable("Attachments");
+                    b.HasIndex("CurrencyExchangeId");
+
+                    b.HasIndex("MonetaryAccountId");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("Attachments", t =>
+                        {
+                            t.HasCheckConstraint("CK_Attachment_ExactlyOneOwner", "(CASE WHEN [AccountingDocumentId] IS NOT NULL THEN 1 ELSE 0 END +  CASE WHEN [PersonId] IS NOT NULL THEN 1 ELSE 0 END +  CASE WHEN [MonetaryAccountId] IS NOT NULL THEN 1 ELSE 0 END +  CASE WHEN [CurrencyExchangeId] IS NOT NULL THEN 1 ELSE 0 END) = 1");
+                        });
                 });
 
             modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.Currency", b =>
@@ -484,6 +502,60 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.ToTable("Currencies");
                 });
 
+            modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.CurrencyExchange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<Guid>("FromDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ToDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromDocumentId");
+
+                    b.HasIndex("ToDocumentId");
+
+                    b.HasIndex("TenantId", "IsDeleted");
+
+                    b.ToTable("CurrencyExchanges");
+                });
+
             modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.DocumentTypeTranslation", b =>
                 {
                     b.Property<int>("Id")
@@ -504,8 +576,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -570,8 +642,14 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("CurrencyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
 
                     b.Property<bool>("HasBeenUsedInEntries")
                         .HasColumnType("bit");
@@ -590,8 +668,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uniqueidentifier");
@@ -603,9 +681,15 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
                     b.HasIndex("AccountTypeId");
 
+                    b.HasIndex("CurrencyId");
+
                     b.HasIndex("ParentId");
 
                     b.HasIndex("TenantId", "ParentId");
+
+                    b.HasIndex("TenantId", "ParentId", "DisplayOrder")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("LedgerAccounts");
                 });
@@ -623,30 +707,30 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal?>("CreditLimit")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<int>("CurrencyId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("CurrentBalance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
 
                     b.Property<decimal>("InitialBalance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -660,8 +744,17 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.Property<Guid>("LedgerAccountId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("OpeningAccountingDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateOnly>("OpeningDate")
                         .HasColumnType("date");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
@@ -673,65 +766,15 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.HasIndex("LedgerAccountId")
                         .IsUnique();
 
+                    b.HasIndex("OpeningAccountingDocumentId");
+
+                    b.HasIndex("TenantId", "DisplayOrder")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
                     b.ToTable((string)null);
 
                     b.UseTpcMappingStrategy();
-                });
-
-            modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.MoneyTransfer", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("CurrencyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("FromMonetaryAccountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ToMonetaryAccountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("TransferDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CurrencyId");
-
-                    b.HasIndex("FromMonetaryAccountId");
-
-                    b.HasIndex("ToMonetaryAccountId");
-
-                    b.HasIndex("TenantId", "TransferDate");
-
-                    b.ToTable("MoneyTransfers");
                 });
 
             modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.Person", b =>
@@ -747,23 +790,23 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal?>("CreditLimit")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<int>("CurrencyId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("CurrentBalance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
@@ -773,8 +816,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .HasColumnType("nvarchar(320)");
 
                     b.Property<decimal>("InitialBalance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -801,6 +844,12 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.Property<int>("PersonType")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("TelNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -816,6 +865,10 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .IsUnique();
 
                     b.HasIndex("OpeningAccountingDocumentId");
+
+                    b.HasIndex("TenantId", "DisplayOrder")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Persons");
                 });
@@ -867,8 +920,8 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -970,12 +1023,12 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("BranchName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("IBAN")
                         .HasMaxLength(50)
@@ -1099,6 +1152,56 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                     b.Navigation("LedgerAccount");
                 });
 
+            modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.Attachment", b =>
+                {
+                    b.HasOne("PersonalFinanceApp.Domain.Entities.AccountingDocument", "AccountingDocument")
+                        .WithMany()
+                        .HasForeignKey("AccountingDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PersonalFinanceApp.Domain.Entities.CurrencyExchange", "CurrencyExchange")
+                        .WithMany()
+                        .HasForeignKey("CurrencyExchangeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PersonalFinanceApp.Domain.Entities.MonetaryAccount", "MonetaryAccount")
+                        .WithMany()
+                        .HasForeignKey("MonetaryAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PersonalFinanceApp.Domain.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AccountingDocument");
+
+                    b.Navigation("CurrencyExchange");
+
+                    b.Navigation("MonetaryAccount");
+
+                    b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.CurrencyExchange", b =>
+                {
+                    b.HasOne("PersonalFinanceApp.Domain.Entities.AccountingDocument", "FromDocument")
+                        .WithMany()
+                        .HasForeignKey("FromDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PersonalFinanceApp.Domain.Entities.AccountingDocument", "ToDocument")
+                        .WithMany()
+                        .HasForeignKey("ToDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FromDocument");
+
+                    b.Navigation("ToDocument");
+                });
+
             modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.DocumentTypeTranslation", b =>
                 {
                     b.HasOne("PersonalFinanceApp.Domain.Entities.Language", "Language")
@@ -1118,12 +1221,18 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("PersonalFinanceApp.Domain.Entities.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId");
+
                     b.HasOne("PersonalFinanceApp.Domain.Entities.LedgerAccount", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("AccountType");
+
+                    b.Navigation("Currency");
 
                     b.Navigation("Parent");
                 });
@@ -1142,36 +1251,15 @@ namespace PersonalFinanceApp.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("PersonalFinanceApp.Domain.Entities.AccountingDocument", "OpeningAccountingDocument")
+                        .WithMany()
+                        .HasForeignKey("OpeningAccountingDocumentId");
+
                     b.Navigation("Currency");
 
                     b.Navigation("LedgerAccount");
-                });
 
-            modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.MoneyTransfer", b =>
-                {
-                    b.HasOne("PersonalFinanceApp.Domain.Entities.Currency", "Currency")
-                        .WithMany()
-                        .HasForeignKey("CurrencyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PersonalFinanceApp.Domain.Entities.MonetaryAccount", "FromMonetaryAccount")
-                        .WithMany()
-                        .HasForeignKey("FromMonetaryAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("PersonalFinanceApp.Domain.Entities.MonetaryAccount", "ToMonetaryAccount")
-                        .WithMany()
-                        .HasForeignKey("ToMonetaryAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Currency");
-
-                    b.Navigation("FromMonetaryAccount");
-
-                    b.Navigation("ToMonetaryAccount");
+                    b.Navigation("OpeningAccountingDocument");
                 });
 
             modelBuilder.Entity("PersonalFinanceApp.Domain.Entities.Person", b =>

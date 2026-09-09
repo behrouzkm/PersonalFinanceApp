@@ -30,7 +30,7 @@ public class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, G
     public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
     {
         var (ledgerAccount, openingDocId) = await _openingBalanceService.CreateAsync(
-            request.ParentLedgerId, AccountCategory.PersonAccount, DocumentType.Person,
+            request.ParentLedgerId, AccountCategory.PersonAccount, 
             request.DisplayName, request.OpeningDate, request.CurrencyId,
             request.InitialBalance, request.CreditLimit, request.Description, cancellationToken);
 

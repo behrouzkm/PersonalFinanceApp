@@ -9,6 +9,5 @@ public interface IReorderable
 {
     int DisplayOrder { get; }
     void SetDisplayOrder(int displayOrder);
-    void IncrementDisplayOrder();
-    void DecrementDisplayOrder();
+
 }

@@ -25,7 +25,7 @@ public interface IApplicationDbContext
     DbSet<Currency> Currencies { get; }
     DbSet<DocumentTypeTranslation> DocumentTypeTranslations { get; }
     DbSet<Language> Languages { get; }
-    DbSet<MoneyTransfer> MoneyTransfers { get; }
+    DbSet<CurrencyExchange> CurrencyExchanges { get; }
     DbSet<Person> Persons { get; }
     DbSet<Tenant> Tenants { get; }
     DbSet<SystemTemplate> SystemTemplates { get; }

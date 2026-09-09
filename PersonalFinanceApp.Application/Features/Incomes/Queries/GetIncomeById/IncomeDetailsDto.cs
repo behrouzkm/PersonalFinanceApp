@@ -1,3 +1,4 @@
+using PersonalFinanceApp.Application.Features.Attachments.Common;
 using PersonalFinanceApp.Application.Features.Common;
 
 namespace PersonalFinanceApp.Application.Features.Incomes.Queries.GetIncomeById;
@@ -15,4 +16,6 @@ public class IncomeDetailsDto
 
     public List<AccountingEntryDto> IncomeLedgerAccountLines { get; set; } = new();
     public List<MonetaryAccountEntryDto> MonetaryAccountEntries { get; set; } = new();
+    public IReadOnlyList<AttachmentDto> Attachments { get; set; } = Array.Empty<AttachmentDto>();
+
 }

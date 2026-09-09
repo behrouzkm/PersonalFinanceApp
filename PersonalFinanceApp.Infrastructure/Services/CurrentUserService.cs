@@ -23,7 +23,9 @@ public class CurrentUserService : ICurrentUserService
         var value = _httpContextAccessor.HttpContext?.User?.FindFirstValue(claimType);
 
         // returning Guid.Empty when unauthenticated/unclaimed
-        return Guid.TryParse(value, out var guid) ? guid : Guid.Empty;
+        return Guid.TryParse(value, out var guid)
+            ? guid
+            : throw new UnauthorizedAccessException();
     }
 
 }
