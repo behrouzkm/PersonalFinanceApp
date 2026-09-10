@@ -9,5 +9,5 @@ namespace PersonalFinanceApp.Domain.Interfaces;
 public interface IConcurrencyAware
 {
     [Timestamp]
-    byte[] RowVersion { get; set; }
+    byte[] RowVersion { get; }
 }

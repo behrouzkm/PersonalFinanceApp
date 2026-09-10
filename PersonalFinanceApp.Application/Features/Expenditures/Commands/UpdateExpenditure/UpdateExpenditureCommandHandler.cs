@@ -76,6 +76,8 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
                 existingEntriesById, personLookup.ById, personLookup.ByLedgerAccountId,
                 nameof(Person), modifiedBy, cancellationToken);
 
+        document.EnsureBalanced();
+
         await _context.SaveChangesAsync(cancellationToken);
     }
 
@@ -132,8 +134,7 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
             if (!changed)
                 continue;
 
-            existingExpenditureEntry.UpdateEntry(line.LedgerAccountId, line.Amount, 0, line.Description);
-            existingExpenditureEntry.UpdateAudit(modifiedBy);
+            existingExpenditureEntry.UpdateEntry(line.LedgerAccountId, line.Amount, 0,modifiedBy, line.Description);
 
             expenseLedgerAccount.MarkAsUsed();
 
@@ -227,8 +228,7 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
                 await _ledgerValidator.ValidateAsync(paymentSource, documentDate, 0, payment.Amount,
                         replacingEntryId: entry.Id, cancellationToken);
 
-                entry.UpdateEntry(paymentSource.LedgerAccountId, 0, payment.Amount, payment.Description);
-                entry.UpdateAudit(modifiedBy);
+                entry.UpdateEntry(paymentSource.LedgerAccountId, 0, payment.Amount,modifiedBy, payment.Description);
                 paymentSource.AdjustBalance(-payment.Amount);
 
                 ledgerAccountEntity.MarkAsUsed();
@@ -248,9 +248,8 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
             await _ledgerValidator.ValidateAsync(paymentSource, documentDate, 0, payment.Amount,
                       replacingEntryId: entry.Id, cancellationToken);
 
-            entry.SetAmounts(0, payment.Amount);
-            entry.SetDescription(payment.Description);
-            entry.UpdateAudit(modifiedBy);
+            entry.UpdateEntry(0, payment.Amount, modifiedBy, payment.Description);
+
             paymentSource.AdjustBalance(-amountDelta);
 
         }

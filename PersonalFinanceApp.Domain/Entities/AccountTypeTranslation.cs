@@ -18,25 +18,25 @@ public class AccountTypeTranslation
     public Language Language { get; private set; } = null!;
 
 
-    public string Name { get; private set; } = string.Empty!;
+    public string Translation { get; private set; } = string.Empty!;
     public string? Description { get; private set; }
 
     private AccountTypeTranslation() { }
 
-    public AccountTypeTranslation(int accountTypeId, int languageId, string name, string? description = null)
+    public AccountTypeTranslation(int accountTypeId, int languageId, string translation, string? description = null)
     {
         SetAccountType(accountTypeId);
         SetLanguage(languageId);
-        SetName(name);
+        SetTranslation(translation);
         SetDescription(description);
     }
 
 
-    public void UpdateAccountTypeTranslation(int accountTypeId, int languageId, string name, string? description = null)
+    public void UpdateAccountTypeTranslation(int accountTypeId, int languageId, string translation, string? description = null)
     {
         SetAccountType(accountTypeId);
         SetLanguage(languageId);
-        SetName(name);
+        SetTranslation(translation);
         SetDescription(description);
     }
 
@@ -44,12 +44,12 @@ public class AccountTypeTranslation
 
     private void SetLanguage(int languageId) => LanguageId = languageId;
 
-    private void SetName(string name)
+    private void SetTranslation(string translation)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException(DomainErrors.LedgerAccount.NameRequired);
+        if (string.IsNullOrWhiteSpace(translation))
+            throw new DomainException(DomainErrors.AccountTypeTranslation.TranslationRequired);
 
-        Name = name.Trim();
+        Translation = translation.Trim();
     }
 
     private void SetDescription(string? description)

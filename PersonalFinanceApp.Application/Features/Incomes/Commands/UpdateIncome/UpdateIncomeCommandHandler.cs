@@ -105,8 +105,7 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
             if (!changed)
                 continue;
 
-            entry.UpdateEntry(line.LedgerAccountId, 0, line.Amount, line.Description);
-            entry.UpdateAudit(_currentUser.UserId);
+            entry.UpdateEntry(line.LedgerAccountId, 0, line.Amount,_currentUser.UserId, line.Description);
 
             account.MarkAsUsed();
         }
@@ -171,8 +170,7 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
                 await _ledgerValidator.ValidateAsync(
                     monetaryAccount, request.DocumentDate, deposit.Amount, 0, replacingEntryId: entry.Id, cancellationToken);
 
-                entry.UpdateEntry(monetaryAccount.LedgerAccountId, deposit.Amount, 0, deposit.Description);
-                entry.UpdateAudit(_currentUser.UserId);
+                entry.UpdateEntry(monetaryAccount.LedgerAccountId, deposit.Amount, 0,_currentUser.UserId, deposit.Description);
                 monetaryAccount.AdjustBalance(deposit.Amount);
                 monetaryAccount.LedgerAccount.MarkAsUsed();
 
@@ -189,13 +187,13 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
             await _ledgerValidator.ValidateAsync(
                 monetaryAccount, request.DocumentDate, deposit.Amount, 0, replacingEntryId: entry.Id, cancellationToken);
 
-            entry.SetAmounts(deposit.Amount, 0);
-            entry.SetDescription(deposit.Description);
-            entry.UpdateAudit(_currentUser.UserId);
+            entry.UpdateEntry(deposit.Amount, 0, _currentUser.UserId, deposit.Description);
             monetaryAccount.AdjustBalance(amountDelta);
 
 
         }
+
+        document.EnsureBalanced();
 
         await _context.SaveChangesAsync(cancellationToken);
 

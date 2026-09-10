@@ -100,6 +100,8 @@ public class CreateIncomeCommandHandler : IRequestHandler<CreateIncomeCommand, G
             monetaryAccount.AdjustBalance(deposit.Amount);
         }
 
+        income.EnsureBalanced();
+        
         _context.AccountingDocuments.Add(income);
         await _context.SaveChangesAsync(cancellationToken);
 

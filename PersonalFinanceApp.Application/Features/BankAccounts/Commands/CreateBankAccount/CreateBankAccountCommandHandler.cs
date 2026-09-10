@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using PersonalFinanceApp.Application.Common.Errors;
 using PersonalFinanceApp.Application.Common.Exceptions;
@@ -34,7 +35,11 @@ public class CreateBankAccountCommandHandler : IRequestHandler<CreateBankAccount
             request.DisplayName, request.OpeningDate, request.CurrencyId,
             request.InitialBalance, request.CreditLimit, request.Description, cancellationToken);
 
-        var maxDisplayOrder = await _context.BankAccounts.MaxAsync(c => (int?)c.DisplayOrder, cancellationToken) ?? 0;
+        const int maxAttempts = 3;
+
+        for (var attempt = 1; ; attempt++)
+        {
+            var maxDisplayOrder = await _context.BankAccounts.MaxAsync(c => (int?)c.DisplayOrder, cancellationToken) ?? 0;
 
         var bankAccount = new BankAccount(
             request.DisplayName,
@@ -56,7 +61,15 @@ public class CreateBankAccountCommandHandler : IRequestHandler<CreateBankAccount
         );
 
         await _context.BankAccounts.AddAsync(bankAccount, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
-        return bankAccount.Id;
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+                return bankAccount.Id;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 } && attempt < maxAttempts)
+            {
+                _context.Remove(bankAccount); // detach the failed attempt before retrying
+            }
+        }
     }
 }

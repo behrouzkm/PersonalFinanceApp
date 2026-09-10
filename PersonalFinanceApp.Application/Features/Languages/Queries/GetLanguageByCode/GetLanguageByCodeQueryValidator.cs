@@ -5,10 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using PersonalFinanceApp.Application.Common.Errors;
+using PersonalFinanceApp.Application.Features.Languages.Queries.GetLanguageById;
 
-namespace PersonalFinanceApp.Application.Features.Languages.Commands.CreateLanguage;
+namespace PersonalFinanceApp.Application.Features.Languages.Queries.GetLanguageByCode;
 
-public class GetLanguageByCodeQueryValidator : AbstractValidator<CreateLanguageCommand>
+public class GetLanguageByCodeQueryValidator : AbstractValidator<GetLanguageByCodeQuery>
 {
     public GetLanguageByCodeQueryValidator()
     {
@@ -16,11 +17,6 @@ public class GetLanguageByCodeQueryValidator : AbstractValidator<CreateLanguageC
             .NotEmpty().WithErrorCode(ApplicationErrorCodes.Language.CodeRequired)
             .Length(2).WithErrorCode(ApplicationErrorCodes.Language.InvalidLanguageCode)
             .Matches("^[a-zA-Z]{2}$").WithErrorCode(ApplicationErrorCodes.Language.InvalidLanguageCode);
-
-
-        RuleFor(x => x.Name)
-            .NotEmpty()
-            .WithErrorCode(ApplicationErrorCodes.Language.NameRequired);
 
     }
 }

@@ -76,6 +76,10 @@ public class CreateCurrencyExchangeCommandHandler : IRequestHandler<CreateCurren
         toDocument.AddEntry(toClearing.Id, 0, request.ToAmount, request.Description, _currentUser.UserId);
 
 
+        fromDocument.EnsureBalanced();
+        toDocument.EnsureBalanced();
+
+
         fromLedgerAccount.MarkAsUsed();
         toLedgerAccount.MarkAsUsed();
         fromClearing.MarkAsUsed();

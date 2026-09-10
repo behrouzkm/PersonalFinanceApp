@@ -64,6 +64,8 @@ public class CreateMoneyTransferCommandHandler : IRequestHandler<CreateMoneyTran
         fromMonetaryAccount.AdjustBalance(-request.Amount);
         toMonetaryAccount.AdjustBalance(request.Amount);
 
+        accountingDocument.EnsureBalanced();
+
         _context.AccountingDocuments.Add(accountingDocument);
         await _context.SaveChangesAsync(cancellationToken);
 

@@ -7,11 +7,11 @@ namespace PersonalFinanceApp.Domain.Entities;
 
 public class ApiAuditLog
 {
-    public Guid Id {get;set;}
-    public DateTime Timestamp {get;set;}
+    public Guid Id {get; private set; }
+    public DateTime Timestamp {get; private set; }
 
-    public Guid? UserId {get;set;}
-    public Guid? TenantId {get;set;}
+    public Guid? UserId {get; private set; }
+    public Guid? TenantId {get; private set; }
 
 
     public string HttpMethod { get; private set; } = string.Empty;

@@ -21,7 +21,7 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
     public IReadOnlyCollection<AccountingEntry> Entries => _entries.AsReadOnly();
 
     [Timestamp]
-    public byte[] RowVersion { get; set; } = default!;
+    public byte[] RowVersion { get; private set; } = default!;
 
     private AccountingDocument() { }
 
@@ -69,6 +69,25 @@ public class AccountingDocument : BaseAuditableEntity, IConcurrencyAware
             throw new DomainException(DomainErrors.AccountingDocument.CurrencyMismatch);
     }
 
+    //the fundamental double-entry invariant - every posted document's debits
+    // and credits must sum to the same value - protected here instead of only in
+    // FluentValidation, so it holds no matter which Application code path builds a
+    // document. Only counts active (non-soft-deleted) entries: an Update flow may have
+    // soft-deleted some rows and added others in the same call, and it's the resulting
+    // active set that must balance, not the full historical set including deleted rows.
+    // Call this as the last step before SaveChangesAsync in any handler that finishes
+    // adding/editing/removing this document's entries.
+    public void EnsureBalanced()
+    {
+        var activeEntries = _entries.Where(e => !e.IsDeleted).ToList();
+
+        var totalDebit = activeEntries.Sum(e => e.Debit);
+        var totalCredit = activeEntries.Sum(e => e.Credit);
+
+        if (totalDebit != totalCredit)
+            throw new DomainException(DomainErrors.AccountingDocument.NotBalanced);
+    }
+    
 
     public override void SoftDelete(Guid deletedBy)
     {

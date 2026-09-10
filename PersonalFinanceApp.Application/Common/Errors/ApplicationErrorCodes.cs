@@ -17,6 +17,14 @@ public static class ApplicationErrorCodes
 
     }
 
+    public static class AccountTypeTranslation
+    {
+        public const string AccountTypeTranslationIdRequired = "ErrorCodes.AccountTypeTranslation.AccountTypeTranslationIdRequired";
+        public const string LanguageIdRequired = "ErrorCodes.AccountTypeTranslation.LanguageIdRequired";
+        public const string TranslationRequired = "ErrorCodes.AccountTypeTranslation.TranslationRequired";
+        public const string DuplicateRecord = "ErrorCodes.AccountTypeTranslation.DuplicateRecord";
+    }
+
     public static class Attachment
     {
         public const string OwnerIdRequired = "ErrorCodes.Attachment.OwnerIdRequired";
@@ -27,30 +35,31 @@ public static class ApplicationErrorCodes
 
     public static class Currency
     {
-        public const string IdRequired = "ApplicationErrorCodes.Currency.IdRequired";
-        public const string CodeRequired = "ApplicationErrorCodes.Currency.CodeRequired";
-        public const string InvalidCurrencyCode = "ApplicationErrorCodes.Currency.InvalidCurrencyCode";
-        public const string NameRequired = "ApplicationErrorCodes.Currency.NameRequired";
-        public const string DecimalRequired = "ApplicationErrorCodes.Currency.DecimalRequired";
-        public const string InvalidDecimalPlaces = "ApplicationErrorCodes.Currency.InvalidDecimalPlaces";
-        public const string SymbolRequired = "ApplicationErrorCodes.Currency.SymbolRequired";
-        public const string DuplicateCodeOrName = "ApplicationErrorCodes.Currency.DuplicateCodeOrName";
-        public const string CurrencyInUse = "ApplicationErrorCodes.Currency.CurrencyInUse";
-        public const string InvalidDisplayOrder = "ApplicationErrorCodes.Currency.InvalidDisplayOrder";
-    }
+        public const string IdRequired = "ErrorCodes.Currency.IdRequired";
+        public const string CodeRequired = "ErrorCodes.Currency.CodeRequired";
+        public const string InvalidCurrencyCode = "ErrorCodes.Currency.InvalidCurrencyCode";
+        public const string NameRequired = "ErrorCodes.Currency.NameRequired";
+        public const string DecimalRequired = "ErrorCodes.Currency.DecimalRequired";
+        public const string InvalidDecimalPlaces = "ErrorCodes.Currency.InvalidDecimalPlaces";
+        public const string SymbolRequired = "ErrorCodes.Currency.SymbolRequired";
+        public const string DuplicateCodeOrName = "ErrorCodes.Currency.DuplicateCodeOrName";
+        public const string CurrencyInUse = "ErrorCodes.Currency.CurrencyInUse";
+        public const string InvalidDisplayOrder = "ErrorCodes.Currency.InvalidDisplayOrder";
+         public const string CurrencyDeactivated = "ErrorCodes.Currency.CurrencyDeactivated";
+   }
 
     public static class Language
     {
-        public const string IdRequired = "ApplicationErrorCodes.Language.IdRequired";
-        public const string CodeRequired = "ApplicationErrorCodes.Language.CodeRequired";
-        public const string InvalidLanguageCode = "ApplicationErrorCodes.Language.InvalidLanguageCode";
-        public const string NameRequired = "ApplicationErrorCodes.Language.NameRequired";
-        //public const string DecimalRequired = "ApplicationErrorCodes.Language.DecimalRequired";
-        //public const string InvalidDecimalPlaces = "ApplicationErrorCodes.Language.InvalidDecimalPlaces";
-        //public const string SymbolRequired = "ApplicationErrorCodes.Language.SymbolRequired";
-        public const string DuplicateCodeOrName = "ApplicationErrorCodes.Language.DuplicateCodeOrName";
-        public const string LanguageInUse = "ApplicationErrorCodes.Language.LanguageInUse";
-        public const string InvalidDisplayOrder = "ApplicationErrorCodes.Language.InvalidDisplayOrder";
+        public const string IdRequired = "ErrorCodes.Language.IdRequired";
+        public const string CodeRequired = "ErrorCodes.Language.CodeRequired";
+        public const string InvalidLanguageCode = "ErrorCodes.Language.InvalidLanguageCode";
+        public const string NameRequired = "ErrorCodes.Language.NameRequired";
+        public const string LanguageDeactivated = "ErrorCodes.Language.LanguageDeactivated";
+        //public const string InvalidDecimalPlaces = "ErrorCodes.Language.InvalidDecimalPlaces";
+        //public const string SymbolRequired = "ErrorCodes.Language.SymbolRequired";
+        public const string DuplicateCodeOrName = "ErrorCodes.Language.DuplicateCodeOrName";
+        public const string LanguageInUse = "ErrorCodes.Language.LanguageInUse";
+        public const string InvalidDisplayOrder = "ErrorCodes.Language.InvalidDisplayOrder";
     }
 
     public static class Auth
@@ -63,12 +72,12 @@ public static class ApplicationErrorCodes
         public const string LastNameRequired = "ErrorCodes.Auth.LastNameRequired";
         public const string DefaultLanguageRequired = "ErrorCodes.Auth.DefaultLanguageRequired";
         public const string DefaultCurrencyRequired = "ErrorCodes.Auth.DefaultCurrencyRequired";
-
         public const string RegistrationFailed = "ErrorCodes.Auth.RegistrationFailed";
         public const string LoginFailed = "ErrorCodes.Auth.LoginFailed";
-
         public const string TenantInactive = "ErrorCodes.Auth.TenantInactive";
-    }
+        public const string DefaultLanguageNotFound = "ErrorCodes.Auth.DefaultLanguageNotFound";
+        public const string DefaultLanguageTranslationsIncomplete = "ErrorCodes.Auth.DefaultLanguageTranslationsIncomplete";
+  }
 
     public static class ExpenditureList
     {
@@ -121,73 +130,73 @@ public static class ApplicationErrorCodes
     public static class MoneyTransfer
     {
         public const string TransferDocumentIdRequired = "ErrorCodes.MoneyTransfer.TransferDocumentIdRequired";
-        public static string CurrencyRequired = "ErrorCodes.MoneyTransfer.CurrencyRequired";
-        public static string SourceDestinationCurrencyMismatch = "ErrorCodes.MoneyTransfer.SourceDestinationCurrencyMismatch";
-        public static string TransferDateRequired = "ErrorCodes.MoneyTransfer.TransferDateRequired";
-        public static string TransferDateInFuture = "ErrorCodes.MoneyTransfer.TransferDateInFuture";
-        public static string FromMonetaryAccountIdRequired = "ErrorCodes.MoneyTransfer.FromMonetaryAccountIdRequired";
-        public static string ToMonetaryAccountIdRequired = "ErrorCodes.MoneyTransfer.ToMonetaryAccountIdRequired";
-        public static string SourceAndDestinationMustDiffer = "ErrorCodes.MoneyTransfer.SourceAndDestinationMustDiffer";
-        public static string TransferAmountMustBePositive = "ErrorCodes.MoneyTransfer.TransferAmountMustBePositive";
-        public static string InsufficientBalance = "ErrorCodes.MoneyTransfer.InsufficientBalance";
-        public static string RowVersionRequired = "ErrorCodes.MoneyTransfer.RowVersionRequired";
-        public static string CreditEntryNotFound = "ErrorCodes.MoneyTransfer.CreditEntryNotFound";
-        public static string DebitEntryNotFound = "ErrorCodes.MoneyTransfer.DebitEntryNotFound";
-        public static string FromMonetaryAccountNotFound = "ErrorCodes.MoneyTransfer.FromMonetaryAccountNotFound";
-        public static string ToMonetaryAccountNotFound = "ErrorCodes.MoneyTransfer.ToMonetaryAccountNotFound";
-        public static string FromLaterThanToDate = "ErrorCodes.MoneyTransfer.FromLaterThanToDate";
+        public const string CurrencyRequired = "ErrorCodes.MoneyTransfer.CurrencyRequired";
+        public const string SourceDestinationCurrencyMismatch = "ErrorCodes.MoneyTransfer.SourceDestinationCurrencyMismatch";
+        public const string TransferDateRequired = "ErrorCodes.MoneyTransfer.TransferDateRequired";
+        public const string TransferDateInFuture = "ErrorCodes.MoneyTransfer.TransferDateInFuture";
+        public const string FromMonetaryAccountIdRequired = "ErrorCodes.MoneyTransfer.FromMonetaryAccountIdRequired";
+        public const string ToMonetaryAccountIdRequired = "ErrorCodes.MoneyTransfer.ToMonetaryAccountIdRequired";
+        public const string SourceAndDestinationMustDiffer = "ErrorCodes.MoneyTransfer.SourceAndDestinationMustDiffer";
+        public const string TransferAmountMustBePositive = "ErrorCodes.MoneyTransfer.TransferAmountMustBePositive";
+        public const string InsufficientBalance = "ErrorCodes.MoneyTransfer.InsufficientBalance";
+        public const string RowVersionRequired = "ErrorCodes.MoneyTransfer.RowVersionRequired";
+        public const string CreditEntryNotFound = "ErrorCodes.MoneyTransfer.CreditEntryNotFound";
+        public const string DebitEntryNotFound = "ErrorCodes.MoneyTransfer.DebitEntryNotFound";
+        public const string FromMonetaryAccountNotFound = "ErrorCodes.MoneyTransfer.FromMonetaryAccountNotFound";
+        public const string ToMonetaryAccountNotFound = "ErrorCodes.MoneyTransfer.ToMonetaryAccountNotFound";
+        public const string FromLaterThanToDate = "ErrorCodes.MoneyTransfer.FromLaterThanToDate";
     }
 
     public static class CurrencyExchange
     {
         public const string DocumentIdRequired = "ErrorCodes.CurrencyExchange.DocumentIdRequired";
         public const string ClearingEntryNotFound = "ErrorCodes.CurrencyExchange.ClearingEntryNotFound";
-        public static string FundSourceEntryNotFound = "ErrorCodes.CurrencyExchange.FundSourceEntryNotFound";
-        public static string SameCurrencyExchangeNotAllowed = "ErrorCodes.CurrencyExchange.SameCurrencyExchangeNotAllowed";
-        public static string ExchangeDateRequired = "ErrorCodes.CurrencyExchange.ExchangeDateRequired";
-        public static string ExchangeDateInFuture = "ErrorCodes.CurrencyExchange.ExchangeDateInFuture";
-        internal static string FromLedgerAccountRequired = "ErrorCodes.CurrencyExchange.FromLedgerAccountRequired";
-        internal static string ToLedgerAccountRequired = "ErrorCodes.CurrencyExchange.ToLedgerAccountRequired";
-        internal static string SourceAndDestinationMustDiffer = "ErrorCodes.CurrencyExchange.SourceAndDestinationMustDiffer";
-        internal static string AmountRateMismatch = "ErrorCodes.CurrencyExchange.AmountRateMismatch";
-        internal static string FromAmountMustBePositive = "ErrorCodes.CurrencyExchange.FromAmountMustBePositive";
-        internal static string ToAmountMustBePositive = "ErrorCodes.CurrencyExchange.ToAmountMustBePositive";
-        internal static string ExchangeRateMustBePositive = "ErrorCodes.CurrencyExchange.ExchangeRateMustBePositive";
-        internal static string InsufficientBalance = "ErrorCodes.CurrencyExchange.InsufficientBalance";
-        internal static string RowVersionRequired = "ErrorCodes.CurrencyExchange.RowVersionRequired";
-        internal static string CreditEntryNotFound = "ErrorCodes.CurrencyExchange.CreditEntryNotFound";
-        internal static string DebitEntryNotFound = "ErrorCodes.CurrencyExchange.DebitEntryNotFound";
-        internal static string FromMonetaryAccountNotFound = "ErrorCodes.CurrencyExchange.FromMonetaryAccountNotFound";
-        internal static string ToMonetaryAccountNotFound = "ErrorCodes.CurrencyExchange.ToMonetaryAccountNotFound";
+        public const string FundSourceEntryNotFound = "ErrorCodes.CurrencyExchange.FundSourceEntryNotFound";
+        public const string SameCurrencyExchangeNotAllowed = "ErrorCodes.CurrencyExchange.SameCurrencyExchangeNotAllowed";
+        public const string ExchangeDateRequired = "ErrorCodes.CurrencyExchange.ExchangeDateRequired";
+        public const string ExchangeDateInFuture = "ErrorCodes.CurrencyExchange.ExchangeDateInFuture";
+        public const string FromLedgerAccountRequired = "ErrorCodes.CurrencyExchange.FromLedgerAccountRequired";
+        public const string ToLedgerAccountRequired = "ErrorCodes.CurrencyExchange.ToLedgerAccountRequired";
+        public const string SourceAndDestinationMustDiffer = "ErrorCodes.CurrencyExchange.SourceAndDestinationMustDiffer";
+        public const string AmountRateMismatch = "ErrorCodes.CurrencyExchange.AmountRateMismatch";
+        public const string FromAmountMustBePositive = "ErrorCodes.CurrencyExchange.FromAmountMustBePositive";
+        public const string ToAmountMustBePositive = "ErrorCodes.CurrencyExchange.ToAmountMustBePositive";
+        public const string ExchangeRateMustBePositive = "ErrorCodes.CurrencyExchange.ExchangeRateMustBePositive";
+        public const string InsufficientBalance = "ErrorCodes.CurrencyExchange.InsufficientBalance";
+        public const string RowVersionRequired = "ErrorCodes.CurrencyExchange.RowVersionRequired";
+        public const string CreditEntryNotFound = "ErrorCodes.CurrencyExchange.CreditEntryNotFound";
+        public const string DebitEntryNotFound = "ErrorCodes.CurrencyExchange.DebitEntryNotFound";
+        public const string FromMonetaryAccountNotFound = "ErrorCodes.CurrencyExchange.FromMonetaryAccountNotFound";
+        public const string ToMonetaryAccountNotFound = "ErrorCodes.CurrencyExchange.ToMonetaryAccountNotFound";
     }
 
     public static class FundSource
     {
-        internal static string InitialDebtExceedsCreditLimit = "ErrorCodes.FundSource.InitialDebtExceedsCreditLimit";
-        internal static string InvalidParentLedgerAccount = "ErrorCodes.FundSource.InvalidParentLedgerAccount";
-        internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.FundSource.InvalidOpeningAccountEquityLedgerAccount";
-        internal static string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.FundSource.OpeningDateCannotBeAfterExistingTransactions";
-        internal static string CannotChangeCurrencyWithExistingTransactions = "ErrorCodes.FundSource.CannotChangeCurrencyWithExistingTransactions";
+        public const string InitialDebtExceedsCreditLimit = "ErrorCodes.FundSource.InitialDebtExceedsCreditLimit";
+        public const string InvalidParentLedgerAccount = "ErrorCodes.FundSource.InvalidParentLedgerAccount";
+        public const string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.FundSource.InvalidOpeningAccountEquityLedgerAccount";
+        public const string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.FundSource.OpeningDateCannotBeAfterExistingTransactions";
+        public const string CannotChangeCurrencyWithExistingTransactions = "ErrorCodes.FundSource.CannotChangeCurrencyWithExistingTransactions";
     }
 
     public static class Person
     {
         public const string PersonIdRequired = "ErrorCodes.Person.PersonIdRequired";
         public const string DisplayNameRequired = "ErrorCodes.Person.DisplayNameRequired";
-        public static string CurrencyRequired = "ErrorCodes.Person.CurrencyRequired";
-        public static string InvalidCreditLimit = "ErrorCodes.Person.InvalidCreditLimit";
-        public static string InvalidParentLedgerId = "ErrorCodes.Person.InvalidParentLedgerId";
-        public static string InvalidEmailAddress = "ErrorCodes.Person.InvalidEmailAddress";
-        public static string MobileNumberIsTooLong = "ErrorCodes.Person.MobileNumberIsTooLong";
-        public static string TelNumberIsTooLong = "ErrorCodes.Person.TelNumberIsTooLong";
-        public static string EmailAddressIsTooLong = "ErrorCodes.Person.EmailAddressIsTooLong";
-        public static string OpeningDateRequired = "ErrorCodes.Person.OpeningDateRequired";
-        public static string OpeningDateInFuture = "ErrorCodes.Person.OpeningDateInFuture";
-        internal static string InvalidParentLedgerAccount = "ErrorCodes.Person.InvalidParentLedgerAccount";
-        internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.Person.InvalidOpeningAccountEquityLedgerAccount";
-        internal static string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.Person.OpeningDateCannotBeAfterExistingTransactions";
-        internal static string CannotDeleteWithAccountingHistory = "ErrorCodes.Person.CannotDeleteWithAccountingHistory";
-        internal static string InvalidDisplayOrder = "ErrorCodes.Person.InvalidDisplayOrder";
+        public const string CurrencyRequired = "ErrorCodes.Person.CurrencyRequired";
+        public const string InvalidCreditLimit = "ErrorCodes.Person.InvalidCreditLimit";
+        public const string InvalidParentLedgerId = "ErrorCodes.Person.InvalidParentLedgerId";
+        public const string InvalidEmailAddress = "ErrorCodes.Person.InvalidEmailAddress";
+        public const string MobileNumberIsTooLong = "ErrorCodes.Person.MobileNumberIsTooLong";
+        public const string TelNumberIsTooLong = "ErrorCodes.Person.TelNumberIsTooLong";
+        public const string EmailAddressIsTooLong = "ErrorCodes.Person.EmailAddressIsTooLong";
+        public const string OpeningDateRequired = "ErrorCodes.Person.OpeningDateRequired";
+        public const string OpeningDateInFuture = "ErrorCodes.Person.OpeningDateInFuture";
+        public const string InvalidParentLedgerAccount = "ErrorCodes.Person.InvalidParentLedgerAccount";
+        public const string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.Person.InvalidOpeningAccountEquityLedgerAccount";
+        public const string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.Person.OpeningDateCannotBeAfterExistingTransactions";
+        public const string CannotDeleteWithAccountingHistory = "ErrorCodes.Person.CannotDeleteWithAccountingHistory";
+        public const string InvalidDisplayOrder = "ErrorCodes.Person.InvalidDisplayOrder";
     }
 
 
@@ -195,19 +204,19 @@ public static class ApplicationErrorCodes
     {
         public const string BankAccountIdRequired = "ErrorCodes.BankAccount.BankAccountIdRequired";
         public const string DisplayNameRequired = "ErrorCodes.BankAccount.DisplayNameRequired";
-        public static string CurrencyRequired = "ErrorCodes.BankAccount.CurrencyRequired";
-        public static string CreditLimitMustBePositive = "ErrorCodes.BankAccount.CreditLimitMustBePositive";
-        public static string InvalidParentLedgerId = "ErrorCodes.BankAccount.InvalidParentLedgerId";
-        public static string InvalidBankName = "ErrorCodes.BankAccount.InvalidBankName";
-        public static string InvalidBankAccountNo = "ErrorCodes.BankAccount.InvalidBankAccountNo";
-        public static string TelNumberIsTooLong = "ErrorCodes.BankAccount.TelNumberIsTooLong";
-        public static string OpeningDateRequired = "ErrorCodes.BankAccount.OpeningDateRequired";
-        public static string OpeningDateInFuture = "ErrorCodes.BankAccount.OpeningDateInFuture";
-        internal static string InvalidParentLedgerAccount = "ErrorCodes.BankAccount.InvalidParentLedgerAccount";
-        internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.BankAccount.InvalidOpeningAccountEquityLedgerAccount";
-        internal static string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.BankAccount.OpeningDateCannotBeAfterExistingTransactions";
-        internal static string CannotDeleteWithAccountingHistory = "ErrorCodes.BankAccount.CannotDeleteWithAccountingHistory";
-        internal static string InvalidDisplayOrder = "ErrorCodes.BankAccount.InvalidDisplayOrder";
+        public const string CurrencyRequired = "ErrorCodes.BankAccount.CurrencyRequired";
+        public const string CreditLimitMustBePositive = "ErrorCodes.BankAccount.CreditLimitMustBePositive";
+        public const string InvalidParentLedgerId = "ErrorCodes.BankAccount.InvalidParentLedgerId";
+        public const string InvalidBankName = "ErrorCodes.BankAccount.InvalidBankName";
+        public const string InvalidBankAccountNo = "ErrorCodes.BankAccount.InvalidBankAccountNo";
+        public const string TelNumberIsTooLong = "ErrorCodes.BankAccount.TelNumberIsTooLong";
+        public const string OpeningDateRequired = "ErrorCodes.BankAccount.OpeningDateRequired";
+        public const string OpeningDateInFuture = "ErrorCodes.BankAccount.OpeningDateInFuture";
+        public const string InvalidParentLedgerAccount = "ErrorCodes.BankAccount.InvalidParentLedgerAccount";
+        public const string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.BankAccount.InvalidOpeningAccountEquityLedgerAccount";
+        public const string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.BankAccount.OpeningDateCannotBeAfterExistingTransactions";
+        public const string CannotDeleteWithAccountingHistory = "ErrorCodes.BankAccount.CannotDeleteWithAccountingHistory";
+        public const string InvalidDisplayOrder = "ErrorCodes.BankAccount.InvalidDisplayOrder";
     }
 
     public static class CashAccount
@@ -215,30 +224,30 @@ public static class ApplicationErrorCodes
         public const string CashAccountIdRequired = "ErrorCodes.CashAccount.CashAccountIdRequired";
         public const string DisplayNameRequired = "ErrorCodes.CashAccount.DisplayNameRequired";
         public const string LocationRequired = "ErrorCodes.CashAccount.LocationRequired";
-        public static string CurrencyRequired = "ErrorCodes.CashAccount.CurrencyRequired";
-        public static string CreditLimitMustBePositive = "ErrorCodes.CashAccount.CreditLimitMustBePositive";
-        public static string InvalidParentLedgerId = "ErrorCodes.CashAccount.InvalidParentLedgerId";
-        public static string InvalidCashName = "ErrorCodes.CashAccount.InvalidCashName";
-        public static string InvalidCashAccountNo = "ErrorCodes.CashAccount.InvalidCashAccountNo";
-        public static string TelNumberIsTooLong = "ErrorCodes.CashAccount.TelNumberIsTooLong";
-        public static string OpeningDateRequired = "ErrorCodes.CashAccount.OpeningDateRequired";
-        public static string OpeningDateInFuture = "ErrorCodes.CashAccount.OpeningDateInFuture";
-        internal static string InvalidParentLedgerAccount = "ErrorCodes.CashAccount.InvalidParentLedgerAccount";
-        internal static string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.CashAccount.InvalidOpeningAccountEquityLedgerAccount";
-        internal static string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.CashAccount.OpeningDateCannotBeAfterExistingTransactions";
-        internal static string CannotDeleteWithAccountingHistory = "ErrorCodes.CashAccount.CannotDeleteWithAccountingHistory";
-        internal static string InvalidDisplayOrder = "ErrorCodes.CashAccount.InvalidDisplayOrder";
+        public const string CurrencyRequired = "ErrorCodes.CashAccount.CurrencyRequired";
+        public const string CreditLimitMustBePositive = "ErrorCodes.CashAccount.CreditLimitMustBePositive";
+        public const string InvalidParentLedgerId = "ErrorCodes.CashAccount.InvalidParentLedgerId";
+        public const string InvalidCashName = "ErrorCodes.CashAccount.InvalidCashName";
+        public const string InvalidCashAccountNo = "ErrorCodes.CashAccount.InvalidCashAccountNo";
+        public const string TelNumberIsTooLong = "ErrorCodes.CashAccount.TelNumberIsTooLong";
+        public const string OpeningDateRequired = "ErrorCodes.CashAccount.OpeningDateRequired";
+        public const string OpeningDateInFuture = "ErrorCodes.CashAccount.OpeningDateInFuture";
+        public const string InvalidParentLedgerAccount = "ErrorCodes.CashAccount.InvalidParentLedgerAccount";
+        public const string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.CashAccount.InvalidOpeningAccountEquityLedgerAccount";
+        public const string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.CashAccount.OpeningDateCannotBeAfterExistingTransactions";
+        public const string CannotDeleteWithAccountingHistory = "ErrorCodes.CashAccount.CannotDeleteWithAccountingHistory";
+        public const string InvalidDisplayOrder = "ErrorCodes.CashAccount.InvalidDisplayOrder";
     }
 
     public static class LedgerAccount
     {
         public const string LedgerAccountIdRequired = "ErrorCodes.LedgerAccount.LedgerAccountIdRequired";
         public const string NameRequired = "ErrorCodes.LedgerAccount.NameRequired";
-        public static string InvalidParentLedgerId = "ErrorCodes.LedgerAccount.InvalidParentLedgerId";
-        internal static string InvalidParentLedgerAccount = "ErrorCodes.LedgerAccount.InvalidParentLedgerAccount";
-        internal static string CannotDeleteWithAccountingHistory = "ErrorCodes.LedgerAccount.CannotDeleteWithAccountingHistory";
-        internal static string InvalidDisplayOrder = "ErrorCodes.LedgerAccount.InvalidDisplayOrder";
-        internal static string InvalidAccountTypeId = "ErrorCodes.LedgerAccount.InvalidAccountTypeId";
-        internal static string CannotDeleteDirectly = "ErrorCodes.LedgerAccount.InvalidAccountTypeId";
+        public const string InvalidParentLedgerId = "ErrorCodes.LedgerAccount.InvalidParentLedgerId";
+        public const string InvalidParentLedgerAccount = "ErrorCodes.LedgerAccount.InvalidParentLedgerAccount";
+        public const string CannotDeleteWithAccountingHistory = "ErrorCodes.LedgerAccount.CannotDeleteWithAccountingHistory";
+        public const string InvalidDisplayOrder = "ErrorCodes.LedgerAccount.InvalidDisplayOrder";
+        public const string InvalidAccountTypeId = "ErrorCodes.LedgerAccount.InvalidAccountTypeId";
+        public const string CannotDeleteDirectly = "ErrorCodes.LedgerAccount.CannotDeleteDirectly";
     }
 }

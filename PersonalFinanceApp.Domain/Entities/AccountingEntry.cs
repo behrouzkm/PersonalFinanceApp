@@ -18,20 +18,35 @@ public class AccountingEntry : BaseAuditableEntity
     private AccountingEntry() { }
 
     public AccountingEntry(Guid accountingDocumentId, Guid ledgerAccountId, decimal debit, decimal credit,
-                            string? description,Guid tenantId, Guid createdBy) : base(tenantId,createdBy,description)
+                            string? description, Guid tenantId, Guid createdBy) : base(tenantId, createdBy, description)
     {
         SetDocumentId(accountingDocumentId);
         SetLedgerAccountId(ledgerAccountId);
         SetAmounts(debit, credit);
     }
 
-    public void UpdateEntry(Guid ledgerAccountId, decimal debit, decimal credit, string? description)
+    public void UpdateEntry(Guid ledgerAccountId, decimal debit, decimal credit, Guid modifiedBy, string? description)
     {
         SetLedgerAccountId(ledgerAccountId);
         SetAmounts(debit, credit);
         SetDescription(description);
+
+        UpdateAudit(modifiedBy);
     }
 
+    public void UpdateEntry(decimal debit, decimal credit, Guid modifiedBy)
+    {
+        SetAmounts(debit, credit);
+
+        UpdateAudit(modifiedBy);
+    }
+    public void UpdateEntry(decimal debit, decimal credit, Guid modifiedBy, string? description)
+    {
+        SetAmounts(debit, credit);
+        SetDescription(description);
+
+        UpdateAudit(modifiedBy);
+    }
 
     private void SetDocumentId(Guid documentId)
     {
@@ -47,7 +62,7 @@ public class AccountingEntry : BaseAuditableEntity
         LedgerAccountId = ledgerAccountId;
     }
 
-    public void SetAmounts(decimal debit, decimal credit)
+    private void SetAmounts(decimal debit, decimal credit)
     {
         if (debit < 0 || credit < 0)
             throw new DomainException(DomainErrors.AccountingEntry.NegativeAmountNotAllowed);

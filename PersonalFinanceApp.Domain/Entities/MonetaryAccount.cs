@@ -5,11 +5,14 @@ using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Domain.Entities;
 
-public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReorderable
+public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReorderable, IConcurrencyAware
 {
     public string DisplayName { get; private set; } = string.Empty;
 
     // Foreign key to the related ledger account
+    // LedgerAccountId is application-generated, immutable after creation, and never supplied by the client.
+    // Therefore, cross-table uniqueness limitations caused by TPC are not considered a practical integrity
+    // risk in the current design.
     public Guid LedgerAccountId { get; private set; }
     public LedgerAccount LedgerAccount { get; private set; } = null!;
 
@@ -33,7 +36,7 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
 
 
     [Timestamp]
-    public byte[] RowVersion { get; set; } = default!;
+    public byte[] RowVersion { get; private set; } = default!;
 
 
 
@@ -79,8 +82,8 @@ public abstract class MonetaryAccount : BaseAuditableEntity, IFundSource, IReord
         SetCurrencyId(currencyId);
         SetOpeningDate(openingDate);
 
-        SetCreditLimit(creditLimit);
         UpdateInitialBalance(initialBalance);
+        SetCreditLimit(creditLimit);
 
         SetDescription(description);
 

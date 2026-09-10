@@ -81,8 +81,7 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
 
             oldFromMonetaryAccount.AdjustBalance(existingCreditEntry.Credit);
 
-            existingCreditEntry.UpdateEntry(fromMonetaryAccount.LedgerAccountId, 0, request.Amount, request.Description);
-            existingCreditEntry.UpdateAudit(_currentUser.UserId);
+            existingCreditEntry.UpdateEntry(fromMonetaryAccount.LedgerAccountId, 0, request.Amount, _currentUser.UserId, request.Description);
 
             fromMonetaryAccount.LedgerAccount.MarkAsUsed();
             fromMonetaryAccount.AdjustBalance(-request.Amount);
@@ -99,9 +98,7 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
 
             }
 
-            existingCreditEntry.SetAmounts(0, request.Amount);
-            existingCreditEntry.SetDescription(request.Description);
-            existingCreditEntry.UpdateAudit(_currentUser.UserId);
+            existingCreditEntry.UpdateEntry(0, request.Amount, _currentUser.UserId, request.Description);
 
             fromMonetaryAccount.AdjustBalance(-amountDelta);
         }
@@ -123,8 +120,7 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
 
             oldToMonetaryAccount.AdjustBalance(-existingDebitEntry.Debit);
 
-            existingDebitEntry.UpdateEntry(toMonetaryAccount.LedgerAccountId, request.Amount, 0, request.Description);
-            existingDebitEntry.UpdateAudit(_currentUser.UserId);
+            existingDebitEntry.UpdateEntry(toMonetaryAccount.LedgerAccountId, request.Amount, 0, _currentUser.UserId, request.Description);
 
             toMonetaryAccount.LedgerAccount.MarkAsUsed();
             toMonetaryAccount.AdjustBalance(request.Amount);
@@ -138,9 +134,7 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
                       replacingEntryId: existingDebitEntry.Id, cancellationToken);
 
 
-            existingDebitEntry.SetAmounts(request.Amount, 0);
-            existingDebitEntry.SetDescription(request.Description);
-            existingDebitEntry.UpdateAudit(_currentUser.UserId);
+            existingDebitEntry.UpdateEntry(request.Amount, 0, _currentUser.UserId, request.Description);
 
             toMonetaryAccount.AdjustBalance(amountDelta);
         }
@@ -150,6 +144,8 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
             existingDebitEntry.UpdateAudit(_currentUser.UserId);
         }
 
+        transferDocument.EnsureBalanced();
+        
         await _context.SaveChangesAsync(cancellationToken);
     }
 

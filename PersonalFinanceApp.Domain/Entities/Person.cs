@@ -11,7 +11,7 @@ using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Domain.Entities;
 
-public class Person : BaseAuditableEntity, IFundSource, IReorderable
+public class Person : BaseAuditableEntity, IFundSource, IReorderable, IConcurrencyAware
 {
     public PersonType PersonType { get; private set; } = PersonType.Individual;
 
@@ -48,7 +48,7 @@ public class Person : BaseAuditableEntity, IFundSource, IReorderable
 
 
     [Timestamp]
-    public byte[] RowVersion { get; set; } = default!;
+    public byte[] RowVersion { get; private set; } = default!;
 
     private Person() { }
 
@@ -108,8 +108,8 @@ public class Person : BaseAuditableEntity, IFundSource, IReorderable
         SetTelNumber(telNumber);
         SetDescription(description);
 
-        SetCreditLimit(creditLimit);
         UpdateInitialBalance(initialBalance);
+        SetCreditLimit(creditLimit);
 
         UpdateAudit(modifiedBy);
     }
@@ -140,39 +140,24 @@ public class Person : BaseAuditableEntity, IFundSource, IReorderable
 
     private void SetMobileNumber(string? mobileNumber)
     {
-        if (string.IsNullOrWhiteSpace(mobileNumber))
-        {
-            MobileNumber = null;
-            return;
-        }
-
-        // Remove common separators to validate the core number digits
-        // Keeps the leading '+' if present
-        var sanitized = mobileNumber.Trim();
-        var digitsOnly = sanitized.Replace(" ", "").Replace("-", "");
-
-        // Regex explanation:
-        // ^\+?          : Optional leading '+'
-        // \d{7,15}$ : Must start with a  digit, followed by 7 to 15 digits
-        if (!Regex.IsMatch(digitsOnly, @"^\+?\d{7,15}$"))
-        {
-            throw new DomainException(DomainErrors.Person.InvalidMobileNumberFormat);
-        }
-
-        MobileNumber = digitsOnly;
+        MobileNumber = ValidatePhoneNumber(mobileNumber, DomainErrors.Person.InvalidMobileNumberFormat);
     }
 
     private void SetTelNumber(string? telNumber)
     {
-        if (string.IsNullOrWhiteSpace(telNumber))
+        TelNumber = ValidatePhoneNumber(telNumber, DomainErrors.Person.InvalidTelNumberFormat);
+    }
+
+    private string? ValidatePhoneNumber(string? number, string errorCode)
+    {
+        if (string.IsNullOrWhiteSpace(number))
         {
-            TelNumber = null;
-            return;
+            return null;
         }
 
         // Remove common separators to validate the core number digits
         // Keeps the leading '+' if present
-        var sanitized = telNumber.Trim();
+        var sanitized = number.Trim();
         var digitsOnly = sanitized.Replace(" ", "").Replace("-", "");
 
         // Regex explanation:
@@ -180,10 +165,10 @@ public class Person : BaseAuditableEntity, IFundSource, IReorderable
         // \d{7,15}$ : Must start with a  digit, followed by 7 to 15 digits
         if (!Regex.IsMatch(digitsOnly, @"^\+?\d{7,15}$"))
         {
-            throw new DomainException(DomainErrors.Person.InvalidTelNumberFormat);
+            throw new DomainException(errorCode);
         }
 
-        TelNumber = digitsOnly;
+        return digitsOnly;
     }
 
     private void SetLedgerAccountId(Guid ledgerAccountId)

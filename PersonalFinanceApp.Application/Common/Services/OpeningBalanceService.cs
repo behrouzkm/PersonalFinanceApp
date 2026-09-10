@@ -78,6 +78,8 @@ public class OpeningBalanceService : IOpeningBalanceService
             ledgerAccount.MarkAsUsed();
             equityAccount.MarkAsUsed();
 
+            doc.EnsureBalanced();
+
             _context.AccountingDocuments.Add(doc);
             openingDocId = doc.Id;
         }
@@ -150,6 +152,8 @@ public class OpeningBalanceService : IOpeningBalanceService
             ledgerAccount.MarkAsUsed();
             equityAccount.MarkAsUsed();
 
+            doc.EnsureBalanced();
+
             _context.AccountingDocuments.Add(doc);
 
             await _ledgerBalance.ValidateAsync(
@@ -201,13 +205,12 @@ public class OpeningBalanceService : IOpeningBalanceService
             foreach (var item in existingDoc.Entries)
             {
                 if (item.LedgerAccountId == fundSource.LedgerAccountId)
-                    item.SetAmounts(debit, credit);
+                    item.UpdateEntry(debit, credit, _currentUser.UserId, description);
                 else
-                    item.SetAmounts(credit, debit);
-
-                item.SetDescription(description);
-                item.UpdateAudit(_currentUser.UserId);
+                    item.UpdateEntry(credit, debit, _currentUser.UserId, description);
             }
+            
+            existingDoc.EnsureBalanced();
         }
         else if (newInitialBalance == 0)
         {

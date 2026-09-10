@@ -121,6 +121,8 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
                     payment.Amount, payment.Description, _currentUser.UserId, cancellationToken);
         }
 
+        expenditureDocument.EnsureBalanced();
+        
         _context.AccountingDocuments.Add(expenditureDocument);
         await _context.SaveChangesAsync(cancellationToken);
 

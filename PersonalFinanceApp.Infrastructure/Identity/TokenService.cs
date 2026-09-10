@@ -15,15 +15,17 @@ public class TokenService : ITokenService
         _jwtSettings = jwtSettings;
     }
 
-    public string GenerateToken(Guid userId, Guid tenantId, string email)
+    public string GenerateToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier,userId.ToString()),
-            new Claim("tenant_id",tenantId.ToString()),
-            new Claim(ClaimTypes.Email,email),
-            new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim("tenant_id", tenantId.ToString()),
+            new Claim(ClaimTypes.Email, email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -37,6 +39,5 @@ public class TokenService : ITokenService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-
     }
 }

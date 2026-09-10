@@ -9,7 +9,7 @@ using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Infrastructure.Persistence.Configurations;
 
-public class MoneyTransferConfiguration : IEntityTypeConfiguration<CurrencyExchange>
+public class CurrencyExchangeConfiguration : IEntityTypeConfiguration<CurrencyExchange>
 {
     public void Configure(EntityTypeBuilder<CurrencyExchange> builder)
     {

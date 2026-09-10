@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using PersonalFinanceApp.Application.Common.Constants;
+using PersonalFinanceApp.Application.Common.Errors;
+using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Entities;
 using PersonalFinanceApp.Domain.Enums;
@@ -15,17 +18,20 @@ public class IdentityService : IIdentityService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ITokenService _tokenService;
     private readonly ApplicationDbContext _context;
 
     public IdentityService(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
+        RoleManager<IdentityRole<Guid>> roleManager,
         ITokenService tokenService,
         ApplicationDbContext context)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _roleManager = roleManager;
         _tokenService = tokenService;
         _context = context;
     }
@@ -59,6 +65,11 @@ public class IdentityService : IIdentityService
                 Errors = result.Errors.Select(e => e.Description).ToList()
             };
         }
+
+        // Deliberately no role assignment here - additional users invited into an
+        // existing tenant are not administrators by default. If/when this app needs
+        // an "invite as admin" capability, that's a separate, explicit decision on
+        // this command - not something that should happen implicitly.
 
         return new IdentityRegistrationResult
         {
@@ -94,7 +105,13 @@ public class IdentityService : IIdentityService
             };
         }
 
-        var token = _tokenService.GenerateToken(user.Id, user.TenantId, user.Email!);
+        // JWT bearer auth is stateless - [Authorize(Roles = ...)] reads role claims out
+        // of the token itself, not a live DB lookup on every request. The user's current
+        // roles have to be fetched and embedded here, or role checks can never pass no
+        // matter what's assigned in the database.
+        var roles = await _userManager.GetRolesAsync(user);
+
+        var token = _tokenService.GenerateToken(user.Id, user.TenantId, user.Email!, roles);
 
         return new IdentityLoginResult
         {
@@ -113,6 +130,11 @@ public class IdentityService : IIdentityService
             int defaultCurrencyId,
             CancellationToken cancellationToken)
     {
+        // A2 fix: fail fast, before opening the transaction, if the chosen language
+        // doesn't have a complete set of AccountTypeTranslation rows. Without this,
+        // the LedgerAccount-seeding loop further down throws an unguarded
+        // KeyNotFoundException instead of a clean, translatable error.
+        await EnsureLanguageHasCompleteAccountTypeTranslationsAsync(defaultLanguageId, cancellationToken);
 
         // Transaction guards against an orphaned Tenant if user creation fails
         // afterward (weak password, duplicate email, etc.) - both succeed together
@@ -149,6 +171,26 @@ public class IdentityService : IIdentityService
                 };
             }
 
+            // A1 fix: the user who registers is the tenant's owner - grant them the
+            // Administrators role for their own tenant. Seed the role itself on first
+            // use if it doesn't exist yet (participates in the same transaction/context).
+            if (!await _roleManager.RoleExistsAsync(Roles.Administrators))
+            {
+                await _roleManager.CreateAsync(new IdentityRole<Guid>(Roles.Administrators));
+            }
+
+            var roleResult = await _userManager.AddToRoleAsync(user, Roles.Administrators);
+            if (!roleResult.Succeeded)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+
+                return new IdentityRegistrationResult
+                {
+                    Succeeded = false,
+                    Errors = roleResult.Errors.Select(s => s.Description).ToList()
+                };
+            }
+
             var accountTypes = await (
                 from accountType in _context.AccountTypes
                 join translation in _context.AccountTypeTranslations
@@ -158,7 +200,7 @@ public class IdentityService : IIdentityService
                 {
                     accountType.Category,
                     accountType.Id,
-                    translation.Name,
+                    translation.Translation,
                     translation.Description
                 })
               .ToDictionaryAsync(
@@ -166,7 +208,7 @@ public class IdentityService : IIdentityService
                   x => new
                   {
                       x.Id,
-                      x.Name,
+                      x.Translation,
                       x.Description
 
                   },
@@ -178,7 +220,7 @@ public class IdentityService : IIdentityService
             {
                 var ledgerAccount = new LedgerAccount(
                     accountTypes[category].Id,
-                    accountTypes[category].Name,
+                    accountTypes[category].Translation,
                     tenant.Id,
                     user.Id,
                     accountTypes[category].Description);
@@ -200,5 +242,29 @@ public class IdentityService : IIdentityService
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+
+    // A2 fix: every AccountCategory value must have a translation row for the
+    // requested language, or the LedgerAccount root-seeding loop above will fail.
+    // Checked up front so a bad/incomplete language choice surfaces as a normal,
+    // translatable BusinessRuleException instead of an unhandled exception mid-transaction.
+    private async Task EnsureLanguageHasCompleteAccountTypeTranslationsAsync(
+        int languageId, CancellationToken cancellationToken)
+    {
+        var languageExists = await _context.Languages.AnyAsync(l => l.Id == languageId, cancellationToken);
+        if (!languageExists)
+            throw new BusinessRuleException(ApplicationErrorCodes.Auth.DefaultLanguageNotFound, languageId);
+
+        var translatedCategoryCount = await _context.AccountTypeTranslations
+            .Where(t => t.LanguageId == languageId)
+            .Select(t => t.AccountType.Category)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+        var requiredCategoryCount = Enum.GetValues<AccountCategory>().Length;
+
+        if (translatedCategoryCount < requiredCategoryCount)
+            throw new BusinessRuleException(
+                ApplicationErrorCodes.Auth.DefaultLanguageTranslationsIncomplete, languageId);
     }
 }

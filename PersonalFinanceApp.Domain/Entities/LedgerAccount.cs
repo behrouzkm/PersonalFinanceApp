@@ -5,7 +5,7 @@ using PersonalFinanceApp.Domain.Interfaces;
 
 namespace PersonalFinanceApp.Domain.Entities;
 
-public class LedgerAccount : BaseAuditableEntity ,IReorderable
+public class LedgerAccount : BaseAuditableEntity, IReorderable
 {
     public int AccountTypeId { get; private set; }
     public AccountType AccountType { get; private set; } = null!;
@@ -13,11 +13,11 @@ public class LedgerAccount : BaseAuditableEntity ,IReorderable
 
     public int? CurrencyId { get; private set; }
     public Currency? Currency { get; private set; }
-    
+
     // Is this account allowed for using in AccountEntry?
     public bool IsPostingAccount { get; private set; }
 
-    public bool HasBeenUsedInEntries {get; private set;}
+    public bool HasBeenUsedInEntries { get; private set; }
 
     // Link to the parent
     public Guid? ParentId { get; private set; }
@@ -30,7 +30,7 @@ public class LedgerAccount : BaseAuditableEntity ,IReorderable
 
 
     private readonly List<LedgerAccount> _children = new();
-    public IReadOnlyCollection<LedgerAccount> Children  => _children.AsReadOnly();
+    public IReadOnlyCollection<LedgerAccount> Children => _children.AsReadOnly();
 
     // Controls the display order of this account among its siblings in the Chart of Accounts tree.
     // This is independent of Person.DisplayOrder and MonetaryAccount.DisplayOrder,
@@ -40,13 +40,13 @@ public class LedgerAccount : BaseAuditableEntity ,IReorderable
     private LedgerAccount() { }
 
     public LedgerAccount(int accountTypeId, string name, Guid tenantId, Guid createdBy, string? description = null)
-                            : base(tenantId, createdBy,description)
+                            : base(tenantId, createdBy, description)
     {
         AccountTypeId = accountTypeId;
 
         SetName(name);
 
-        IsPostingAccount=true;
+        IsPostingAccount = true;
     }
 
     public void UpdateLedgerAccount(string name, Guid modifiedBy, string? description)
@@ -59,16 +59,21 @@ public class LedgerAccount : BaseAuditableEntity ,IReorderable
 
     public void AddChild(LedgerAccount child)
     {
-        if(HasBeenUsedInEntries)
+        if (HasBeenUsedInEntries)
             throw new DomainException(DomainErrors.LedgerAccount.CannotModifyUsedAccount);
+
+        if (AccountTypeId != child.AccountTypeId)
+            throw new DomainException(DomainErrors.LedgerAccount.ChildAndParentAccountTypeCannotBeSame);
 
         IsPostingAccount = false;
         _children.Add(child);
+
+        child.ParentId = Id;
     }
 
     public void MarkAsUsed()
     {
-        HasBeenUsedInEntries=true;
+        HasBeenUsedInEntries = true;
     }
 
     public void SetAsPostingAccount()
@@ -98,7 +103,7 @@ public class LedgerAccount : BaseAuditableEntity ,IReorderable
     public void SetDisplayOrder(int displayOrder)
     {
         if (displayOrder < 0)
-            throw new DomainException(DomainErrors.MonetaryAccount.DisplayOrderCannotBeNegative);
+            throw new DomainException(DomainErrors.LedgerAccount.DisplayOrderCannotBeNegative);
 
         DisplayOrder = displayOrder;
     }

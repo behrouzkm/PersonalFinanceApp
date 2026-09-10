@@ -29,8 +29,13 @@ public static class DomainErrors
         public const string NoOwnerAssigned = "ErrorCodes.Attachment.NoOwnerAssigned";
         public const string FileSizeMustBePositive = "ErrorCodes.Attachment.FileSizeMustBePositive";
         public const string FileNameRequired = "ErrorCodes.Attachment.FileNameRequired";
-        public const string FilePathRequired = "ErrorCodes.Attachment.FilePathRequired";
-        public const string FileContentRequired = "ErrorCodes.Attachment.FileContentRequired";
+        public const string StorageKeyRequired = "ErrorCodes.Attachment.StorageKeyRequired";
+        public const string ContentTypeRequired = "ErrorCodes.Attachment.ContentTypeRequired";
+    }
+
+    public static class AccountTypeTranslation
+    {
+        public const string TranslationRequired = "ErrorCodes.AccountTypeTranslation.TranslationRequired";
     }
 
     public static class LedgerAccount
@@ -38,6 +43,8 @@ public static class DomainErrors
         public const string NameRequired = "ErrorCodes.LedgerAccount.NameRequired";
         public const string CannotSetParentAsPosting = "ErrorCodes.LedgerAccount.CannotSetParentAsPosting";
         public const string CannotModifyUsedAccount = "ErrorCodes.LedgerAccount.CannotModifyUsedAccount";
+        public const string DisplayOrderCannotBeNegative = "ErrorCodes.LedgerAccount.DisplayOrderCannotBeNegative";
+        public const string ChildAndParentAccountTypeCannotBeSame = "ErrorCodes.LedgerAccount.ChildAndParentAccountTypeCannotBeSame";
 
     }
 
@@ -112,6 +119,7 @@ public static class DomainErrors
         public const string DuplicateEntryNotAllowed = "ErrorCodes.AccountingDocument.DuplicateEntryNotAllowed";
         public const string CurrencyMismatch = "ErrorCodes.AccountingDocument.CurrencyMismatch";
         public const string CurrencyRequired = "ErrorCodes.AccountingDocument.CurrencyRequired";
+        public const string NotBalanced = "ErrorCodes.AccountingDocument.NotBalanced";
     }
 
     public static class AccountingEntry

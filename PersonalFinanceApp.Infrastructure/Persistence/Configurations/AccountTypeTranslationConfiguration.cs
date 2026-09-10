@@ -16,7 +16,7 @@ public class AccountTypeTranslationConfiguration : IEntityTypeConfiguration<Acco
         builder.HasKey(a => a.Id);
         builder.Property(a => a.Id).ValueGeneratedOnAdd();
 
-        builder.Property(a => a.Name).IsRequired().HasMaxLength(FieldLengths.Name);
+        builder.Property(a => a.Translation).IsRequired().HasMaxLength(FieldLengths.Name);
         builder.Property(a => a.Description).HasMaxLength(FieldLengths.Description);
 
         builder.HasOne(a => a.AccountType)

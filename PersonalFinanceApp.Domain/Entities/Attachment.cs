@@ -47,7 +47,7 @@ public class Attachment : BaseAuditableEntity
         SetFileSize(fileSizeBytes);
         SetContentType(contentType);
 
-        StorageKey = storageKey;
+        SetStorageKey(storageKey);
     }
 
     public static Attachment ForAccountingDocument(Guid documentId, string fileName, string contentType,
@@ -75,10 +75,18 @@ public class Attachment : BaseAuditableEntity
         FileName = name.Trim();
     }
 
+    private void SetStorageKey(string storageKey)
+    {
+        if (string.IsNullOrWhiteSpace(storageKey))
+            throw new DomainException(DomainErrors.Attachment.StorageKeyRequired);
+
+        StorageKey = storageKey.Trim();
+    }
+
     private void SetContentType(string contentType)
     {
         if (string.IsNullOrWhiteSpace(contentType))
-            throw new DomainException(DomainErrors.Attachment.FileContentRequired);
+            throw new DomainException(DomainErrors.Attachment.ContentTypeRequired);
 
         ContentType = contentType.Trim();
     }

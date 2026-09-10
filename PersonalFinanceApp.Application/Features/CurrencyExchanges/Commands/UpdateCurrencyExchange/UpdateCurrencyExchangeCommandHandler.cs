@@ -56,6 +56,9 @@ public class UpdateCurrencyExchangeCommandHandler : IRequestHandler<UpdateCurren
 
         exchange.UpdateExchangeRate(request.ExchangeRate, _currentUser.UserId, request.Description);
 
+        exchange.FromDocument.EnsureBalanced();
+        exchange.ToDocument.EnsureBalanced();
+
         await _context.SaveChangesAsync(cancellationToken);
 
     }
@@ -134,25 +137,23 @@ public class UpdateCurrencyExchangeCommandHandler : IRequestHandler<UpdateCurren
         {
             document.UpdateAccountingDocument(newDate, newFundSource.CurrencyId, _currentUser.UserId, description);
             clearingEntry.UpdateEntry(newClearing.Id,
-                isFromSide ? newAmount : 0, isFromSide ? 0 : newAmount, description);
+                isFromSide ? newAmount : 0, isFromSide ? 0 : newAmount, _currentUser.UserId, description);
             newClearing.MarkAsUsed();
         }
         else if (newDate != document.DocumentDate || description != document.Description)
         {
             document.UpdateAccountingDocument(newDate, document.CurrencyId, _currentUser.UserId, description);
-            clearingEntry.SetAmounts(
-                isFromSide ? newAmount : 0, isFromSide ? 0 : newAmount);
+            clearingEntry.UpdateEntry(
+                isFromSide ? newAmount : 0, isFromSide ? 0 : newAmount, _currentUser.UserId, description);
         }
         else
         {
-            clearingEntry.SetAmounts(isFromSide ? newAmount : 0, isFromSide ? 0 : newAmount);
+            clearingEntry.UpdateEntry(isFromSide ? newAmount : 0, isFromSide ? 0 : newAmount, _currentUser.UserId, description);
         }
-        clearingEntry.SetDescription(description);
-        clearingEntry.UpdateAudit(_currentUser.UserId);
+
 
         fundSourceEntry.UpdateEntry(newLedgerAccountId,
-            isFromSide ? 0 : newAmount, isFromSide ? newAmount : 0, description);
-        fundSourceEntry.UpdateAudit(_currentUser.UserId);
+                isFromSide ? 0 : newAmount, isFromSide ? newAmount : 0, _currentUser.UserId, description);
 
         newLedgerAccount.MarkAsUsed();
 

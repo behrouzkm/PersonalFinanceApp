@@ -36,6 +36,8 @@ public interface IApplicationDbContext
 
     EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
     DbSet<TEntity> Set<TEntity>() where TEntity : class;
+    EntityEntry<TEntity> Remove<TEntity>(TEntity entity)
+        where TEntity : class;
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 
