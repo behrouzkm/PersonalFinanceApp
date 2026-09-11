@@ -78,6 +78,9 @@ public static class DependencyInjection
                 };
             });
 
+        services.Configure<DevelopmentSeedOptions>(configuration.GetSection("DevelopmentSeed"));
+        services.AddScoped<IDevelopmentDataSeeder, DevelopmentDataSeeder>();
+
         services.AddAuthorization();
 
         return services;
