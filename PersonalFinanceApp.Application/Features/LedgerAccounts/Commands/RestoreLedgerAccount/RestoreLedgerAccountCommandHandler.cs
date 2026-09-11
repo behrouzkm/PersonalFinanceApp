@@ -15,13 +15,18 @@ public class RestoreLedgerAccountCommandHandler : IRequestHandler<RestoreLedgerA
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly IReorderService _reorderService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public RestoreLedgerAccountCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-        IReorderService reorderService)
+    public RestoreLedgerAccountCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        IReorderService reorderService,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _reorderService=reorderService;
+        _unitOfWork =unitOfWork;
     }
 
     public async Task Handle(RestoreLedgerAccountCommand request, CancellationToken cancellationToken)
@@ -37,6 +42,6 @@ public class RestoreLedgerAccountCommandHandler : IRequestHandler<RestoreLedgerA
         await _reorderService.AppendToEndAsync(ledgerAccount, p => p.TenantId == ledgerAccount.TenantId &&
                 p.ParentId == ledgerAccount.ParentId, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

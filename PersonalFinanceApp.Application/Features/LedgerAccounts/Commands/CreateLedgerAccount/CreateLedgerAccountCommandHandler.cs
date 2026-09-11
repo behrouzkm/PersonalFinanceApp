@@ -16,14 +16,17 @@ public class CreateLedgerAccountCommandHandler : IRequestHandler<CreateLedgerAcc
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly IOpeningBalanceService _openingBalanceService;
+    private readonly IUnitOfWork _unitOfWork;
     public CreateLedgerAccountCommandHandler(
                 IApplicationDbContext context,
                 ICurrentUserService currentUser,
-                IOpeningBalanceService openingBalanceService)
+                IOpeningBalanceService openingBalanceService,
+                IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _openingBalanceService = openingBalanceService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> Handle(CreateLedgerAccountCommand request, CancellationToken cancellationToken)
@@ -52,7 +55,7 @@ public class CreateLedgerAccountCommandHandler : IRequestHandler<CreateLedgerAcc
         await _context.LedgerAccounts.AddAsync(ledgerAccount, cancellationToken);
         parentLedger.AddChild(ledgerAccount);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return ledgerAccount.Id;
     }
 }

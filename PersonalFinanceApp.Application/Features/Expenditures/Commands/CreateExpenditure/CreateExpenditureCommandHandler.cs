@@ -21,14 +21,20 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
     private readonly ICurrentUserService _currentUser;
     private readonly IAccountingLookupService _lookupService;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateExpenditureCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-                        IAccountingLookupService lookupService, ILedgerBalanceValidationService ledgerValidator)
+    public CreateExpenditureCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        IAccountingLookupService lookupService,
+        ILedgerBalanceValidationService ledgerValidator,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _lookupService = lookupService;
         _ledgerValidator = ledgerValidator;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> Handle(CreateExpenditureCommand request, CancellationToken cancellationToken)
@@ -122,9 +128,9 @@ public class CreateExpenditureCommandHandler : IRequestHandler<CreateExpenditure
         }
 
         expenditureDocument.EnsureBalanced();
-        
+
         _context.AccountingDocuments.Add(expenditureDocument);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return expenditureDocument.Id;
     }

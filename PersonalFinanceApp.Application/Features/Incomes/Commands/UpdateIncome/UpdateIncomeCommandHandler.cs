@@ -17,17 +17,20 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
     private readonly ICurrentUserService _currentUser;
     private readonly IAccountingLookupService _lookup;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public UpdateIncomeCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUser,
         IAccountingLookupService lookup,
-        ILedgerBalanceValidationService ledgerValidator)
+        ILedgerBalanceValidationService ledgerValidator,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _lookup = lookup;
         _ledgerValidator = ledgerValidator;
+        _unitOfWork =unitOfWork;
     }
 
     public async Task Handle(UpdateIncomeCommand request, CancellationToken cancellationToken)
@@ -195,7 +198,7 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
 
         document.EnsureBalanced();
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     }
 

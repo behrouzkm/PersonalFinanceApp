@@ -8,11 +8,11 @@ using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Application.Features.Languages.Queries.GetLanguageByCode;
 
-public class GetLanguageByIdQueryHandler : IRequestHandler<GetLanguageByCodeQuery, LanguageDto>
+public class GetLanguageByCodeQueryHandler : IRequestHandler<GetLanguageByCodeQuery, LanguageDto>
 {
     private readonly IApplicationDbContext _context;
 
-    public GetLanguageByIdQueryHandler(IApplicationDbContext context)
+    public GetLanguageByCodeQueryHandler(IApplicationDbContext context)
     {
         _context = context;
     }

@@ -8,11 +8,11 @@ using PersonalFinanceApp.Domain.Entities;
 
 namespace PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrencyByCode;
 
-public class GetCurrencyByIdQueryHandler : IRequestHandler<GetCurrencyByCodeQuery, CurrencyDto>
+public class GetCurrencyByCodeQueryHandler : IRequestHandler<GetCurrencyByCodeQuery, CurrencyDto>
 {
     private readonly IApplicationDbContext _context;
 
-    public GetCurrencyByIdQueryHandler(IApplicationDbContext context)
+    public GetCurrencyByCodeQueryHandler(IApplicationDbContext context)
     {
         _context = context;
     }

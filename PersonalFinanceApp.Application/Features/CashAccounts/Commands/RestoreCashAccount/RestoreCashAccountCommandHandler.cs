@@ -17,17 +17,20 @@ public class RestoreCashAccountCommandHandler : IRequestHandler<RestoreCashAccou
     private readonly ICurrentUserService _currentUser;
     private readonly IReorderService _reorderService;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public RestoreCashAccountCommandHandler(
                 IApplicationDbContext context,
                 ICurrentUserService currentUser,
                 IReorderService reorderService,
-                IAttachmentService attachmentService)
+                IAttachmentService attachmentService,
+                IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _reorderService = reorderService;
         _attachmentService = attachmentService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(RestoreCashAccountCommand request, CancellationToken cancellationToken)
@@ -56,6 +59,6 @@ public class RestoreCashAccountCommandHandler : IRequestHandler<RestoreCashAccou
         await _attachmentService.RestoreAllForOwnerAsync(
             AttachmentOwnerType.MonetaryAccount, cashAccount.Id, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

@@ -20,14 +20,20 @@ public class CreateCurrencyExchangeCommandHandler : IRequestHandler<CreateCurren
     private readonly ICurrentUserService _currentUser;
     private readonly IAccountingLookupService _lookupService;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateCurrencyExchangeCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-        IAccountingLookupService lookupService, ILedgerBalanceValidationService ledgerValidator)
+    public CreateCurrencyExchangeCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        IAccountingLookupService lookupService,
+        ILedgerBalanceValidationService ledgerValidator,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _lookupService = lookupService;
         _ledgerValidator = ledgerValidator;
+        _unitOfWork= unitOfWork;
     }
 
 
@@ -95,7 +101,7 @@ public class CreateCurrencyExchangeCommandHandler : IRequestHandler<CreateCurren
         _context.AccountingDocuments.AddRange(fromDocument, toDocument);
         _context.CurrencyExchanges.Add(exchange);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return exchange.Id;
     }

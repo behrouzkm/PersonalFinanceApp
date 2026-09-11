@@ -14,10 +14,12 @@ namespace PersonalFinanceApp.Application.Features.Languages.Commands.UpdateLangu
 public class UpdateLanguageCommandHandler : IRequestHandler<UpdateLanguageCommand>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateLanguageCommandHandler(IApplicationDbContext context)
+    public UpdateLanguageCommandHandler(IApplicationDbContext context,IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(UpdateLanguageCommand request, CancellationToken cancellationToken)
@@ -37,7 +39,7 @@ public class UpdateLanguageCommandHandler : IRequestHandler<UpdateLanguageComman
 
         language.UpdateLanguage(request.Code, request.Name, request.IsActive, request.IsRightToLeft);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     }
 }

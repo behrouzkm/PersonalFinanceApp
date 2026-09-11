@@ -13,7 +13,7 @@ public class UpdateAccountTypeTranslationCommandValidator : AbstractValidator<Up
     public UpdateAccountTypeTranslationCommandValidator()
     {
         RuleFor(x => x.AccountTypeId)
-            .GreaterThan(0).WithErrorCode(ApplicationErrorCodes.AccountTypeTranslation.AccountTypeTranslationIdRequired);
+            .GreaterThan(0).WithErrorCode(ApplicationErrorCodes.AccountTypeTranslation.AccountTypeIdRequired);
 
         RuleFor(x => x.LanguageId)
              .GreaterThan(0).WithErrorCode(ApplicationErrorCodes.AccountTypeTranslation.LanguageIdRequired);

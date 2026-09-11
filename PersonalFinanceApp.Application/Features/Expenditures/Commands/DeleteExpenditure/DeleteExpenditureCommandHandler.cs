@@ -16,13 +16,18 @@ public class DeleteExpenditureCommandHandler : IRequestHandler<DeleteExpenditure
     public readonly IApplicationDbContext _context;
     public readonly ICurrentUserService _currentUser;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteExpenditureCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService,
-        IAttachmentService attachmentService)
+    public DeleteExpenditureCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUserService,
+        IAttachmentService attachmentService,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUserService;
         _attachmentService = attachmentService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(DeleteExpenditureCommand request, CancellationToken cancellationToken)
@@ -65,7 +70,7 @@ public class DeleteExpenditureCommandHandler : IRequestHandler<DeleteExpenditure
         await _attachmentService.SoftDeleteAllForOwnerAsync(
             AttachmentOwnerType.AccountingDocument, document.Id, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     }
 }

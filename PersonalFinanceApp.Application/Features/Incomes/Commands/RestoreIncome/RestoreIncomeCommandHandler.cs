@@ -18,14 +18,20 @@ public class RestoreIncomeCommandHandler : IRequestHandler<RestoreIncomeCommand>
     private readonly ICurrentUserService _currentUser;
     private readonly ILedgerBalanceValidationService _ledgerBalanceValidation;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public RestoreIncomeCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-        ILedgerBalanceValidationService ledgerBalanceValidation, IAttachmentService attachmentService)
+    public RestoreIncomeCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        ILedgerBalanceValidationService ledgerBalanceValidation,
+        IAttachmentService attachmentService,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _ledgerBalanceValidation = ledgerBalanceValidation;
         _attachmentService = attachmentService;
+        _unitOfWork =unitOfWork;
     }
 
     public async Task Handle(RestoreIncomeCommand request, CancellationToken cancellationToken)
@@ -62,6 +68,6 @@ public class RestoreIncomeCommandHandler : IRequestHandler<RestoreIncomeCommand>
         await _attachmentService.RestoreAllForOwnerAsync(
             AttachmentOwnerType.AccountingDocument, document.Id, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

@@ -20,17 +20,20 @@ public class CreateIncomeCommandHandler : IRequestHandler<CreateIncomeCommand, G
     private readonly ICurrentUserService _currentUser;
     private readonly IAccountingLookupService _lookup;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CreateIncomeCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUserService,
         IAccountingLookupService lookup,
-        ILedgerBalanceValidationService ledgerValidator)
+        ILedgerBalanceValidationService ledgerValidator,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUserService;
         _lookup = lookup;
         _ledgerValidator = ledgerValidator;
+        _unitOfWork=unitOfWork;
     }
 
 
@@ -101,9 +104,9 @@ public class CreateIncomeCommandHandler : IRequestHandler<CreateIncomeCommand, G
         }
 
         income.EnsureBalanced();
-        
+
         _context.AccountingDocuments.Add(income);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return income.Id;
     }

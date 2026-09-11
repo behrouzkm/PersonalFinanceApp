@@ -14,10 +14,12 @@ namespace PersonalFinanceApp.Application.Features.Currencies.Commands.CreateCurr
 public class CreateCurrencyCommandHandler : IRequestHandler<CreateCurrencyCommand, int>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateCurrencyCommandHandler(IApplicationDbContext context)
+    public CreateCurrencyCommandHandler(IApplicationDbContext context,IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<int> Handle(CreateCurrencyCommand request, CancellationToken cancellationToken)
@@ -39,7 +41,7 @@ public class CreateCurrencyCommandHandler : IRequestHandler<CreateCurrencyComman
             request.Symbol);
 
         await _context.Currencies.AddAsync(currency, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return currency.Id;
 

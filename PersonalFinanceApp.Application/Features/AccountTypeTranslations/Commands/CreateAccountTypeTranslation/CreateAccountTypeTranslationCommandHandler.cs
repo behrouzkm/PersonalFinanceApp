@@ -14,14 +14,26 @@ namespace PersonalFinanceApp.Application.Features.AccountTypeTranslations.Comman
 public class CreateAccountTypeTranslationCommandHandler : IRequestHandler<CreateAccountTypeTranslationCommand, int>
 {
     private readonly IApplicationDbContext _context;
-
-    public CreateAccountTypeTranslationCommandHandler(IApplicationDbContext context)
+    private readonly IUnitOfWork _unitOfWork;
+    public CreateAccountTypeTranslationCommandHandler(IApplicationDbContext context,IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork=unitOfWork;
     }
 
     public async Task<int> Handle(CreateAccountTypeTranslationCommand request, CancellationToken cancellationToken)
     {
+        var accountType = await _context.AccountTypes
+            .FirstOrDefaultAsync(x => x.Id == request.AccountTypeId, cancellationToken)
+            ?? throw new NotFoundException(nameof(AccountType), request.AccountTypeId);
+
+        var language = await _context.Languages
+            .FirstOrDefaultAsync(r => r.Id == request.LanguageId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Language), request.LanguageId);
+
+        if (!language.IsActive)
+            throw new BusinessRuleException(ApplicationErrorCodes.AccountTypeTranslation.LanguageIsNoActive);
+
         var duplicateExist = await _context.AccountTypeTranslations
                 .AnyAsync(c => c.AccountTypeId == request.AccountTypeId && c.LanguageId == request.LanguageId, cancellationToken);
 
@@ -37,7 +49,7 @@ public class CreateAccountTypeTranslationCommandHandler : IRequestHandler<Create
             );
 
         await _context.AccountTypeTranslations.AddAsync(att, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return att.Id;
 

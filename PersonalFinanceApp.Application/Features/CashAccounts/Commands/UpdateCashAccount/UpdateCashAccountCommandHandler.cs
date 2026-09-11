@@ -17,15 +17,18 @@ public class UpdateCashAccountCommandHandler : IRequestHandler<UpdateCashAccount
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly IOpeningBalanceService _openingBalanceService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public UpdateCashAccountCommandHandler(
                 IApplicationDbContext context,
                 ICurrentUserService currentUser,
-                IOpeningBalanceService openingBalanceService)
+                IOpeningBalanceService openingBalanceService,
+                IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _openingBalanceService = openingBalanceService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(UpdateCashAccountCommand request, CancellationToken cancellationToken)
@@ -66,6 +69,6 @@ public class UpdateCashAccountCommandHandler : IRequestHandler<UpdateCashAccount
 
         cashAccount.UpdateOpeningAccountingDocumentId(openingDocId, _currentUser.UserId);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

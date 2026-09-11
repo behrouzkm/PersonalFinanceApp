@@ -19,19 +19,22 @@ public class DeleteCurrencyExchangeCommandHandler : IRequestHandler<DeleteCurren
     private readonly IAccountingLookupService _lookupService;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public DeleteCurrencyExchangeCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUser,
         IAccountingLookupService lookupService,
         ILedgerBalanceValidationService ledgerValidator,
-        IAttachmentService attachmentService)
+        IAttachmentService attachmentService,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _lookupService = lookupService;
         _ledgerValidator = ledgerValidator;
         _attachmentService = attachmentService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(DeleteCurrencyExchangeCommand request, CancellationToken cancellationToken)
@@ -71,6 +74,6 @@ public class DeleteCurrencyExchangeCommandHandler : IRequestHandler<DeleteCurren
         await _attachmentService.SoftDeleteAllForOwnerAsync(
            AttachmentOwnerType.CurrencyExchange, exchange.Id, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

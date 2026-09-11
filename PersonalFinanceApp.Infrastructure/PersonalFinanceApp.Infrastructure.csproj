@@ -28,5 +28,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.11" />
   </ItemGroup>
-
+  <ItemGroup>
+    <EmbeddedResource Include="Persistence\Seed\account-type-translations.json" />
+  </ItemGroup>
 </Project>

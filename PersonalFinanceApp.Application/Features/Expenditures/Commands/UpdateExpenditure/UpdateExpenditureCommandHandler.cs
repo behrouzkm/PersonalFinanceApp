@@ -16,16 +16,20 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
     private readonly ICurrentUserService _currentUser;
     private readonly IAccountingLookupService _lookupService;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IUnitOfWork _unitOfWork;
+
     public UpdateExpenditureCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUser,
         IAccountingLookupService lookupService,
-        ILedgerBalanceValidationService ledgerValidator)
+        ILedgerBalanceValidationService ledgerValidator,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _lookupService = lookupService;
         _ledgerValidator = ledgerValidator;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(UpdateExpenditureCommand request, CancellationToken cancellationToken)
@@ -78,7 +82,7 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
 
         document.EnsureBalanced();
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private void SetExpenditureEntries(AccountingDocument document,

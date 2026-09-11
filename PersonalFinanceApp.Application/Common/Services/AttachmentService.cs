@@ -18,12 +18,18 @@ public class AttachmentService : IAttachmentService
     private readonly IApplicationDbContext _context;
     private readonly IFileStorageService _fileStorage;
     private readonly ICurrentUserService _currentUser;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public AttachmentService(IApplicationDbContext context, IFileStorageService fileStorage, ICurrentUserService currentUser)
+    public AttachmentService(
+            IApplicationDbContext context,
+            IFileStorageService fileStorage,
+            ICurrentUserService currentUser,
+            IUnitOfWork unitOfWork)
     {
         _context = context;
         _fileStorage = fileStorage;
         _currentUser = currentUser;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> UploadAsync(AttachmentOwnerType ownerType, Guid ownerId, Stream content,
@@ -50,7 +56,7 @@ public class AttachmentService : IAttachmentService
         };
 
         _context.Attachments.Add(attachment);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return attachment.Id;
     }
 
@@ -63,7 +69,7 @@ public class AttachmentService : IAttachmentService
         var stream = await _fileStorage.OpenReadAsync(attachment.StorageKey, cancellationToken);
         return (stream, attachment.ContentType, attachment.FileName);
     }
-    
+
     public async Task<IReadOnlyList<AttachmentDto>> GetForOwnerAsync(
         AttachmentOwnerType ownerType, Guid ownerId, CancellationToken cancellationToken)
     {
@@ -87,7 +93,7 @@ public class AttachmentService : IAttachmentService
             ?? throw new NotFoundException(nameof(Attachment), attachmentId);
 
         attachment.SoftDelete(_currentUser.UserId);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         // Deliberately not deleting the underlying blob here — soft-deleted
         // attachments should stay recoverable via Restore, same as everything else.
     }

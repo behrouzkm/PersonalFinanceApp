@@ -16,13 +16,16 @@ public class UpdateLedgerAccountCommandHandler : IRequestHandler<UpdateLedgerAcc
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
+    private readonly IUnitOfWork _unitOfWork;
 
     public UpdateLedgerAccountCommandHandler(
                 IApplicationDbContext context,
-                ICurrentUserService currentUser)
+                ICurrentUserService currentUser,
+                IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(UpdateLedgerAccountCommand request, CancellationToken cancellationToken)
@@ -36,7 +39,7 @@ public class UpdateLedgerAccountCommandHandler : IRequestHandler<UpdateLedgerAcc
         ledgerAccount.UpdateLedgerAccount(request.Name, _currentUser.UserId, request.Description);
 
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     }
 }

@@ -20,9 +20,11 @@ public static class ApplicationErrorCodes
     public static class AccountTypeTranslation
     {
         public const string AccountTypeTranslationIdRequired = "ErrorCodes.AccountTypeTranslation.AccountTypeTranslationIdRequired";
-        public const string LanguageIdRequired = "ErrorCodes.AccountTypeTranslation.LanguageIdRequired";
+        public const string AccountTypeIdRequired = "ErrorCodes.AccountTypeTranslation.AccountTypeIdRequired";
+      public const string LanguageIdRequired = "ErrorCodes.AccountTypeTranslation.LanguageIdRequired";
         public const string TranslationRequired = "ErrorCodes.AccountTypeTranslation.TranslationRequired";
         public const string DuplicateRecord = "ErrorCodes.AccountTypeTranslation.DuplicateRecord";
+        public const string LanguageIsNoActive = "ErrorCodes.AccountTypeTranslation.LanguageIsNoActive";
     }
 
     public static class Attachment

@@ -14,12 +14,12 @@ namespace PersonalFinanceApp.Application.Features.AccountTypeTranslations.Comman
 public class DeleteAccountTypeTranslationCommandHandler : IRequestHandler<DeleteAccountTypeTranslationCommand>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IReorderService _reorderService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteAccountTypeTranslationCommandHandler(IApplicationDbContext context, IReorderService reorderService)
+    public DeleteAccountTypeTranslationCommandHandler(IApplicationDbContext context, IUnitOfWork unitOfWork)
     {
         _context = context;
-        _reorderService = reorderService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(DeleteAccountTypeTranslationCommand request, CancellationToken cancellationToken)
@@ -29,8 +29,7 @@ public class DeleteAccountTypeTranslationCommandHandler : IRequestHandler<Delete
                 ?? throw new NotFoundException(nameof(AccountTypeTranslation), request.Id);
 
         _context.AccountTypeTranslations.Remove(att);
-        await _context.SaveChangesAsync(cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

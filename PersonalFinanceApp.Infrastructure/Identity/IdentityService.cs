@@ -21,19 +21,25 @@ public class IdentityService : IIdentityService
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ITokenService _tokenService;
     private readonly ApplicationDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionManager _transactionManager;
 
     public IdentityService(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         RoleManager<IdentityRole<Guid>> roleManager,
         ITokenService tokenService,
-        ApplicationDbContext context)
+        ApplicationDbContext context,
+        IUnitOfWork unitOfWork,
+        ITransactionManager transactionManager)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
         _tokenService = tokenService;
         _context = context;
+        _unitOfWork = unitOfWork;
+        _transactionManager = transactionManager;
     }
 
 
@@ -139,14 +145,13 @@ public class IdentityService : IIdentityService
         // Transaction guards against an orphaned Tenant if user creation fails
         // afterward (weak password, duplicate email, etc.) - both succeed together
         // or neither is persisted.
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-
+        await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
         try
         {
             var tenant = new Tenant(tenantName, defaultLanguageId, defaultCurrencyId);
 
             _context.Tenants.Add(tenant);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
 
             var user = new ApplicationUser
@@ -228,7 +233,7 @@ public class IdentityService : IIdentityService
                 await _context.LedgerAccounts.AddAsync(ledgerAccount);
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
             return new IdentityRegistrationResult

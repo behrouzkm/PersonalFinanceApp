@@ -16,14 +16,20 @@ public class UpdateCurrencyExchangeCommandHandler : IRequestHandler<UpdateCurren
     private readonly ICurrentUserService _currentUser;
     private readonly IAccountingLookupService _lookupService;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateCurrencyExchangeCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-        IAccountingLookupService lookupService, ILedgerBalanceValidationService ledgerValidator)
+    public UpdateCurrencyExchangeCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        IAccountingLookupService lookupService,
+        ILedgerBalanceValidationService ledgerValidator,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _lookupService = lookupService;
         _ledgerValidator = ledgerValidator;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(UpdateCurrencyExchangeCommand request, CancellationToken cancellationToken)
@@ -59,7 +65,7 @@ public class UpdateCurrencyExchangeCommandHandler : IRequestHandler<UpdateCurren
         exchange.FromDocument.EnsureBalanced();
         exchange.ToDocument.EnsureBalanced();
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     }
 

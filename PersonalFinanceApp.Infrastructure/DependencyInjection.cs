@@ -50,6 +50,9 @@ public static class DependencyInjection
         // IOptions<T>/IOptionsSnapshot<T>/IOptionsMonitor<T> wrappers, never the bare type.
         services.AddSingleton(jwtSettings);
 
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ITransactionManager, TransactionManager>();
+
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IIdentityService, IdentityService>();
 

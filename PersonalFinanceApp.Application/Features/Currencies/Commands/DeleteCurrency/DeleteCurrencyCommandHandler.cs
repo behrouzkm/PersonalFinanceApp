@@ -15,11 +15,19 @@ public class DeleteCurrencyCommandHandler : IRequestHandler<DeleteCurrencyComman
 {
     private readonly IApplicationDbContext _context;
     private readonly IReorderService _reorderService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionManager _transactionManager;
 
-    public DeleteCurrencyCommandHandler(IApplicationDbContext context, IReorderService reorderService)
+    public DeleteCurrencyCommandHandler(
+        IApplicationDbContext context,
+        IReorderService reorderService,
+        IUnitOfWork unitOfWork,
+        ITransactionManager transactionManager)
     {
         _context = context;
         _reorderService = reorderService;
+        _unitOfWork=unitOfWork;
+        _transactionManager = transactionManager;
     }
 
     public async Task Handle(DeleteCurrencyCommand request, CancellationToken cancellationToken)
@@ -36,16 +44,16 @@ public class DeleteCurrencyCommandHandler : IRequestHandler<DeleteCurrencyComman
         if (currencyInUse)
             throw new BusinessRuleException(ApplicationErrorCodes.Currency.CurrencyInUse, request.Id, currency.Name);
 
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
         try
         {
             // Phase 1: the row must actually be gone before anything shifts into its slot.
             _context.Currencies.Remove(currency);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // Phase 2: now the slot is genuinely vacant.
             await _reorderService.CloseGapAsync(currency, cancellationToken, null);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
         }

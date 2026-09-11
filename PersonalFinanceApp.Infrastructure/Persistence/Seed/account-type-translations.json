@@ -1,0 +1,422 @@
+[
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "en",
+    "translation": "Expense"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "fa",
+    "translation": "هزینه"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "tr",
+    "translation": "Gider"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "fr",
+    "translation": "Dépense"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "de",
+    "translation": "Aufwand"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "ar",
+    "translation": "مصروف"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "es",
+    "translation": "Gasto"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "it",
+    "translation": "Spesa"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "ru",
+    "translation": "Расход"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "zh",
+    "translation": "费用"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "ja",
+    "translation": "費用"
+  },
+  {
+    "accountTypeCode": "Expense",
+    "languageCode": "sv",
+    "translation": "Kostnad"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "en",
+    "translation": "Income"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "fa",
+    "translation": "درآمد"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "tr",
+    "translation": "Gelir"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "fr",
+    "translation": "Revenu"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "de",
+    "translation": "Ertrag"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "ar",
+    "translation": "إيراد"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "es",
+    "translation": "Ingreso"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "it",
+    "translation": "Entrata"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "ru",
+    "translation": "Доход"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "zh",
+    "translation": "收入"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "ja",
+    "translation": "収益"
+  },
+  {
+    "accountTypeCode": "Income",
+    "languageCode": "sv",
+    "translation": "Intäkt"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "en",
+    "translation": "Person"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "fa",
+    "translation": "شخص"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "tr",
+    "translation": "Kişi"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "fr",
+    "translation": "Personne"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "de",
+    "translation": "Person"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "ar",
+    "translation": "شخص"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "es",
+    "translation": "Persona"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "it",
+    "translation": "Persona"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "ru",
+    "translation": "Контрагент"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "zh",
+    "translation": "个人"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "ja",
+    "translation": "個人"
+  },
+  {
+    "accountTypeCode": "Person",
+    "languageCode": "sv",
+    "translation": "Person"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "en",
+    "translation": "Bank Account"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "fa",
+    "translation": "حساب بانکی"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "tr",
+    "translation": "Banka Hesabı"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "fr",
+    "translation": "Compte bancaire"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "de",
+    "translation": "Bankkonto"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "ar",
+    "translation": "حساب مصرفي"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "es",
+    "translation": "Cuenta bancaria"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "it",
+    "translation": "Conto bancario"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "ru",
+    "translation": "Банковский счет"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "zh",
+    "translation": "银行账户"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "ja",
+    "translation": "銀行口座"
+  },
+  {
+    "accountTypeCode": "Bank",
+    "languageCode": "sv",
+    "translation": "Bankkonto"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "en",
+    "translation": "Cash"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "fa",
+    "translation": "حساب نقدی"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "tr",
+    "translation": "Kasa"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "fr",
+    "translation": "Caisse"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "de",
+    "translation": "Kasse"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "ar",
+    "translation": "نقدية"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "es",
+    "translation": "Caja"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "it",
+    "translation": "Cassa"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "ru",
+    "translation": "Касса"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "zh",
+    "translation": "现金"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "ja",
+    "translation": "現金"
+  },
+  {
+    "accountTypeCode": "Cash",
+    "languageCode": "sv",
+    "translation": "Kassa"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "en",
+    "translation": "Currency Exchange Clearing"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "fa",
+    "translation": "تسویه تبدیل ارز"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "tr",
+    "translation": "Döviz Değişim Takas"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "fr",
+    "translation": "Compte de compensation de change"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "de",
+    "translation": "Währungsumrechnungs-Verrechnung"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "ar",
+    "translation": "تسوية صرف العملات"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "es",
+    "translation": "Compensación de cambio de divisas"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "it",
+    "translation": "Compensazione cambio valuta"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "ru",
+    "translation": "Расчетный счет обмена валют"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "zh",
+    "translation": "货币兑换结算"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "ja",
+    "translation": "為替交換精算"
+  },
+  {
+    "accountTypeCode": "CurrencyExchangeClearing",
+    "languageCode": "sv",
+    "translation": "Valutaväxlingsavräkning"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "en",
+    "translation": "Opening Balance Equity"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "fa",
+    "translation": "حقوق صاحبان سهام افتتاحیه"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "tr",
+    "translation": "Açılış Bakiyesi Özsermayesi"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "fr",
+    "translation": "Capitaux propres du solde d'ouverture"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "de",
+    "translation": "Eigenkapital der Eröffnungsbilanz"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "ar",
+    "translation": "حقوق الملكية للرصيد الافتتاحي"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "es",
+    "translation": "Patrimonio del saldo inicial"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "it",
+    "translation": "Patrimonio netto del saldo iniziale"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "ru",
+    "translation": "Капитал начального остатка"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "zh",
+    "translation": "期初余额权益"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "ja",
+    "translation": "開始残高資本"
+  },
+  {
+    "accountTypeCode": "OpeningBalanceEquity",
+    "languageCode": "sv",
+    "translation": "Eget kapital för ingående balans"
+  }
+]

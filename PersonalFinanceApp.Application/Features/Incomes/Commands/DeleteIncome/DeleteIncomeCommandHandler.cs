@@ -16,13 +16,18 @@ public class DeleteIncomeCommandHandler : IRequestHandler<DeleteIncomeCommand>
     public readonly IApplicationDbContext _context;
     public readonly ICurrentUserService _currentUser;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteIncomeCommandHandler(IApplicationDbContext context, ICurrentUserService currentUserService,
-        IAttachmentService attachmentService)
+    public DeleteIncomeCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUserService,
+        IAttachmentService attachmentService,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUserService;
         _attachmentService = attachmentService;
+        _unitOfWork=unitOfWork;
     }
 
     public async Task Handle(DeleteIncomeCommand request, CancellationToken cancellationToken)
@@ -57,6 +62,6 @@ public class DeleteIncomeCommandHandler : IRequestHandler<DeleteIncomeCommand>
         await _attachmentService.SoftDeleteAllForOwnerAsync(
            AttachmentOwnerType.AccountingDocument, document.Id, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

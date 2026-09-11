@@ -18,16 +18,21 @@ public class DeleteMoneyTransferCommandHandler : IRequestHandler<DeleteMoneyTran
     private readonly ICurrentUserService _currentUser;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
+
+
     public DeleteMoneyTransferCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUser,
         ILedgerBalanceValidationService ledgerValidator,
-        IAttachmentService attachmentService)
+        IAttachmentService attachmentService,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
-        _ledgerValidator=ledgerValidator;
+        _ledgerValidator = ledgerValidator;
         _attachmentService = attachmentService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(DeleteMoneyTransferCommand request, CancellationToken cancellationToken)
@@ -69,7 +74,7 @@ public class DeleteMoneyTransferCommandHandler : IRequestHandler<DeleteMoneyTran
         await _attachmentService.SoftDeleteAllForOwnerAsync(
             AttachmentOwnerType.AccountingDocument, transferDocument.Id, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     }
 }

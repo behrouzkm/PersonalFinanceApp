@@ -17,15 +17,18 @@ public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand>
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly IOpeningBalanceService _openingBalanceService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public UpdatePersonCommandHandler(
                 IApplicationDbContext context,
                 ICurrentUserService currentUser,
-                IOpeningBalanceService openingBalanceService)
+                IOpeningBalanceService openingBalanceService,
+                IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _openingBalanceService = openingBalanceService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
@@ -55,6 +58,6 @@ public class UpdatePersonCommandHandler : IRequestHandler<UpdatePersonCommand>
 
         person.UpdateOpeningAccountingDocumentId(openingDocId, _currentUser.UserId);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

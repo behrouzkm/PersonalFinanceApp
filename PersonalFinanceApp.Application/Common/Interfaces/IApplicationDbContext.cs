@@ -32,13 +32,10 @@ public interface IApplicationDbContext
     DbSet<ApiAuditLog> ApiAuditLogs {get;}
 
 
-    DatabaseFacade Database { get; }
-
+    
     EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
     DbSet<TEntity> Set<TEntity>() where TEntity : class;
     EntityEntry<TEntity> Remove<TEntity>(TEntity entity)
         where TEntity : class;
-
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 
 }

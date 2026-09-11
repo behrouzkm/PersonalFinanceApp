@@ -18,17 +18,23 @@ public class DeleteCashAccountCommandHandler : IRequestHandler<DeleteCashAccount
     private readonly ICurrentUserService _currentUser;
     private readonly IReorderService _reorderService;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionManager _transactionManager;
 
     public DeleteCashAccountCommandHandler(
                 IApplicationDbContext context,
                 ICurrentUserService currentUser,
                 IReorderService reorderService,
-                IAttachmentService attachmentService)
+                IAttachmentService attachmentService,
+                IUnitOfWork unitOfWork,
+                ITransactionManager transactionManager)
     {
         _context = context;
         _currentUser = currentUser;
         _reorderService = reorderService;
         _attachmentService = attachmentService;
+        _unitOfWork = unitOfWork;
+        _transactionManager =transactionManager;
     }
 
     public async Task Handle(DeleteCashAccountCommand request, CancellationToken cancellationToken)
@@ -50,7 +56,7 @@ public class DeleteCashAccountCommandHandler : IRequestHandler<DeleteCashAccount
         if (hasAccountingHistory)
             throw new BusinessRuleException(ApplicationErrorCodes.CashAccount.CannotDeleteWithAccountingHistory);
 
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
         try
         {
             // Phase 1: commit the deletion first — this is what actually vacates
@@ -60,7 +66,7 @@ public class DeleteCashAccountCommandHandler : IRequestHandler<DeleteCashAccount
 
             cashAccount.LedgerAccount.SoftDelete(_currentUser.UserId);
             cashAccount.SoftDelete(_currentUser.UserId);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // Phase 2: now the vacated slot is genuinely free at the DB level —
             // safe to shift survivors into it regardless of statement order.
@@ -72,7 +78,7 @@ public class DeleteCashAccountCommandHandler : IRequestHandler<DeleteCashAccount
             await _attachmentService.SoftDeleteAllForOwnerAsync(
                 AttachmentOwnerType.MonetaryAccount, cashAccount.Id, cancellationToken);
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
         }

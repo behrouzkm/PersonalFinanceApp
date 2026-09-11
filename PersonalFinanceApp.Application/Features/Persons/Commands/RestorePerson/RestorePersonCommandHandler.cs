@@ -17,14 +17,20 @@ public class RestorePersonCommandHandler : IRequestHandler<RestorePersonCommand>
     private readonly ICurrentUserService _currentUser;
     private readonly IReorderService _reorderService;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public RestorePersonCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-                IReorderService reorderService, IAttachmentService attachmentService)
+    public RestorePersonCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        IReorderService reorderService,
+        IAttachmentService attachmentService,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _reorderService = reorderService;
         _attachmentService = attachmentService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(RestorePersonCommand request, CancellationToken cancellationToken)
@@ -52,6 +58,6 @@ public class RestorePersonCommandHandler : IRequestHandler<RestorePersonCommand>
         await _attachmentService.RestoreAllForOwnerAsync(
             AttachmentOwnerType.Person, person.Id, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

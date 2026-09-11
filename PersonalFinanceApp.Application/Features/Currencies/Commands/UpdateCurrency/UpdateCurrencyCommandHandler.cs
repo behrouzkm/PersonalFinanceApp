@@ -14,10 +14,12 @@ namespace PersonalFinanceApp.Application.Features.Currencies.Commands.UpdateCurr
 public class UpdateCurrencyCommandHandler : IRequestHandler<UpdateCurrencyCommand>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateCurrencyCommandHandler(IApplicationDbContext context)
+    public UpdateCurrencyCommandHandler(IApplicationDbContext context,IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork=unitOfWork;
     }
 
     public async Task Handle(UpdateCurrencyCommand request, CancellationToken cancellationToken)
@@ -37,7 +39,7 @@ public class UpdateCurrencyCommandHandler : IRequestHandler<UpdateCurrencyComman
 
         currency.UpdateCurrency(request.Code,request.Name,request.IsActive, request.DecimalPlaces,request.Symbol);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
     }
 }

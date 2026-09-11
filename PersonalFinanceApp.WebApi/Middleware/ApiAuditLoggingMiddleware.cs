@@ -15,7 +15,9 @@ public class ApiAuditLoggingMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<ApiAuditLoggingMiddleware> _logger;
 
-    public ApiAuditLoggingMiddleware(RequestDelegate next, ILogger<ApiAuditLoggingMiddleware> logger)
+    public ApiAuditLoggingMiddleware(
+        RequestDelegate next,
+        ILogger<ApiAuditLoggingMiddleware> logger)
     {
         _next = next;
         _logger = logger;
@@ -69,9 +71,10 @@ public class ApiAuditLoggingMiddleware
 
         using var scope = context.RequestServices.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         dbContext.ApiAuditLogs.Add(auditLog);
-        await dbContext.SaveChangesAsync(CancellationToken.None);
+        await unitOfWork.SaveChangesAsync(CancellationToken.None);
 
     }
 }

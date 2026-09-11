@@ -18,14 +18,17 @@ public class CreateBankAccountCommandHandler : IRequestHandler<CreateBankAccount
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly IOpeningBalanceService _openingBalanceService;
+    private readonly IUnitOfWork _unitOfWork;
     public CreateBankAccountCommandHandler(
                 IApplicationDbContext context,
                 ICurrentUserService currentUser,
-                IOpeningBalanceService openingBalanceService)
+                IOpeningBalanceService openingBalanceService,
+                IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _openingBalanceService = openingBalanceService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> Handle(CreateBankAccountCommand request, CancellationToken cancellationToken)
@@ -41,29 +44,29 @@ public class CreateBankAccountCommandHandler : IRequestHandler<CreateBankAccount
         {
             var maxDisplayOrder = await _context.BankAccounts.MaxAsync(c => (int?)c.DisplayOrder, cancellationToken) ?? 0;
 
-        var bankAccount = new BankAccount(
-            request.DisplayName,
-            ledgerAccount.Id,
-            request.CurrencyId,
-            request.OpeningDate,
-            request.InitialBalance,
-            maxDisplayOrder + 1,
-            _currentUser.TenantId,
-            _currentUser.UserId,
-            request.BankName,
-            request.BranchName,
-            request.BankAccountType,
-            request.BankAccountNumber,
-            request.IBAN,
-            request.Description,
-            request.CreditLimit,
-            openingDocId
-        );
+            var bankAccount = new BankAccount(
+                request.DisplayName,
+                ledgerAccount.Id,
+                request.CurrencyId,
+                request.OpeningDate,
+                request.InitialBalance,
+                maxDisplayOrder + 1,
+                _currentUser.TenantId,
+                _currentUser.UserId,
+                request.BankName,
+                request.BranchName,
+                request.BankAccountType,
+                request.BankAccountNumber,
+                request.IBAN,
+                request.Description,
+                request.CreditLimit,
+                openingDocId
+            );
 
-        await _context.BankAccounts.AddAsync(bankAccount, cancellationToken);
+            await _context.BankAccounts.AddAsync(bankAccount, cancellationToken);
             try
             {
-                await _context.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
                 return bankAccount.Id;
             }
             catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 } && attempt < maxAttempts)

@@ -13,8 +13,18 @@ namespace PersonalFinanceApp.Application.Common.Services;
 public class ReorderService : IReorderService
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionManager _transactionManager;
 
-    public ReorderService(IApplicationDbContext context) => _context = context;
+    public ReorderService(
+            IApplicationDbContext context,
+            IUnitOfWork unitOfWork,
+            ITransactionManager transactionManager)
+            {
+                _context = context;
+                _unitOfWork= unitOfWork;
+                _transactionManager=transactionManager;
+            }
 
     public async Task ReorderAsync<TEntity>(
     Expression<Func<TEntity, bool>> selector, object identifier, int newDisplayOrder,
@@ -34,7 +44,7 @@ public class ReorderService : IReorderService
         var newPosition = Math.Clamp(newDisplayOrder, 1, count);
         if (oldPosition == newPosition) return;
 
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
         try
         {
             // 1. Park the target outside the valid range. count+1 can never fall inside
@@ -88,13 +98,13 @@ public class ReorderService : IReorderService
         var newGroupCount = await newGroup.CountAsync(cancellationToken);
         var targetPosition = Math.Clamp(newDisplayOrder, 1, newGroupCount + 1);
 
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
         try
         {
             // 1. Park the target — tracked path, since RowVersion (if present) must stay
             // in sync with what the final SaveChangesAsync below will check against.
             entity.SetDisplayOrder(Math.Max(oldGroupCount, newGroupCount) + 1);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 2. Close the gap in the old group — set-based, and since oldGroupScope
             // already excludes the entity, its parked row is never touched here.
@@ -111,7 +121,7 @@ public class ReorderService : IReorderService
             // this is where domain validation (e.g. ChangeParent) actually runs.
             assignToNewGroup(entity);
             entity.SetDisplayOrder(targetPosition);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
         }

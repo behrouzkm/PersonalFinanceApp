@@ -17,14 +17,20 @@ public class RestoreExpenditureCommandHandler : IRequestHandler<RestoreExpenditu
     private readonly ICurrentUserService _currentUser;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public RestoreExpenditureCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-        ILedgerBalanceValidationService ledgerValidator, IAttachmentService attachmentService)
+    public RestoreExpenditureCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        ILedgerBalanceValidationService ledgerValidator,
+        IAttachmentService attachmentService,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _ledgerValidator = ledgerValidator;
         _attachmentService = attachmentService;
+        _unitOfWork = unitOfWork;
     }
 
 
@@ -72,6 +78,6 @@ public class RestoreExpenditureCommandHandler : IRequestHandler<RestoreExpenditu
         await _attachmentService.RestoreAllForOwnerAsync(
             AttachmentOwnerType.AccountingDocument, document.Id, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

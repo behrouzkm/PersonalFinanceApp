@@ -19,13 +19,18 @@ public class CreateMoneyTransferCommandHandler : IRequestHandler<CreateMoneyTran
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateMoneyTransferCommandHandler(IApplicationDbContext context, ICurrentUserService currentUser,
-                        ILedgerBalanceValidationService ledgerValidator)
+    public CreateMoneyTransferCommandHandler(
+        IApplicationDbContext context,
+        ICurrentUserService currentUser,
+        ILedgerBalanceValidationService ledgerValidator,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _ledgerValidator = ledgerValidator;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> Handle(CreateMoneyTransferCommand request, CancellationToken cancellationToken)
@@ -67,7 +72,7 @@ public class CreateMoneyTransferCommandHandler : IRequestHandler<CreateMoneyTran
         accountingDocument.EnsureBalanced();
 
         _context.AccountingDocuments.Add(accountingDocument);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return accountingDocument.Id;
     }

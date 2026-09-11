@@ -17,20 +17,24 @@ public class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, G
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly IOpeningBalanceService _openingBalanceService;
+    private readonly IUnitOfWork _unitOfWork;
+
     public CreatePersonCommandHandler(
                 IApplicationDbContext context,
                 ICurrentUserService currentUser,
-                IOpeningBalanceService openingBalanceService)
+                IOpeningBalanceService openingBalanceService,
+                IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _openingBalanceService = openingBalanceService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
     {
         var (ledgerAccount, openingDocId) = await _openingBalanceService.CreateAsync(
-            request.ParentLedgerId, AccountCategory.PersonAccount, 
+            request.ParentLedgerId, AccountCategory.PersonAccount,
             request.DisplayName, request.OpeningDate, request.CurrencyId,
             request.InitialBalance, request.CreditLimit, request.Description, cancellationToken);
 
@@ -44,7 +48,7 @@ public class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, G
             request.CreditLimit, openingDocId);
 
         await _context.Persons.AddAsync(person, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return person.Id;
     }
 }

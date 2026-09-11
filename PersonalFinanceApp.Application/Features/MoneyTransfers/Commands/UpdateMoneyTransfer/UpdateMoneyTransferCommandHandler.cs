@@ -15,14 +15,18 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IUnitOfWork _unitOfWork;
+
     public UpdateMoneyTransferCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUser,
-        ILedgerBalanceValidationService ledgerValidator)
+        ILedgerBalanceValidationService ledgerValidator,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _ledgerValidator = ledgerValidator;
+        _unitOfWork=unitOfWork;
     }
 
     public async Task Handle(UpdateMoneyTransferCommand request, CancellationToken cancellationToken)
@@ -145,8 +149,8 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
         }
 
         transferDocument.EnsureBalanced();
-        
-        await _context.SaveChangesAsync(cancellationToken);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
 }

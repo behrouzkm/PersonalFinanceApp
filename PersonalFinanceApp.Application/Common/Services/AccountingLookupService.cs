@@ -19,11 +19,16 @@ public class AccountingLookupService : IAccountingLookupService
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _userService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public AccountingLookupService(IApplicationDbContext context, ICurrentUserService userService)
+    public AccountingLookupService(
+        IApplicationDbContext context,
+        ICurrentUserService userService,
+        IUnitOfWork unitOfWork)
     {
         _context = context;
         _userService = userService;
+        _unitOfWork =unitOfWork;
     }
 
     public async Task<Dictionary<Guid, LedgerAccount>> GetLedgerAccountsAsync(IEnumerable<Guid> ledgerAccountsIds,
@@ -136,7 +141,7 @@ public class AccountingLookupService : IAccountingLookupService
             ledgerAccount = new LedgerAccount(accountType.Id, currency.Name, _userService.TenantId, _userService.UserId);
 
             _context.LedgerAccounts.Add(ledgerAccount);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
         return ledgerAccount;

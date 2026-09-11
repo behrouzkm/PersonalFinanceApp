@@ -18,17 +18,23 @@ public class DeletePersonCommandHandler : IRequestHandler<DeletePersonCommand>
     private readonly ICurrentUserService _currentUser;
     private readonly IReorderService _reorderService;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionManager _transactionManager;
 
     public DeletePersonCommandHandler(
                 IApplicationDbContext context,
                 ICurrentUserService currentUser,
                 IReorderService reorderService,
-                IAttachmentService attachmentService)
+                IAttachmentService attachmentService,
+                IUnitOfWork unitOfWork,
+                ITransactionManager transactionManager)
     {
         _context = context;
         _currentUser = currentUser;
         _reorderService = reorderService;
         _attachmentService = attachmentService;
+        _unitOfWork = unitOfWork;
+        _transactionManager=transactionManager;
     }
 
     public async Task Handle(DeletePersonCommand request, CancellationToken cancellationToken)
@@ -50,7 +56,7 @@ public class DeletePersonCommandHandler : IRequestHandler<DeletePersonCommand>
         if (hasAccountingHistory)
             throw new BusinessRuleException(ApplicationErrorCodes.Person.CannotDeleteWithAccountingHistory);
 
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
         try
         {
             // Phase 1: commit the deletion first — this is what actually vacates
@@ -60,14 +66,14 @@ public class DeletePersonCommandHandler : IRequestHandler<DeletePersonCommand>
 
             person.LedgerAccount.SoftDelete(_currentUser.UserId);
             person.SoftDelete(_currentUser.UserId);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // Phase 2: now the vacated slot is genuinely free at the DB level —
             // safe to shift survivors into it regardless of statement order.
             await _reorderService.CloseGapAsync(person, cancellationToken,p => p.TenantId == person.TenantId);
             await _reorderService.CloseGapAsync(person.LedgerAccount, cancellationToken,
                 p => p.TenantId == person.TenantId && p.ParentId == person.LedgerAccount.ParentId);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await _attachmentService.SoftDeleteAllForOwnerAsync(
                 AttachmentOwnerType.Person, person.Id, cancellationToken);

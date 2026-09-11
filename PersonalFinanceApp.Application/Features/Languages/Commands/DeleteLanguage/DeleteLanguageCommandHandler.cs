@@ -15,11 +15,18 @@ public class DeleteLanguageCommandHandler : IRequestHandler<DeleteLanguageComman
 {
     private readonly IApplicationDbContext _context;
     private readonly IReorderService _reorderService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionManager _transactionManager;
 
-    public DeleteLanguageCommandHandler(IApplicationDbContext context,IReorderService reorderService )
+    public DeleteLanguageCommandHandler(
+        IApplicationDbContext context,
+        IReorderService reorderService,
+        IUnitOfWork unitOfWork,
+        ITransactionManager transactionManager )
     {
         _context = context;
         _reorderService=reorderService;
+        _unitOfWork=unitOfWork;
     }
 
     public async Task Handle(DeleteLanguageCommand request, CancellationToken cancellationToken)
@@ -41,16 +48,16 @@ public class DeleteLanguageCommandHandler : IRequestHandler<DeleteLanguageComman
         if (languageInUse)
             throw new BusinessRuleException(ApplicationErrorCodes.Language.LanguageInUse, request.Id, language.Name);
 
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
         try
         {
             // Phase 1: the row must actually be gone before anything shifts into its slot.
             _context.Languages.Remove(language);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // Phase 2: now the slot is genuinely vacant.
             await _reorderService.CloseGapAsync(language, cancellationToken, null);
-            await _context.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
         }

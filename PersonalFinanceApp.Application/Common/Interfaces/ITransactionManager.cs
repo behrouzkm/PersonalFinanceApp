@@ -1,0 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace PersonalFinanceApp.Application.Common.Interfaces;
+
+public interface ITransactionManager
+{
+    Task<IAppTransaction> BeginTransactionAsync(
+        CancellationToken cancellationToken = default);
+}

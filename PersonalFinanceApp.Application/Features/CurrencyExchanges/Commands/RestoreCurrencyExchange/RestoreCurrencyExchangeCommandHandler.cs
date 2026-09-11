@@ -18,17 +18,20 @@ public class RestoreCurrencyExchangeCommandHandler : IRequestHandler<RestoreCurr
     private readonly IAccountingLookupService _lookupService;
     private readonly ICurrentUserService _currentUser;
     private readonly IAttachmentService _attachmentService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public RestoreCurrencyExchangeCommandHandler(
             IApplicationDbContext context,
             IAccountingLookupService lookupService,
             ICurrentUserService currentUser,
-            IAttachmentService attachmentService)
+            IAttachmentService attachmentService,
+            IUnitOfWork unitOfWork)
     {
         _context = context;
         _lookupService = lookupService;
         _currentUser = currentUser;
         _attachmentService = attachmentService;
+        _unitOfWork=unitOfWork;
     }
 
     public async Task Handle(RestoreCurrencyExchangeCommand request, CancellationToken cancellationToken)
@@ -65,6 +68,6 @@ public class RestoreCurrencyExchangeCommandHandler : IRequestHandler<RestoreCurr
         await _attachmentService.RestoreAllForOwnerAsync(
             AttachmentOwnerType.CurrencyExchange, exchange.Id, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

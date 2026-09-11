@@ -17,14 +17,17 @@ public class CreateCashAccountCommandHandler : IRequestHandler<CreateCashAccount
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly IOpeningBalanceService _openingBalanceService;
+    private readonly IUnitOfWork _unitOfWork;
     public CreateCashAccountCommandHandler(
                 IApplicationDbContext context,
                 ICurrentUserService currentUser,
-                IOpeningBalanceService openingBalanceService)
+                IOpeningBalanceService openingBalanceService,
+                IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _openingBalanceService = openingBalanceService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> Handle(CreateCashAccountCommand request, CancellationToken cancellationToken)
@@ -52,7 +55,7 @@ public class CreateCashAccountCommandHandler : IRequestHandler<CreateCashAccount
         );
 
         await _context.CashAccounts.AddAsync(cashAccount, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return cashAccount.Id;
     }
 }

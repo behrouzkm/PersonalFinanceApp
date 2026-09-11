@@ -14,10 +14,12 @@ namespace PersonalFinanceApp.Application.Features.Languages.Commands.CreateLangu
 public class CreateLanguageCommandHandler : IRequestHandler<CreateLanguageCommand, int>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateLanguageCommandHandler(IApplicationDbContext context)
+    public CreateLanguageCommandHandler(IApplicationDbContext context,IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<int> Handle(CreateLanguageCommand request, CancellationToken cancellationToken)
@@ -38,7 +40,7 @@ public class CreateLanguageCommandHandler : IRequestHandler<CreateLanguageComman
             request.IsRightToLeft);
 
         await _context.Languages.AddAsync(language, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return language.Id;
 
