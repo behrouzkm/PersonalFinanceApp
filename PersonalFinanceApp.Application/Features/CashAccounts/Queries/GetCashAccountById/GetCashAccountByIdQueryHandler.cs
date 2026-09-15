@@ -37,7 +37,6 @@ public class GetCashAccountByIdQueryHandler : IRequestHandler<GetCashAccountById
             OpeningDate = cashAccount.OpeningDate,
             InitialBalance = cashAccount.InitialBalance,
             CurrentBalance = cashAccount.CurrentBalance,
-            CreditLimit = cashAccount.CreditLimit,
             OpeningAccountingDocumentId = cashAccount.OpeningAccountingDocumentId,
             CurrencyId = cashAccount.CurrencyId,
             CurrencyName = cashAccount.Currency.Name,

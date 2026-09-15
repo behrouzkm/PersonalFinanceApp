@@ -39,12 +39,25 @@ public class LedgerAccount : BaseAuditableEntity, IReorderable
 
     private LedgerAccount() { }
 
-    public LedgerAccount(int accountTypeId, string name, Guid tenantId, Guid createdBy, string? description = null)
+    public LedgerAccount(int accountTypeId, string name, Guid tenantId, Guid createdBy, int displayOrder, string? description = null)
                             : base(tenantId, createdBy, description)
     {
         AccountTypeId = accountTypeId;
 
         SetName(name);
+        SetDisplayOrder(displayOrder);
+
+        IsPostingAccount = true;
+    }
+    public LedgerAccount(int accountTypeId, string name, int currencyId, Guid tenantId, Guid createdBy, int displayOrder, string? description = null)
+                        : base(tenantId, createdBy, description)
+    {
+        AccountTypeId = accountTypeId;
+
+        SetName(name);
+        SetCurrencyId(currencyId);
+        SetDisplayOrder(displayOrder);
+
 
         IsPostingAccount = true;
     }
@@ -98,6 +111,13 @@ public class LedgerAccount : BaseAuditableEntity, IReorderable
             throw new DomainException(DomainErrors.LedgerAccount.NameRequired);
 
         Name = newName.Trim();
+    }
+
+    private void SetCurrencyId(int currencyId)
+    {
+        if (currencyId == 0)
+            throw new DomainException(DomainErrors.LedgerAccount.CurrencyRequired);
+        CurrencyId = currencyId;
     }
 
     public void SetDisplayOrder(int displayOrder)

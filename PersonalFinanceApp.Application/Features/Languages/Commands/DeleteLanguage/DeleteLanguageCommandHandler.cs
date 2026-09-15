@@ -22,11 +22,12 @@ public class DeleteLanguageCommandHandler : IRequestHandler<DeleteLanguageComman
         IApplicationDbContext context,
         IReorderService reorderService,
         IUnitOfWork unitOfWork,
-        ITransactionManager transactionManager )
+        ITransactionManager transactionManager)
     {
         _context = context;
-        _reorderService=reorderService;
-        _unitOfWork=unitOfWork;
+        _reorderService = reorderService;
+        _unitOfWork = unitOfWork;
+        _transactionManager = transactionManager;
     }
 
     public async Task Handle(DeleteLanguageCommand request, CancellationToken cancellationToken)

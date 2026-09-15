@@ -17,14 +17,6 @@ public class CreateCashAccountCommandValidator : AbstractValidator<CreateCashAcc
             .NotEmpty()
             .WithErrorCode(ApplicationErrorCodes.CashAccount.DisplayNameRequired);
 
-        RuleFor(p => p.CashName)
-            .NotEmpty()
-            .WithErrorCode(ApplicationErrorCodes.CashAccount.InvalidCashName);
-
-        RuleFor(p => p.CashAccountNumber)
-            .NotEmpty()
-            .WithErrorCode(ApplicationErrorCodes.CashAccount.InvalidCashAccountNo);
-
         RuleFor(p => p.ParentLedgerId)
             .NotEmpty()
             .NotEqual(Guid.Empty)
@@ -35,9 +27,6 @@ public class CreateCashAccountCommandValidator : AbstractValidator<CreateCashAcc
             .Must(date => date <= DateOnly.FromDateTime(DateTime.UtcNow))
             .WithErrorCode(ApplicationErrorCodes.CashAccount.OpeningDateInFuture);
 
-        RuleFor(p => p.CreditLimit)
-           .GreaterThanOrEqualTo(0)
-            .WithErrorCode(ApplicationErrorCodes.CashAccount.CreditLimitMustBePositive);
 
         RuleFor(p => p.CurrencyId)
             .NotEmpty()

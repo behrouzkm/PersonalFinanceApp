@@ -19,19 +19,22 @@ public class RestoreCurrencyExchangeCommandHandler : IRequestHandler<RestoreCurr
     private readonly ICurrentUserService _currentUser;
     private readonly IAttachmentService _attachmentService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILedgerBalanceValidationService _ledgerValidator;
 
     public RestoreCurrencyExchangeCommandHandler(
             IApplicationDbContext context,
             IAccountingLookupService lookupService,
             ICurrentUserService currentUser,
             IAttachmentService attachmentService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILedgerBalanceValidationService ledgerValidator)
     {
         _context = context;
         _lookupService = lookupService;
         _currentUser = currentUser;
         _attachmentService = attachmentService;
-        _unitOfWork=unitOfWork;
+        _unitOfWork = unitOfWork;
+        _ledgerValidator = ledgerValidator;
     }
 
     public async Task Handle(RestoreCurrencyExchangeCommand request, CancellationToken cancellationToken)
@@ -60,6 +63,9 @@ public class RestoreCurrencyExchangeCommandHandler : IRequestHandler<RestoreCurr
         exchange.FromDocument.Restore(_currentUser.UserId);
         exchange.ToDocument.Restore(_currentUser.UserId);
         exchange.Restore(_currentUser.UserId);
+
+        await _ledgerValidator.ValidateAsync(fromFundSource, exchange.FromDocument.DocumentDate, 0, fromEntry.Credit,
+            replacingEntryId: fromEntry.Id, cancellationToken);
 
         fromFundSource.AdjustBalance(-fromEntry.Credit);
         toFundSource.AdjustBalance(toEntry.Debit);

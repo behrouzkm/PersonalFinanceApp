@@ -29,8 +29,7 @@ public static class DependencyInjection
 
 
         services.AddScoped<IAttachmentService, AttachmentService>();
-        services.AddScoped<IFileStorageService, LocalFileStorageService>();
-
+ 
 
         return services;
     }

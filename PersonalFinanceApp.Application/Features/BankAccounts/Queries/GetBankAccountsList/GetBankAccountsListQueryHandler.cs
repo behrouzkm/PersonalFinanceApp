@@ -48,7 +48,7 @@ public class GetBankAccountsListQueryHandler : IRequestHandler<GetBankAccountsLi
                 BranchName = r.BranchName,
                 BankAccountNumber = r.BankAccountNumber,
                 IBAN = r.IBAN,
-                AttachmentCount=_context.Attachments.Count(r=>r.MonetaryAccountId == r.Id)
+                AttachmentCount=_context.Attachments.Count(b=>b.MonetaryAccountId == r.Id)
             });
 
         return await PaginatedList<BankAccountListItemDto>.CreateAsync(projection, request.PageNumber,

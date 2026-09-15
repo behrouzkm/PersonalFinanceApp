@@ -10,8 +10,10 @@ namespace PersonalFinanceApp.Application.Features.MoneyTransfers.Commands.Create
 public class CreateMoneyTransferCommand : IRequest< Guid>
 {
     public DateOnly TransferDate { get; set; }
-    public Guid FromMonetaryAccountId { get; set; }
-    public Guid ToMonetaryAccountId { get; set; }
+    public Guid FromLedgerAccountId { get; init; }
+    public Guid ToLedgerAccountId { get; init; }
+    // public Guid FromMonetaryAccountId { get; set; }
+    // public Guid ToMonetaryAccountId { get; set; }
     public int CurrencyId{get;set;}
     public decimal Amount{get;set;}
     public string? Description { get; set; }

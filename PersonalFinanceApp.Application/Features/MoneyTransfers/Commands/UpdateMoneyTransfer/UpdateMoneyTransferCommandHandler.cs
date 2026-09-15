@@ -14,19 +14,22 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
 
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAccountingLookupService _lookupService;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateMoneyTransferCommandHandler(
         IApplicationDbContext context,
         ICurrentUserService currentUser,
+        IAccountingLookupService lookupService,
         ILedgerBalanceValidationService ledgerValidator,
         IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
+        _lookupService = lookupService;
         _ledgerValidator = ledgerValidator;
-        _unitOfWork=unitOfWork;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(UpdateMoneyTransferCommand request, CancellationToken cancellationToken)
@@ -37,17 +40,16 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
             .FirstOrDefaultAsync(r => r.Id == request.MoneyTransferDocumentId, cancellationToken)
             ?? throw new NotFoundException(nameof(AccountingDocument), request.MoneyTransferDocumentId);
 
-        // load and validate ToMonetaryAccount (debit side)
-        var toMonetaryAccount = await _context.MonetaryAccounts
-                .Include(m => m.LedgerAccount)
-                .FirstOrDefaultAsync(r => r.Id == request.ToMonetaryAccountId, cancellationToken)
-            ?? throw new NotFoundException(nameof(MonetaryAccount), request.ToMonetaryAccountId);
 
-        // load and validate FromMonetaryAccount (credit side)
-        var fromMonetaryAccount = await _context.MonetaryAccounts
-                .Include(m => m.LedgerAccount)
-                .FirstOrDefaultAsync(r => r.Id == request.FromMonetaryAccountId, cancellationToken)
-            ?? throw new NotFoundException(nameof(MonetaryAccount), request.FromMonetaryAccountId);
+
+        var (newFromFundSource, newFromLedgerAccount) = await _lookupService
+                  .GetFundSourceByLedgerAccountIdAsync(request.FromLedgerAccountId, cancellationToken);
+        var (newToFundSource, newToLedgerAccount) = await _lookupService
+            .GetFundSourceByLedgerAccountIdAsync(request.ToLedgerAccountId, cancellationToken);
+
+        if (newFromFundSource.CurrencyId != newToFundSource.CurrencyId)
+            throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.SourceDestinationCurrencyMismatch);
+
 
 
         _context.Entry(transferDocument).Property(d => d.RowVersion).OriginalValue = request.RowVersion;
@@ -55,8 +57,8 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
         // update the document's header fields
         transferDocument.UpdateAccountingDocument(request.TransferDate, request.CurrencyId, _currentUser.UserId, request.Description);
 
-        transferDocument.EnsureCurrencyMatches(fromMonetaryAccount.CurrencyId);
-        transferDocument.EnsureCurrencyMatches(toMonetaryAccount.CurrencyId);
+        transferDocument.EnsureCurrencyMatches(newFromFundSource.CurrencyId);
+        transferDocument.EnsureCurrencyMatches(newToFundSource.CurrencyId);
 
 
 
@@ -70,25 +72,26 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
 
 
         // --- Credit side (From) ---
-        if (existingCreditEntry.LedgerAccountId != fromMonetaryAccount.LedgerAccountId)
+        if (existingCreditEntry.LedgerAccountId != newFromFundSource.LedgerAccountId)
         {
-            if (!fromMonetaryAccount.CanWithdraw(request.Amount))
+            if (!newFromFundSource.CanWithdraw(request.Amount))
                 throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.InsufficientBalance,
-                                                    fromMonetaryAccount.Id, request.Amount);
+                                                    newFromFundSource.Id, request.Amount);
 
-            await _ledgerValidator.ValidateAsync(fromMonetaryAccount, request.TransferDate, 0, request.Amount,
+            await _ledgerValidator.ValidateAsync(newFromFundSource, request.TransferDate, 0, request.Amount,
                 replacingEntryId: null, cancellationToken);
 
-            var oldFromMonetaryAccount = await _context.MonetaryAccounts
-                    .FirstOrDefaultAsync(r => r.LedgerAccountId == existingCreditEntry.LedgerAccountId, cancellationToken)
-                    ?? throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.FromMonetaryAccountIdRequired);
+            var (oldFromFundSource, _) = await _lookupService.GetFundSourceByLedgerAccountIdAsync(existingCreditEntry.LedgerAccountId, cancellationToken);
 
-            oldFromMonetaryAccount.AdjustBalance(existingCreditEntry.Credit);
+            if (oldFromFundSource == null)
+                throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.FromFundSourceNotFound);
 
-            existingCreditEntry.UpdateEntry(fromMonetaryAccount.LedgerAccountId, 0, request.Amount, _currentUser.UserId, request.Description);
+            oldFromFundSource.AdjustBalance(existingCreditEntry.Credit);
 
-            fromMonetaryAccount.LedgerAccount.MarkAsUsed();
-            fromMonetaryAccount.AdjustBalance(-request.Amount);
+            existingCreditEntry.UpdateEntry(newFromFundSource.LedgerAccountId, 0, request.Amount, _currentUser.UserId, request.Description);
+
+            newFromLedgerAccount.MarkAsUsed();
+            newFromFundSource.AdjustBalance(-request.Amount);
         }
         else if (request.Amount != existingCreditEntry.Credit)
         {
@@ -96,15 +99,15 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
 
             if (amountDelta > 0)
             {
-                if (!fromMonetaryAccount.CanWithdraw(amountDelta))
+                if (!newFromFundSource.CanWithdraw(amountDelta))
                     throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.InsufficientBalance,
-                                                        fromMonetaryAccount.Id, amountDelta);
+                                                        newFromFundSource.Id, amountDelta);
 
             }
 
             existingCreditEntry.UpdateEntry(0, request.Amount, _currentUser.UserId, request.Description);
 
-            fromMonetaryAccount.AdjustBalance(-amountDelta);
+            newFromFundSource.AdjustBalance(-amountDelta);
         }
         else
         {
@@ -113,34 +116,39 @@ public class UpdateMoneyTransferCommandHandler : IRequestHandler<UpdateMoneyTran
         }
 
         // --- Debit side (To) ---
-        if (existingDebitEntry.LedgerAccountId != toMonetaryAccount.LedgerAccountId)
+        if (existingDebitEntry.LedgerAccountId != newToFundSource.LedgerAccountId)
         {
-            var oldToMonetaryAccount = await _context.MonetaryAccounts
-                  .FirstOrDefaultAsync(r => r.LedgerAccountId == existingDebitEntry.LedgerAccountId, cancellationToken)
-                  ?? throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.FromMonetaryAccountIdRequired);
 
-            await _ledgerValidator.ValidateRemovalAsync(oldToMonetaryAccount, existingDebitEntry.Id, cancellationToken);
+            await _ledgerValidator.ValidateAsync(newFromFundSource, request.TransferDate, 0, request.Amount,
+                replacingEntryId: null, cancellationToken);
+
+            var (oldToFundSource, _) = await _lookupService.GetFundSourceByLedgerAccountIdAsync(existingCreditEntry.LedgerAccountId, cancellationToken);
+
+            if (oldToFundSource == null)
+                throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.ToFundSourceNotFound);
+
+            await _ledgerValidator.ValidateRemovalAsync(oldToFundSource, existingDebitEntry.Id, cancellationToken);
 
 
-            oldToMonetaryAccount.AdjustBalance(-existingDebitEntry.Debit);
+            oldToFundSource.AdjustBalance(-existingDebitEntry.Debit);
 
-            existingDebitEntry.UpdateEntry(toMonetaryAccount.LedgerAccountId, request.Amount, 0, _currentUser.UserId, request.Description);
+            existingDebitEntry.UpdateEntry(newToFundSource.LedgerAccountId, request.Amount, 0, _currentUser.UserId, request.Description);
 
-            toMonetaryAccount.LedgerAccount.MarkAsUsed();
-            toMonetaryAccount.AdjustBalance(request.Amount);
+            newToLedgerAccount.MarkAsUsed();
+            newToFundSource.AdjustBalance(request.Amount);
         }
         else if (request.Amount != existingDebitEntry.Debit)
         {
             var amountDelta = request.Amount - existingDebitEntry.Debit;
 
             if (amountDelta < 0)
-                await _ledgerValidator.ValidateAsync(toMonetaryAccount, request.TransferDate, request.Amount, 0,
+                await _ledgerValidator.ValidateAsync(newToFundSource, request.TransferDate, request.Amount, 0,
                       replacingEntryId: existingDebitEntry.Id, cancellationToken);
 
 
             existingDebitEntry.UpdateEntry(request.Amount, 0, _currentUser.UserId, request.Description);
 
-            toMonetaryAccount.AdjustBalance(amountDelta);
+            newToFundSource.AdjustBalance(amountDelta);
         }
         else
         {

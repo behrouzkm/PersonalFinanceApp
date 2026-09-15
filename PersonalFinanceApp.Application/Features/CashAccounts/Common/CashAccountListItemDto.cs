@@ -8,7 +8,6 @@ public class CashAccountListItemDto
     public DateOnly OpeningDate { get; set; }
     public decimal InitialBalance { get; set; }
     public decimal CurrentBalance { get; set; }
-    public decimal? CreditLimit { get; set; }
     public Guid? OpeningAccountingDocumentId { get; set; }
     public int CurrencyId { get; set; }
     public string CurrencyName { get; set; } = null!;

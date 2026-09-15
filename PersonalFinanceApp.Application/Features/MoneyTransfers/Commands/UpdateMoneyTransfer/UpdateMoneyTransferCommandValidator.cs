@@ -30,16 +30,16 @@ public class UpdateMoneyTransferCommandValidator : AbstractValidator<UpdateMoney
             .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.CurrencyRequired);
 
         RuleFor(x => x)
-            .Must(x => x.FromMonetaryAccountId != x.ToMonetaryAccountId)
+            .Must(x => x.FromLedgerAccountId != x.ToLedgerAccountId)
             .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.SourceAndDestinationMustDiffer);
 
-        RuleFor(x => x.FromMonetaryAccountId)
+        RuleFor(x => x.FromLedgerAccountId)
             .NotEqual(Guid.Empty)
-            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.FromMonetaryAccountIdRequired);
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.FromLedgerAccountRequired);
 
-        RuleFor(x => x.ToMonetaryAccountId)
+        RuleFor(x => x.ToLedgerAccountId)
             .NotEqual(Guid.Empty)
-            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.ToMonetaryAccountIdRequired);
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.ToLedgerAccountRequired);
 
         RuleFor(x => x.Amount)
             .GreaterThan(0)

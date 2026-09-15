@@ -17,6 +17,7 @@ public class DeleteMoneyTransferCommandHandler : IRequestHandler<DeleteMoneyTran
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly ILedgerBalanceValidationService _ledgerValidator;
+    private readonly IAccountingLookupService _lookupService;
     private readonly IAttachmentService _attachmentService;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -25,12 +26,14 @@ public class DeleteMoneyTransferCommandHandler : IRequestHandler<DeleteMoneyTran
         IApplicationDbContext context,
         ICurrentUserService currentUser,
         ILedgerBalanceValidationService ledgerValidator,
+        IAccountingLookupService lookupService,
         IAttachmentService attachmentService,
         IUnitOfWork unitOfWork)
     {
         _context = context;
         _currentUser = currentUser;
         _ledgerValidator = ledgerValidator;
+        _lookupService = lookupService;
         _attachmentService = attachmentService;
         _unitOfWork = unitOfWork;
     }
@@ -53,19 +56,21 @@ public class DeleteMoneyTransferCommandHandler : IRequestHandler<DeleteMoneyTran
                 ?? throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.DebitEntryNotFound);
 
 
-        var fromMonetaryAccount = await _context.MonetaryAccounts
-            .FirstOrDefaultAsync(ma => ma.LedgerAccountId == existingCreditEntry.LedgerAccountId, cancellationToken)
-            ?? throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.FromMonetaryAccountNotFound);
+        var (fromFundSource, _) = await _lookupService.GetFundSourceByLedgerAccountIdAsync(existingCreditEntry.LedgerAccountId, cancellationToken);
+        var (toFundSource, _) = await _lookupService.GetFundSourceByLedgerAccountIdAsync(existingDebitEntry.LedgerAccountId, cancellationToken);
 
-        var toMonetaryAccount = await _context.MonetaryAccounts
-            .FirstOrDefaultAsync(ma => ma.LedgerAccountId == existingDebitEntry.LedgerAccountId, cancellationToken)
-            ?? throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.ToMonetaryAccountNotFound);
 
-        await _ledgerValidator.ValidateRemovalAsync(toMonetaryAccount, existingDebitEntry.Id, cancellationToken);
+        if (fromFundSource == null)
+            throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.FromFundSourceNotFound);
+
+        if (toFundSource == null)
+            throw new BusinessRuleException(ApplicationErrorCodes.MoneyTransfer.ToFundSourceNotFound);
+
+        await _ledgerValidator.ValidateRemovalAsync(toFundSource, existingDebitEntry.Id, cancellationToken);
 
         // reverse the debit/credit entries
-        fromMonetaryAccount.AdjustBalance(existingCreditEntry.Credit);
-        toMonetaryAccount.AdjustBalance(-existingDebitEntry.Debit);
+        fromFundSource.AdjustBalance(existingCreditEntry.Credit);
+        toFundSource.AdjustBalance(-existingDebitEntry.Debit);
 
 
         // soft delete the document and its entries

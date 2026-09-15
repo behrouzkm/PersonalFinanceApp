@@ -11,7 +11,7 @@ using PersonalFinanceApp.Application.Features.Currencies.Commands.ReorderCurrenc
 
 namespace PersonalFinanceApp.WebApi.Controllers.Admin;
 
-public class CurrenciesController : AdminBaseApiController
+public class CurrenciesController : SystemAdminBaseApiController
 {
     public CurrenciesController(IMediator mediator) : base(mediator)
     {

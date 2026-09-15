@@ -21,7 +21,7 @@ public static class ApplicationErrorCodes
     {
         public const string AccountTypeTranslationIdRequired = "ErrorCodes.AccountTypeTranslation.AccountTypeTranslationIdRequired";
         public const string AccountTypeIdRequired = "ErrorCodes.AccountTypeTranslation.AccountTypeIdRequired";
-      public const string LanguageIdRequired = "ErrorCodes.AccountTypeTranslation.LanguageIdRequired";
+        public const string LanguageIdRequired = "ErrorCodes.AccountTypeTranslation.LanguageIdRequired";
         public const string TranslationRequired = "ErrorCodes.AccountTypeTranslation.TranslationRequired";
         public const string DuplicateRecord = "ErrorCodes.AccountTypeTranslation.DuplicateRecord";
         public const string LanguageIsNoActive = "ErrorCodes.AccountTypeTranslation.LanguageIsNoActive";
@@ -32,6 +32,7 @@ public static class ApplicationErrorCodes
         public const string OwnerIdRequired = "ErrorCodes.Attachment.OwnerIdRequired";
         public const string FileNameRequired = "ErrorCodes.Attachment.FileNameRequired";
         public const string UnsupportedContentType = "ErrorCodes.Attachment.UnsupportedContentType";
+        public const string InvalidFileContent = "ErrorCodes.Attachment.InvalidFileContent";
         public const string FileTooLarge = "ErrorCodes.Attachment.FileTooLarge";
     }
 
@@ -47,8 +48,8 @@ public static class ApplicationErrorCodes
         public const string DuplicateCodeOrName = "ErrorCodes.Currency.DuplicateCodeOrName";
         public const string CurrencyInUse = "ErrorCodes.Currency.CurrencyInUse";
         public const string InvalidDisplayOrder = "ErrorCodes.Currency.InvalidDisplayOrder";
-         public const string CurrencyDeactivated = "ErrorCodes.Currency.CurrencyDeactivated";
-   }
+        public const string CurrencyDeactivated = "ErrorCodes.Currency.CurrencyDeactivated";
+    }
 
     public static class Language
     {
@@ -79,7 +80,7 @@ public static class ApplicationErrorCodes
         public const string TenantInactive = "ErrorCodes.Auth.TenantInactive";
         public const string DefaultLanguageNotFound = "ErrorCodes.Auth.DefaultLanguageNotFound";
         public const string DefaultLanguageTranslationsIncomplete = "ErrorCodes.Auth.DefaultLanguageTranslationsIncomplete";
-  }
+    }
 
     public static class ExpenditureList
     {
@@ -136,16 +137,16 @@ public static class ApplicationErrorCodes
         public const string SourceDestinationCurrencyMismatch = "ErrorCodes.MoneyTransfer.SourceDestinationCurrencyMismatch";
         public const string TransferDateRequired = "ErrorCodes.MoneyTransfer.TransferDateRequired";
         public const string TransferDateInFuture = "ErrorCodes.MoneyTransfer.TransferDateInFuture";
-        public const string FromMonetaryAccountIdRequired = "ErrorCodes.MoneyTransfer.FromMonetaryAccountIdRequired";
-        public const string ToMonetaryAccountIdRequired = "ErrorCodes.MoneyTransfer.ToMonetaryAccountIdRequired";
+        public const string ToLedgerAccountRequired = "ErrorCodes.MoneyTransfer.ToLedgerAccountRequired";
         public const string SourceAndDestinationMustDiffer = "ErrorCodes.MoneyTransfer.SourceAndDestinationMustDiffer";
         public const string TransferAmountMustBePositive = "ErrorCodes.MoneyTransfer.TransferAmountMustBePositive";
         public const string InsufficientBalance = "ErrorCodes.MoneyTransfer.InsufficientBalance";
         public const string RowVersionRequired = "ErrorCodes.MoneyTransfer.RowVersionRequired";
         public const string CreditEntryNotFound = "ErrorCodes.MoneyTransfer.CreditEntryNotFound";
         public const string DebitEntryNotFound = "ErrorCodes.MoneyTransfer.DebitEntryNotFound";
-        public const string FromMonetaryAccountNotFound = "ErrorCodes.MoneyTransfer.FromMonetaryAccountNotFound";
-        public const string ToMonetaryAccountNotFound = "ErrorCodes.MoneyTransfer.ToMonetaryAccountNotFound";
+        public const string FromFundSourceNotFound = "ErrorCodes.MoneyTransfer.FromFundSourceNotFound";
+        public const string ToFundSourceNotFound = "ErrorCodes.MoneyTransfer.ToFundSourceNotFound";
+        public const string FromLedgerAccountRequired = "ErrorCodes.MoneyTransfer.FromLedgerAccountRequired";
         public const string FromLaterThanToDate = "ErrorCodes.MoneyTransfer.FromLaterThanToDate";
     }
 

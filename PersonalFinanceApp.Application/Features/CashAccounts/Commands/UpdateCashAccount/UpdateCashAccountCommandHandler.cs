@@ -41,7 +41,6 @@ public class UpdateCashAccountCommandHandler : IRequestHandler<UpdateCashAccount
         _context.Entry(cashAccount).Property(d => d.RowVersion).OriginalValue = request.RowVersion;
 
         var oldInitialBalance = cashAccount.InitialBalance;
-        var oldCreditLimit = cashAccount.CreditLimit;
         var oldCurrencyId = cashAccount.CurrencyId;
         var existingOpeningDocId = cashAccount.OpeningAccountingDocumentId;
 
@@ -61,7 +60,7 @@ public class UpdateCashAccountCommandHandler : IRequestHandler<UpdateCashAccount
             cashAccount,
             existingOpeningDocId,
             oldInitialBalance,
-            oldCreditLimit,
+            0,
             oldCurrencyId,
             AccountCategory.CashAccount,
             request.Description,

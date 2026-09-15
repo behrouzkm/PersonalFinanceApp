@@ -49,6 +49,7 @@ public class CreateLedgerAccountCommandHandler : IRequestHandler<CreateLedgerAcc
                 request.Name,
                 _currentUser.TenantId,
                 _currentUser.UserId,
+                maxDisplayOrder+1,
                 request.Description
             );
 

@@ -11,8 +11,10 @@ public class UpdateMoneyTransferCommand : IRequest
     public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
     public DateOnly TransferDate { get; set; }
-    public Guid FromMonetaryAccountId { get; set; }
-    public Guid ToMonetaryAccountId { get; set; }
+    public Guid FromLedgerAccountId { get; init; }
+    public Guid ToLedgerAccountId { get; init; }
+    // public Guid FromMonetaryAccountId { get; set; }
+    // public Guid ToMonetaryAccountId { get; set; }
     public int CurrencyId { get; set; }
     public decimal Amount { get; set; }
     public string? Description { get; set; }

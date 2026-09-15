@@ -22,8 +22,9 @@ public class AttachmentsController : BaseApiController
 
     [HttpPost]
     [RequestSizeLimit(50 * 1024 * 1024)]   // hard infra ceiling — rarely changes
+    [Consumes("multipart/form-data")]
     public async Task<ActionResult<Guid>> Upload(
-        [FromForm] AttachmentOwnerType ownerType, [FromForm] Guid ownerId, [FromForm] IFormFile file,
+        [FromForm] AttachmentOwnerType ownerType, [FromForm] Guid ownerId,  IFormFile file,
         CancellationToken cancellationToken)
     {
         await using var stream = file.OpenReadStream();

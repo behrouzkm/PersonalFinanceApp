@@ -16,7 +16,7 @@ using PersonalFinanceApp.Application.Features.Languages.Commands.ReorderLanguage
 
 namespace PersonalFinanceApp.WebApi.Controllers.Admin;
 
-public class LanguagesController : AdminBaseApiController
+public class LanguagesController : SystemAdminBaseApiController
 {
     public LanguagesController(IMediator mediator) : base(mediator)
     {

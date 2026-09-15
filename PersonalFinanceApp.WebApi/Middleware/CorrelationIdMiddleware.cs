@@ -16,7 +16,7 @@ public class CorrelationIdMiddleware
         _next = next;
     }
 
-    private async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context)
     {
         var correlationId = context.Request.Headers.TryGetValue(HeaderName, out var incoming) &&
             !string.IsNullOrWhiteSpace(incoming)

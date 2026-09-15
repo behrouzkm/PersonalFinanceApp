@@ -45,6 +45,7 @@ public static class DomainErrors
         public const string CannotModifyUsedAccount = "ErrorCodes.LedgerAccount.CannotModifyUsedAccount";
         public const string DisplayOrderCannotBeNegative = "ErrorCodes.LedgerAccount.DisplayOrderCannotBeNegative";
         public const string ChildAndParentAccountTypeCannotBeSame = "ErrorCodes.LedgerAccount.ChildAndParentAccountTypeCannotBeSame";
+      public const string CurrencyRequired = "ErrorCodes.LedgerAccount.CurrencyRequired";
 
     }
 

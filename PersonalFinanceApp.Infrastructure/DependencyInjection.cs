@@ -78,6 +78,8 @@ public static class DependencyInjection
                 };
             });
 
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
         services.Configure<DevelopmentSeedOptions>(configuration.GetSection("DevelopmentSeed"));
         services.AddScoped<IDevelopmentDataSeeder, DevelopmentDataSeeder>();
 

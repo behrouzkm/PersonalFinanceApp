@@ -35,7 +35,7 @@ public class CreateCashAccountCommandHandler : IRequestHandler<CreateCashAccount
         var (ledgerAccount, openingDocId) = await _openingBalanceService.CreateAsync(
             request.ParentLedgerId, AccountCategory.CashAccount,
             request.DisplayName, request.OpeningDate, request.CurrencyId,
-            request.InitialBalance, request.CreditLimit, request.Description, cancellationToken);
+            request.InitialBalance, 0, request.Description, cancellationToken);
 
         var maxDisplayOrder = await _context.CashAccounts.MaxAsync(c => (int?)c.DisplayOrder, cancellationToken) ?? 0;
 

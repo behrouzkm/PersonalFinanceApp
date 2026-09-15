@@ -21,7 +21,7 @@ public interface IAccountingLookupService
     Task<FundSourceLookup<Person>> GetPersonsAsync(
           IEnumerable<Guid> PersonsIds, IEnumerable<Guid> alsoByLedgerAccountId, CancellationToken cancellationToken);
 
-    Task<LedgerAccount?> GetOpeningBalanceEquityLedgerAccount(AccountCategory accountCategory,CancellationToken cancellationToken);
+    Task<LedgerAccount?> GetOrCreateOpeningBalanceEquityLedgerAccountAsync(int currencyId,CancellationToken cancellationToken);
 
     // Resolves the concrete Person/MonetaryAccount owning this ledger account, plus the
     // LedgerAccount itself (avoids a second round trip for MarkAsUsed()). Throws

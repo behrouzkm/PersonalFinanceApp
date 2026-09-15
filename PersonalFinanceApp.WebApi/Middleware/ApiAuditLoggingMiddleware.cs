@@ -23,7 +23,7 @@ public class ApiAuditLoggingMiddleware
         _logger = logger;
     }
 
-    public async Task InvokeAsynk(HttpContext context)
+    public async Task InvokeAsync(HttpContext context)
     {
         var stopwatch = Stopwatch.StartNew();
 

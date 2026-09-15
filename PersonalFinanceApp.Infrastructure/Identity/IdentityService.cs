@@ -44,44 +44,73 @@ public class IdentityService : IIdentityService
 
 
     public async Task<IdentityRegistrationResult> CreateUserForExistingTenantAsync(
-            string email,
-            string password,
-            string firstName,
-            string lastName,
-            Guid tenantId,
-            CancellationToken cancellationToken)
+        string email,
+        string password,
+        string firstName,
+        string lastName,
+        Guid tenantId,
+        CancellationToken cancellationToken)
     {
-        var user = new ApplicationUser
+        await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        try
         {
-            UserName = email,
-            Email = email,
-            FirstName = firstName,
-            LastName = lastName,
-            TenantId = tenantId
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                TenantId = tenantId
+            };
 
-        };
+            var result = await _userManager.CreateAsync(user, password);
 
-        var result = await _userManager.CreateAsync(user, password);
+            if (!result.Succeeded)
+            {
+                await transaction.RollbackAsync(cancellationToken);
 
-        if (!result.Succeeded)
-        {
+                return new IdentityRegistrationResult
+                {
+                    Succeeded = false,
+                    Errors = result.Errors.Select(e => e.Description).ToList()
+                };
+            }
+
+            // Users invited into an existing tenant get the baseline Users role -
+            // TenantAdministrators is granted only at tenant-creation time (RegisterAsync),
+            // never here. If this app later needs "invite as tenant admin", that's a
+            // separate, explicit parameter on this call - not an implicit upgrade path.
+            if (!await _roleManager.RoleExistsAsync(Roles.Users))
+            {
+                await _roleManager.CreateAsync(new IdentityRole<Guid>(Roles.Users));
+            }
+
+            var roleResult = await _userManager.AddToRoleAsync(user, Roles.Users);
+
+            if (!roleResult.Succeeded)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+
+                return new IdentityRegistrationResult
+                {
+                    Succeeded = false,
+                    Errors = roleResult.Errors.Select(e => e.Description).ToList()
+                };
+            }
+
+            await transaction.CommitAsync(cancellationToken);
+
             return new IdentityRegistrationResult
             {
-                Succeeded = false,
-                Errors = result.Errors.Select(e => e.Description).ToList()
+                Succeeded = true,
+                UserId = user.Id
             };
         }
-
-        // Deliberately no role assignment here - additional users invited into an
-        // existing tenant are not administrators by default. If/when this app needs
-        // an "invite as admin" capability, that's a separate, explicit decision on
-        // this command - not something that should happen implicitly.
-
-        return new IdentityRegistrationResult
+        catch
         {
-            Succeeded = true,
-            UserId = user.Id
-        };
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 
     public async Task<IdentityLoginResult> LoginAsync(
@@ -136,7 +165,7 @@ public class IdentityService : IIdentityService
             int defaultCurrencyId,
             CancellationToken cancellationToken)
     {
-        // A2 fix: fail fast, before opening the transaction, if the chosen language
+        // fail fast, before opening the transaction, if the chosen language
         // doesn't have a complete set of AccountTypeTranslation rows. Without this,
         // the LedgerAccount-seeding loop further down throws an unguarded
         // KeyNotFoundException instead of a clean, translatable error.
@@ -176,15 +205,15 @@ public class IdentityService : IIdentityService
                 };
             }
 
-            // A1 fix: the user who registers is the tenant's owner - grant them the
+            // the user who registers is the tenant's owner - grant them the
             // Administrators role for their own tenant. Seed the role itself on first
             // use if it doesn't exist yet (participates in the same transaction/context).
-            if (!await _roleManager.RoleExistsAsync(Roles.Administrators))
+            if (!await _roleManager.RoleExistsAsync(Roles.TenantAdministrators))
             {
-                await _roleManager.CreateAsync(new IdentityRole<Guid>(Roles.Administrators));
+                await _roleManager.CreateAsync(new IdentityRole<Guid>(Roles.TenantAdministrators));
             }
 
-            var roleResult = await _userManager.AddToRoleAsync(user, Roles.Administrators);
+            var roleResult = await _userManager.AddToRoleAsync(user, Roles.TenantAdministrators);
             if (!roleResult.Succeeded)
             {
                 await transaction.RollbackAsync(cancellationToken);
@@ -219,7 +248,7 @@ public class IdentityService : IIdentityService
                   },
                   cancellationToken);
 
-
+            int displayOrder = 1;
             // Create LedgerAccount roots
             foreach (AccountCategory category in Enum.GetValues<AccountCategory>())
             {
@@ -228,6 +257,7 @@ public class IdentityService : IIdentityService
                     accountTypes[category].Translation,
                     tenant.Id,
                     user.Id,
+                    displayOrder++,
                     accountTypes[category].Description);
 
                 await _context.LedgerAccounts.AddAsync(ledgerAccount);
@@ -249,7 +279,7 @@ public class IdentityService : IIdentityService
         }
     }
 
-    // A2 fix: every AccountCategory value must have a translation row for the
+    // every AccountCategory value must have a translation row for the
     // requested language, or the LedgerAccount root-seeding loop above will fail.
     // Checked up front so a bad/incomplete language choice surfaces as a normal,
     // translatable BusinessRuleException instead of an unhandled exception mid-transaction.

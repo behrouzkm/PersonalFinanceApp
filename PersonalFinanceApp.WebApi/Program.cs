@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi;
 using PersonalFinanceApp.Application;
 using PersonalFinanceApp.Application.Common.Interfaces;
 using PersonalFinanceApp.Domain.Entities;
@@ -7,7 +8,9 @@ using PersonalFinanceApp.Infrastructure;
 using PersonalFinanceApp.Infrastructure.Identity;
 using PersonalFinanceApp.Infrastructure.Persistence;
 using PersonalFinanceApp.WebApi.Middleware;
+using PersonalFinanceApp.WebApi.Swagger;
 using Serilog;
+
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -24,6 +27,24 @@ builder.Host.UseSerilog((context,services,configuration) => configuration
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "PersonalFinanceApp API", Version = "v1" });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Paste the raw JWT returned from /api/auth/login (no \"Bearer \" prefix needed here)."
+    });
+
+    options.OperationFilter<AuthorizeCheckOperationFilter>();
+});
+
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -39,6 +60,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalFinanceApp API v1");
+    });
 }
 
 app.UseExceptionHandler();

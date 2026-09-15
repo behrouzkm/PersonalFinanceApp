@@ -52,8 +52,14 @@ public class OpeningBalanceService : IOpeningBalanceService
         if (parent.AccountTypeId != accountType.Id)
             throw new BusinessRuleException(ApplicationErrorCodes.FundSource.InvalidParentLedgerAccount);
 
+
+        var maxDisplayOrder = await _context.LedgerAccounts
+                .Where(r => r.ParentId == parent.Id)
+                .MaxAsync(c => (int?)c.DisplayOrder, cancellationToken)
+            ?? 0;
+
         var ledgerAccount = new LedgerAccount(
-            accountType.Id, displayName, _currentUser.TenantId, _currentUser.UserId, description);
+                accountType.Id, displayName, _currentUser.TenantId, _currentUser.UserId, maxDisplayOrder + 1, description);
 
         _context.LedgerAccounts.Add(ledgerAccount);
         parent.AddChild(ledgerAccount);
@@ -62,7 +68,7 @@ public class OpeningBalanceService : IOpeningBalanceService
 
         if (initialBalance != 0)
         {
-            var equityAccount = await _lookupService.GetOpeningBalanceEquityLedgerAccount(category, cancellationToken)
+            var equityAccount = await _lookupService.GetOrCreateOpeningBalanceEquityLedgerAccountAsync(currencyId, cancellationToken)
                 ?? throw new BusinessRuleException(ApplicationErrorCodes.FundSource.InvalidOpeningAccountEquityLedgerAccount);
 
             var doc = new AccountingDocument(
@@ -128,7 +134,7 @@ public class OpeningBalanceService : IOpeningBalanceService
             if (hasEarlierEntries)
                 throw new BusinessRuleException(ApplicationErrorCodes.FundSource.OpeningDateCannotBeAfterExistingTransactions);
 
-            var equityAccount = await _lookupService.GetOpeningBalanceEquityLedgerAccount(category, cancellationToken)
+            var equityAccount = await _lookupService.GetOrCreateOpeningBalanceEquityLedgerAccountAsync(fundSource.CurrencyId, cancellationToken)
                 ?? throw new BusinessRuleException(ApplicationErrorCodes.FundSource.InvalidOpeningAccountEquityLedgerAccount);
 
             var doc = new AccountingDocument(
@@ -209,7 +215,7 @@ public class OpeningBalanceService : IOpeningBalanceService
                 else
                     item.UpdateEntry(credit, debit, _currentUser.UserId, description);
             }
-            
+
             existingDoc.EnsureBalanced();
         }
         else if (newInitialBalance == 0)
