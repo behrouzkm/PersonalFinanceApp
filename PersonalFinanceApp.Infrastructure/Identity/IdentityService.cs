@@ -151,7 +151,8 @@ public class IdentityService : IIdentityService
         return new IdentityLoginResult
         {
             Succeeded = true,
-            Token = token
+            Token = token.Token,
+            ExpiresAtUtc = token.ExpiresAtUtc
         };
     }
 

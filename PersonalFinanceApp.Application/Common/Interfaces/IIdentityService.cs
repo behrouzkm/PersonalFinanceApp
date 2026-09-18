@@ -47,5 +47,6 @@ public class IdentityLoginResult
 {
     public bool Succeeded { get; init; }
     public string? Token { get; init; }
+    public DateTime ExpiresAtUtc { get; init; }
     public IReadOnlyList<string> Errors { get; init; } = Array.Empty<string>();
 }

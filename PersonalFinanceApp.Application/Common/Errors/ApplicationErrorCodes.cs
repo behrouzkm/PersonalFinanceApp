@@ -148,6 +148,7 @@ public static class ApplicationErrorCodes
         public const string ToFundSourceNotFound = "ErrorCodes.MoneyTransfer.ToFundSourceNotFound";
         public const string FromLedgerAccountRequired = "ErrorCodes.MoneyTransfer.FromLedgerAccountRequired";
         public const string FromLaterThanToDate = "ErrorCodes.MoneyTransfer.FromLaterThanToDate";
+        public const string FromAmountGreaterThanToAmount = "ErrorCodes.MoneyTransfer.FromAmountGreaterThanToAmount";
     }
 
     public static class CurrencyExchange

@@ -6,10 +6,11 @@ using MediatR;
 using PersonalFinanceApp.Application.Common.Errors;
 using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
+using PersonalFinanceApp.Application.Features.Auth.Common;
 
 namespace PersonalFinanceApp.Application.Features.Auth.Commands.Login;
 
-public class LoginCommandHandler : IRequestHandler<LoginCommand, string>
+public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResultDto>
 {
     private readonly IIdentityService _identityService;
 
@@ -18,7 +19,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, string>
         _identityService=identityService;
     }
 
-    public async Task<string> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<AuthResultDto> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var result = await _identityService.LoginAsync(request.Email,request.Password,cancellationToken);
 
@@ -27,6 +28,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, string>
             throw new BusinessRuleException(ApplicationErrorCodes.Auth.LoginFailed, result.Errors.ToArray());
         }
 
-        return result.Token!;
+        return new AuthResultDto(result.Token!, result.ExpiresAtUtc);
     }
 }

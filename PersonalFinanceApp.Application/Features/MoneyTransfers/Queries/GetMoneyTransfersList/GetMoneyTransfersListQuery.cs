@@ -12,12 +12,21 @@ namespace PersonalFinanceApp.Application.Features.MoneyTransfers.Queries.GetMone
 // axis - covers listing, date-range reporting, and account/person-based views at once.
 public class GetMoneyTransfersListQuery : IRequest<PaginatedList<MoneyTransferListItemDto>>
 {
+    public string? SearchText { get; set; }
+
     public DateOnly? FromDate { get; set; }
     public DateOnly? ToDate { get; set; }
+
     public Guid? MonetaryAccountId { get; set; }
     public Guid? PersonId { get; set; }
     public Guid? LedgerAccountId { get; set; }
 
+    public int? CurrencyId { get; set; }
+
+    public decimal? FromAmount { get; set; }
+    public decimal? ToAmount { get; set; }
+
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 20;
+
 }

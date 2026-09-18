@@ -15,7 +15,7 @@ public class TokenService : ITokenService
         _jwtSettings = jwtSettings;
     }
 
-    public string GenerateToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles)
+    public TokenResult GenerateToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles)
     {
         var claims = new List<Claim>
         {
@@ -29,15 +29,16 @@ public class TokenService : ITokenService
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var expiresAtUtc = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
 
         var token = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+            expires: expiresAtUtc,
             signingCredentials: credentials
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new TokenResult(new JwtSecurityTokenHandler().WriteToken(token), expiresAtUtc);
     }
 }

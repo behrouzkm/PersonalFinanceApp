@@ -7,5 +7,7 @@ namespace PersonalFinanceApp.Application.Common.Interfaces;
 
 public interface ITokenService
 {
-    string GenerateToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles);
+    TokenResult GenerateToken(Guid userId, Guid tenantId, string email, IEnumerable<string> roles);
 }
+
+public record TokenResult(string Token, DateTime ExpiresAtUtc);

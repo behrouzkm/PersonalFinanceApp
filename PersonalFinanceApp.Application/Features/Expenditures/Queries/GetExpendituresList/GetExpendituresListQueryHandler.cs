@@ -10,11 +10,11 @@ using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.Application.Features.Expenditures.Queries.GetExpendituresList;
 
-public class GetExpenditureListQueryHandler : IRequestHandler<GetExpendituresListQuery, PaginatedList<ExpenditureListItemDto>>
+public class GetExpendituresListQueryHandler : IRequestHandler<GetExpendituresListQuery, PaginatedList<ExpenditureListItemDto>>
 {
     private readonly IApplicationDbContext _context;
 
-    public GetExpenditureListQueryHandler(IApplicationDbContext context)
+    public GetExpendituresListQueryHandler(IApplicationDbContext context)
     {
         _context = context;
     }
