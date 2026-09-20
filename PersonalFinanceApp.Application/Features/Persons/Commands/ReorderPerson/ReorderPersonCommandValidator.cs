@@ -12,7 +12,7 @@ public class ReorderPersonCommandValidator : AbstractValidator<ReorderPersonComm
 {
     public ReorderPersonCommandValidator()
     {
-        RuleFor(p => p.Id)
+        RuleFor(p => p.PersonId)
             .NotEmpty()
             .NotEqual(Guid.Empty)
             .WithErrorCode(ApplicationErrorCodes.Person.PersonIdRequired);

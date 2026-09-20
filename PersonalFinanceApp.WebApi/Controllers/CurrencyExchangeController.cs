@@ -17,6 +17,7 @@ using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
+[Route("api/currency-exchanges")]
 public class CurrencyExchangeController : AttachableApiController
 {
     protected override AttachmentOwnerType OwnerType => AttachmentOwnerType.CurrencyExchange;

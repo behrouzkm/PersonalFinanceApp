@@ -26,8 +26,15 @@ public class GetLedgerAccountsOptionsQueryHandler : IRequestHandler<GetLedgerAcc
 
         var query = _context.LedgerAccounts.AsNoTracking();
 
-        if (request.AccountTypeId.HasValue)
-            query = query.Where(r => r.AccountTypeId == request.AccountTypeId.Value);
+        if(request.GetJustPostingAccount)
+        {
+            query = query.Where(r => r.IsPostingAccount);
+        }
+
+        if (request.AccountCategories != null)
+        {
+            query = query.Where(r => request.AccountCategories.Contains(r.AccountType.Category));
+        }
 
         if (request.ParentId.HasValue)
             query = query.Where(r => r.ParentId == request.ParentId.Value);

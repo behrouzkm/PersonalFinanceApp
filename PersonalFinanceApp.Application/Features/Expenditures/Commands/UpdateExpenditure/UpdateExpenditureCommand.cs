@@ -11,7 +11,7 @@ namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.UpdateEx
 
 public class UpdateExpenditureCommand : IRequest, IExpenditureRequest
 {
-    public Guid AccountingDocumentId { get; set; }
+    public Guid ExpenditureDocumentId { get; set; }
 
     // The RowVersion the client last read (e.g. from a GetExpenditureById query).
     // Used to detect if someone else edited this document in the meantime.

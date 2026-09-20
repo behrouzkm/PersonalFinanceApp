@@ -45,7 +45,7 @@ public class GetExpenditureByIdQueryHandler : IRequestHandler<GetExpenditureById
 
         var dto = new ExpenditureDetailsDto
         {
-            AccountingDocumentId = document.Id,
+            ExpenditureDocumentId = document.Id,
             RowVersion = document.RowVersion,
             DocumentDate = document.DocumentDate,
             CurrencyId = document.CurrencyId,

@@ -34,7 +34,8 @@ public class GetBankAccountsOptionsQueryHandler : IRequestHandler<GetBankAccount
                 DisplayName = r.DisplayName,
                 CurrencyName = r.Currency.Name,
                 CurrencySymbol = r.Currency.Symbol,
-                CurrentBalance = r.CurrentBalance
+                CurrentBalance = r.CurrentBalance,
+                CurrencyDecimalPlaces = r.Currency.DecimalPlaces
             })
             .ToListAsync(cancellationToken);
 

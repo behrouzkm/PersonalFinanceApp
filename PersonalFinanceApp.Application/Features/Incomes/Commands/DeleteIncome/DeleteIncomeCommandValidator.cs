@@ -11,7 +11,7 @@ public class DeleteIncomeCommandValidator : AbstractValidator<DeleteIncomeComman
 {
     public DeleteIncomeCommandValidator()
     {
-        RuleFor(x => x.AccountingDocumentId)
+        RuleFor(x => x.IncomeDocumentId)
             .NotEqual(Guid.Empty)
             .WithErrorCode(ApplicationErrorCodes.Income.AccountingDocumentIdRequired);
 

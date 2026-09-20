@@ -8,5 +8,5 @@ namespace PersonalFinanceApp.Application.Features.Incomes.Commands.RestoreIncome
 
 public class RestoreIncomeCommand : IRequest
 {
-    public Guid AccountingDocumentId { get; set; }
+    public Guid IncomeDocumentId { get; set; }
 }

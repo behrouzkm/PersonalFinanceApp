@@ -22,5 +22,5 @@ public class ReorderPersonCommandHandler : IRequestHandler<ReorderPersonCommand>
 
     public async Task Handle(ReorderPersonCommand request, CancellationToken cancellationToken)
     => await _reorderService.ReorderAsync<Person>(
-        p => p.Id == request.Id, request.Id, request.NewDisplayOrder, cancellationToken);
+        p => p.Id == request.PersonId, request.PersonId, request.NewDisplayOrder, cancellationToken);
 }

@@ -18,6 +18,7 @@ using PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrenciesOp
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
+[Route("api/currency-options")]
 public class CurrencyOptionsController : BaseApiController
 {
       public CurrencyOptionsController(IMediator mediator): base(mediator)
@@ -26,13 +27,6 @@ public class CurrencyOptionsController : BaseApiController
 
 
 
-    [HttpGet]
-    public async Task<ActionResult<List<CurrencyOptionDto>>> GetOptionList([FromQuery] GetCurrenciesOptionsQuery query,
-                        CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(query, cancellationToken);
-
-        return Ok(result);
-    }
+    
 
 }

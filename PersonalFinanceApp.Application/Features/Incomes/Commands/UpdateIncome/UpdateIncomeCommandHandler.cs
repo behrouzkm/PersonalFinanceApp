@@ -30,7 +30,7 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
         _currentUser = currentUser;
         _lookup = lookup;
         _ledgerValidator = ledgerValidator;
-        _unitOfWork =unitOfWork;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(UpdateIncomeCommand request, CancellationToken cancellationToken)
@@ -38,8 +38,8 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
         // load the document and its entries
         var document = await _context.AccountingDocuments
             .Include(d => d.Entries)
-            .FirstOrDefaultAsync(d => d.Id == request.AccountingDocumentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
+            .FirstOrDefaultAsync(d => d.Id == request.IncomeDocumentId, cancellationToken)
+            ?? throw new NotFoundException(nameof(AccountingDocument), request.IncomeDocumentId);
 
         _context.AccountingDocuments.Entry(document).Property(d => d.RowVersion).OriginalValue = request.RowVersion;
 
@@ -108,7 +108,7 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
             if (!changed)
                 continue;
 
-            entry.UpdateEntry(line.LedgerAccountId, 0, line.Amount,_currentUser.UserId, line.Description);
+            entry.UpdateEntry(line.LedgerAccountId, 0, line.Amount, _currentUser.UserId, line.Description);
 
             account.MarkAsUsed();
         }
@@ -173,7 +173,7 @@ public class UpdateIncomeCommandHandler : IRequestHandler<UpdateIncomeCommand>
                 await _ledgerValidator.ValidateAsync(
                     monetaryAccount, request.DocumentDate, deposit.Amount, 0, replacingEntryId: entry.Id, cancellationToken);
 
-                entry.UpdateEntry(monetaryAccount.LedgerAccountId, deposit.Amount, 0,_currentUser.UserId, deposit.Description);
+                entry.UpdateEntry(monetaryAccount.LedgerAccountId, deposit.Amount, 0, _currentUser.UserId, deposit.Description);
                 monetaryAccount.AdjustBalance(deposit.Amount);
                 monetaryAccount.LedgerAccount.MarkAsUsed();
 

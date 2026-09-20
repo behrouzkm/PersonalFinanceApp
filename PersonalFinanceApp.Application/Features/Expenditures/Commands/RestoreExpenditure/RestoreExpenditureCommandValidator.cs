@@ -12,7 +12,7 @@ public class RestoreExpenditureCommandValidator : AbstractValidator<RestoreExpen
 {
     public RestoreExpenditureCommandValidator()
     {
-        RuleFor(x=> x.AccountingDocumentId)
+        RuleFor(x => x.ExpenditureDocumentId)
             .NotEqual(Guid.Empty)
             .WithErrorCode(ApplicationErrorCodes.Expenditure.AccountingDocumentIdRequired);
     }

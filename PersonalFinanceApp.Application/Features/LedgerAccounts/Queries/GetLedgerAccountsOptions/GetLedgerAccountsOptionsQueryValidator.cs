@@ -13,15 +13,15 @@ public class GetLedgerAccountsOptionsQueryValidator : AbstractValidator<GetLedge
 {
     public GetLedgerAccountsOptionsQueryValidator()
     {
-        RuleFor(p => p.AccountTypeId)
-            .NotEmpty()
-            .NotEqual(0)
-            .WithErrorCode(ApplicationErrorCodes.LedgerAccount.InvalidAccountTypeId);
+        // RuleFor(p => p.AccountTypeId)
+        //     .NotEmpty()
+        //     .NotEqual(0)
+        //     .WithErrorCode(ApplicationErrorCodes.LedgerAccount.InvalidAccountTypeId);
 
-        RuleFor(p => p.ParentId)
-            .NotEmpty()
-            .NotEqual(Guid.Empty)
-            .WithErrorCode(ApplicationErrorCodes.LedgerAccount.InvalidParentLedgerId);
+        // RuleFor(p => p.ParentId)
+        //     .NotEmpty()
+        //     .NotEqual(Guid.Empty)
+        //     .WithErrorCode(ApplicationErrorCodes.LedgerAccount.InvalidParentLedgerId);
 
     }
 }

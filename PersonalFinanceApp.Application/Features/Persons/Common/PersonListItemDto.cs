@@ -16,6 +16,7 @@ public class PersonListItemDto
     public int CurrencyId { get; set; }
     public string CurrencyName { get; set; } = null!;
     public string CurrencySymbol { get; set; } = null!;
+    public byte CurrencyDecimalPlaces { get; set; }
     public int DisplayOrder { get; set; }
     public string? Email { get; set; }
     public string? MobileNumber { get; set; }

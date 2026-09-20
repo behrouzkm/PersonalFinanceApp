@@ -23,9 +23,9 @@ public class GetIncomeByIdQueryHandler : IRequestHandler<GetIncomeByIdQuery, Inc
     {
         var document = await _context.AccountingDocuments
             .Include(d => d.Entries)
-            .FirstOrDefaultAsync(d => d.Id == request.AccountingDocumentId
+            .FirstOrDefaultAsync(d => d.Id == request.IncomeDocumentId
                 && d.DocumentType == DocumentType.Income, cancellationToken)
-            ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
+            ?? throw new NotFoundException(nameof(AccountingDocument), request.IncomeDocumentId);
 
         var activeEntries = document.Entries.Where(e => !e.IsDeleted).ToList();
         var ledgerAccountIds = activeEntries.Select(e => e.LedgerAccountId).Distinct().ToList();

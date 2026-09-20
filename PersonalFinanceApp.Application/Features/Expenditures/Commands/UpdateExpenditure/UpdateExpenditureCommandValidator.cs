@@ -8,16 +8,16 @@ using PersonalFinanceApp.Application.Features.Expenditures.Common;
 
 namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.UpdateExpenditure;
 
-public class UpdateExpenditureCommandValidator: AbstractValidator<UpdateExpenditureCommand>
+public class UpdateExpenditureCommandValidator : AbstractValidator<UpdateExpenditureCommand>
 {
 
     public UpdateExpenditureCommandValidator()
     {
-        RuleFor(x=>x.AccountingDocumentId)
+        RuleFor(x => x.ExpenditureDocumentId)
             .NotEqual(Guid.Empty)
             .WithErrorCode(ApplicationErrorCodes.Expenditure.AccountingDocumentIdRequired);
 
-        RuleFor(x=>x.RowVersion)
+        RuleFor(x => x.RowVersion)
             .NotEmpty()
             .WithErrorCode(ApplicationErrorCodes.Expenditure.RowVersionRequired);
 

@@ -19,6 +19,7 @@ using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
+[Route("api/bank-accounts")]
 public class BankAccountController : AttachableApiController
 {
     protected override AttachmentOwnerType OwnerType => AttachmentOwnerType.MonetaryAccount;

@@ -37,8 +37,8 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
         // load the document to update, including all its entries
         var document = await _context.AccountingDocuments
             .Include(d => d.Entries)
-            .FirstOrDefaultAsync(r => r.Id == request.AccountingDocumentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
+            .FirstOrDefaultAsync(r => r.Id == request.ExpenditureDocumentId, cancellationToken)
+            ?? throw new NotFoundException(nameof(AccountingDocument), request.ExpenditureDocumentId);
 
         _context.Entry(document).Property(d => d.RowVersion).OriginalValue = request.RowVersion;
 
@@ -138,7 +138,7 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
             if (!changed)
                 continue;
 
-            existingExpenditureEntry.UpdateEntry(line.LedgerAccountId, line.Amount, 0,modifiedBy, line.Description);
+            existingExpenditureEntry.UpdateEntry(line.LedgerAccountId, line.Amount, 0, modifiedBy, line.Description);
 
             expenseLedgerAccount.MarkAsUsed();
 
@@ -232,7 +232,7 @@ public class UpdateExpenditureCommandHandler : IRequestHandler<UpdateExpenditure
                 await _ledgerValidator.ValidateAsync(paymentSource, documentDate, 0, payment.Amount,
                         replacingEntryId: entry.Id, cancellationToken);
 
-                entry.UpdateEntry(paymentSource.LedgerAccountId, 0, payment.Amount,modifiedBy, payment.Description);
+                entry.UpdateEntry(paymentSource.LedgerAccountId, 0, payment.Amount, modifiedBy, payment.Description);
                 paymentSource.AdjustBalance(-payment.Amount);
 
                 ledgerAccountEntity.MarkAsUsed();

@@ -34,7 +34,7 @@ public class ExpenditureController : AttachableApiController
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateExpenditureCommand command, CancellationToken cancellationToken)
     {
-        if (id != command.AccountingDocumentId)
+        if (id != command.ExpenditureDocumentId)
             return BadRequest("Route id and command AccountingDocumentId must match.");
 
         await _mediator.Send(command, cancellationToken);
@@ -46,7 +46,7 @@ public class ExpenditureController : AttachableApiController
     {
         await _mediator.Send(new DeleteExpenditureCommand
         {
-            AccountingDocumentId = id,
+            ExpenditureDocumentId = id,
             RowVersion = rowVersion
         },
             cancellationToken);
@@ -59,7 +59,7 @@ public class ExpenditureController : AttachableApiController
     {
         await _mediator.Send(new RestoreExpenditureCommand
         {
-            AccountingDocumentId = id
+            ExpenditureDocumentId = id
         }, cancellationToken);
 
         return NoContent();

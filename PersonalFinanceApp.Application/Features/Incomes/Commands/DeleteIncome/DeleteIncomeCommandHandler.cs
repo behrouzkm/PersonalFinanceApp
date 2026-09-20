@@ -27,15 +27,15 @@ public class DeleteIncomeCommandHandler : IRequestHandler<DeleteIncomeCommand>
         _context = context;
         _currentUser = currentUserService;
         _attachmentService = attachmentService;
-        _unitOfWork=unitOfWork;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(DeleteIncomeCommand request, CancellationToken cancellationToken)
     {
         var document = await _context.AccountingDocuments
                .Include(d => d.Entries)
-               .FirstOrDefaultAsync(d => d.Id == request.AccountingDocumentId, cancellationToken)
-               ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
+               .FirstOrDefaultAsync(d => d.Id == request.IncomeDocumentId, cancellationToken)
+               ?? throw new NotFoundException(nameof(AccountingDocument), request.IncomeDocumentId);
 
         // row version check for concurrency control
         _context.Entry(document).Property(d => d.RowVersion).OriginalValue = request.RowVersion;

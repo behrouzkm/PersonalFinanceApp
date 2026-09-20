@@ -39,10 +39,10 @@ public class RestoreExpenditureCommandHandler : IRequestHandler<RestoreExpenditu
         var document = await _context.AccountingDocuments
             .IgnoreQueryFilters()
             .Include(d => d.Entries)
-            .FirstOrDefaultAsync(d => d.Id == request.AccountingDocumentId
+            .FirstOrDefaultAsync(d => d.Id == request.ExpenditureDocumentId
                 && d.DocumentType == Domain.Enums.DocumentType.Expenditure
                 && d.TenantId == _currentUser.TenantId, cancellationToken)
-            ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
+            ?? throw new NotFoundException(nameof(AccountingDocument), request.ExpenditureDocumentId);
 
         document.Restore(_currentUser.UserId);
 

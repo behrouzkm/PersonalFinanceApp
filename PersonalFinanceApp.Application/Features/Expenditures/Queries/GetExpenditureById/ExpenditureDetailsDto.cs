@@ -7,7 +7,7 @@ namespace PersonalFinanceApp.Application.Features.Expenditures.Queries.GetExpend
 
 public class ExpenditureDetailsDto
 {
-    public Guid AccountingDocumentId { get; set; }
+    public Guid ExpenditureDocumentId { get; set; }
     public byte[] RowVersion { get; set; } = Array.Empty<byte>();
     public DateOnly DocumentDate { get; set; }
     public int CurrencyId { get; set; }

@@ -17,10 +17,11 @@ using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
-public class MoneyTransferController : AttachableApiController
+[Route("api/money-transfers")]
+public class MoneyTransfersController : AttachableApiController
 {
     protected override AttachmentOwnerType OwnerType => AttachmentOwnerType.AccountingDocument;
-    public MoneyTransferController(IMediator mediator): base(mediator)
+    public MoneyTransfersController(IMediator mediator): base(mediator)
     {
     }
 

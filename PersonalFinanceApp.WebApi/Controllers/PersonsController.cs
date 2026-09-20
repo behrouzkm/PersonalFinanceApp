@@ -19,11 +19,11 @@ using PersonalFinanceApp.Domain.Enums;
 namespace PersonalFinanceApp.WebApi.Controllers;
 
 
-public class PersonController : AttachableApiController
+public class PersonsController : AttachableApiController
 {
     protected override AttachmentOwnerType OwnerType => AttachmentOwnerType.Person;
 
-    public PersonController(IMediator mediator) : base(mediator)
+    public PersonsController(IMediator mediator) : base(mediator)
     {
     }
 
@@ -73,7 +73,7 @@ public class PersonController : AttachableApiController
                         CancellationToken cancellationToken)
     {
 
-        if (id != command.Id)
+        if (id != command.PersonId)
             return BadRequest("Route id and command PersonId must match.");
 
 

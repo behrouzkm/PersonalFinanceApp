@@ -11,11 +11,11 @@ using PersonalFinanceApp.Application.Features.Currencies.Common;
 
 namespace PersonalFinanceApp.Application.Features.Currencies.Queries.GetCurrenciesList;
 
-public class GetCurrencyListQueryHandler : IRequestHandler<GetCurrenciesListQuery, PaginatedList<CurrencyDto>>
+public class GetCurrenciesListQueryHandler : IRequestHandler<GetCurrenciesListQuery, PaginatedList<CurrencyDto>>
 {
     private readonly IApplicationDbContext _context;
 
-    public GetCurrencyListQueryHandler(IApplicationDbContext context)
+    public GetCurrenciesListQueryHandler(IApplicationDbContext context)
     {
         _context = context;
     }

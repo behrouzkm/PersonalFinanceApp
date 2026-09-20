@@ -1,5 +1,6 @@
 using MediatR;
 using PersonalFinanceApp.Application.Features.LedgerAccounts.Common;
+using PersonalFinanceApp.Domain.Enums;
 
 
 namespace PersonalFinanceApp.Application.Features.LedgerAccounts.Queries.GetLedgerAccountsOptions;
@@ -8,6 +9,8 @@ namespace PersonalFinanceApp.Application.Features.LedgerAccounts.Queries.GetLedg
 // axis - covers listing, date-range reporting, and account/person-based views at once.
 public class GetLedgerAccountsOptionsQuery : IRequest<List<LedgerAccountOptionDto>>
 {
-    public int? AccountTypeId { get; set; } = null;
+    public bool GetJustPostingAccount { get; set; } = true;
+     public IEnumerable<AccountCategory>? AccountCategories { get; set; } = null;
     public Guid? ParentId { get; set; } = null;
+
 }

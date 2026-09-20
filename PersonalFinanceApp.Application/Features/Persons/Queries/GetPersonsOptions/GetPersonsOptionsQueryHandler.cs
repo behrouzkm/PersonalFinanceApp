@@ -29,7 +29,6 @@ public class GetPersonsOptionsQueryHandler : IRequestHandler<GetPersonsOptionsQu
             .Select(r => new PersonOptionDto
             {
                 Id = r.Id,
-                PersonType = r.PersonType,
                 DisplayName = r.DisplayName
             })
             .ToListAsync(cancellationToken);

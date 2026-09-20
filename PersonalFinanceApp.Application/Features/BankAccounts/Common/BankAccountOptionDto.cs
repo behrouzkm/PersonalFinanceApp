@@ -14,4 +14,5 @@ public class BankAccountOptionDto
     public decimal CurrentBalance { get; set; }
     public string CurrencyName { get; set; } = null!;
     public string CurrencySymbol { get; set; } = null!;
+    public int CurrencyDecimalPlaces { get; set; } = 2;
 }

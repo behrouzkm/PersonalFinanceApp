@@ -19,6 +19,7 @@ using PersonalFinanceApp.Domain.Enums;
 
 namespace PersonalFinanceApp.WebApi.Controllers;
 
+[Route("api/ledger-accounts")]
 public class LedgerAccountController : AttachableApiController
 {
     protected override AttachmentOwnerType OwnerType => AttachmentOwnerType.MonetaryAccount;

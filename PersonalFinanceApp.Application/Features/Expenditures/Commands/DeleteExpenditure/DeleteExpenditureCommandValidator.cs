@@ -7,7 +7,7 @@ public class DeleteExpenditureCommandValidator : AbstractValidator<DeleteExpendi
 {
     public DeleteExpenditureCommandValidator()
     {
-        RuleFor(x => x.AccountingDocumentId)
+        RuleFor(x => x.ExpenditureDocumentId)
             .NotEqual(Guid.Empty)
             .WithErrorCode(ApplicationErrorCodes.Expenditure.AccountingDocumentIdRequired);
 

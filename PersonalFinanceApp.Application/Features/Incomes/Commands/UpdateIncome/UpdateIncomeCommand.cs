@@ -10,7 +10,7 @@ namespace PersonalFinanceApp.Application.Features.Incomes.Commands.UpdateIncome;
 
 public class UpdateIncomeCommand : IRequest, IIncomeRequest
 {
-    public Guid AccountingDocumentId { get; set; }
+    public Guid IncomeDocumentId { get; set; }
 
     public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 

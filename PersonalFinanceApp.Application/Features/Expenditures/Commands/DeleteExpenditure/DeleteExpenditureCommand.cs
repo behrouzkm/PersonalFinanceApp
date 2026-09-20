@@ -8,7 +8,7 @@ namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.DeleteEx
 
 public class DeleteExpenditureCommand : IRequest
 {
-    public Guid AccountingDocumentId { get; set; }
+    public Guid ExpenditureDocumentId { get; set; }
 
     // RowVersion is used for concurrency control to ensure that the document has not been modified by
     // another user since it was last retrieved.

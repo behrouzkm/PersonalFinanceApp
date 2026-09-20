@@ -19,7 +19,7 @@ namespace PersonalFinanceApp.WebApi.Controllers;
 public class IncomeController : AttachableApiController
 {
     protected override AttachmentOwnerType OwnerType => AttachmentOwnerType.AccountingDocument;
-    public IncomeController(IMediator mediator): base(mediator)
+    public IncomeController(IMediator mediator) : base(mediator)
     {
     }
 
@@ -34,7 +34,7 @@ public class IncomeController : AttachableApiController
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateIncomeCommand command, CancellationToken cancellationToken)
     {
-        if (id != command.AccountingDocumentId)
+        if (id != command.IncomeDocumentId)
             return BadRequest("Route id and command AccountingDocumentId must match.");
 
         await _mediator.Send(command, cancellationToken);
@@ -46,7 +46,7 @@ public class IncomeController : AttachableApiController
     {
         await _mediator.Send(new DeleteIncomeCommand
         {
-            AccountingDocumentId = id,
+            IncomeDocumentId = id,
             RowVersion = rowVersion
         }, cancellationToken);
 
@@ -58,7 +58,7 @@ public class IncomeController : AttachableApiController
     {
         await _mediator.Send(new RestoreIncomeCommand
         {
-            AccountingDocumentId = id
+            IncomeDocumentId = id
         }, cancellationToken);
 
         return NoContent();
@@ -69,7 +69,7 @@ public class IncomeController : AttachableApiController
     {
         var result = await _mediator.Send(new GetIncomeByIdQuery
         {
-            AccountingDocumentId = id
+            IncomeDocumentId = id
         }, cancellationToken);
 
         return Ok(result);

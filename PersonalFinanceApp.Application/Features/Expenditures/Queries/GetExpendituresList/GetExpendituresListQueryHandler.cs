@@ -59,7 +59,7 @@ public class GetExpendituresListQueryHandler : IRequestHandler<GetExpendituresLi
             .ThenByDescending(d => d.CreatedAt)
             .Select(d => new ExpenditureListItemDto
             {
-                AccountingDocumentId = d.Id,
+                ExpenditureDocumentId = d.Id,
                 DocumentDate = d.DocumentDate,
                 CurrencyId = d.CurrencyId,
                 Description = d.Description,

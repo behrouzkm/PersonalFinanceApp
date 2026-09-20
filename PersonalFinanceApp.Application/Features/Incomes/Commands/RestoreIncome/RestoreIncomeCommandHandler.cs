@@ -31,7 +31,7 @@ public class RestoreIncomeCommandHandler : IRequestHandler<RestoreIncomeCommand>
         _currentUser = currentUser;
         _ledgerBalanceValidation = ledgerBalanceValidation;
         _attachmentService = attachmentService;
-        _unitOfWork =unitOfWork;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(RestoreIncomeCommand request, CancellationToken cancellationToken)
@@ -40,9 +40,9 @@ public class RestoreIncomeCommandHandler : IRequestHandler<RestoreIncomeCommand>
                 .IgnoreQueryFilters()
                 .Include(d => d.Entries)
                 .FirstOrDefaultAsync(d => d.TenantId == _currentUser.TenantId &&
-                        d.Id == request.AccountingDocumentId &&
+                        d.Id == request.IncomeDocumentId &&
                         d.DocumentType == DocumentType.Income, cancellationToken)
-            ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
+            ?? throw new NotFoundException(nameof(AccountingDocument), request.IncomeDocumentId);
 
         document.Restore(_currentUser.UserId);
 

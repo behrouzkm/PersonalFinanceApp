@@ -20,7 +20,10 @@ public sealed class GetMoneyTransfersListQueryValidator
 
         RuleFor(x => x.SearchText)
             .MaximumLength(200)
-            .When(x => !string.IsNullOrWhiteSpace(x.SearchText));
+            .When(x => !string.IsNullOrWhiteSpace(x.SearchText))
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.SearchTextTooLong);
+
+
 
         RuleFor(x => x.FromDate)
             .LessThanOrEqualTo(x => x.ToDate)
@@ -28,12 +31,14 @@ public sealed class GetMoneyTransfersListQueryValidator
             .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.FromLaterThanToDate);
 
         RuleFor(x => x.FromAmount)
-            .GreaterThanOrEqualTo(0)
-            .When(x => x.FromAmount.HasValue);
+          .GreaterThanOrEqualTo(0)
+          .When(x => x.FromAmount.HasValue)
+          .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.FromAmountMustBeNonNegative);
 
         RuleFor(x => x.ToAmount)
             .GreaterThanOrEqualTo(0)
-            .When(x => x.ToAmount.HasValue);
+            .When(x => x.ToAmount.HasValue)
+            .WithErrorCode(ApplicationErrorCodes.MoneyTransfer.ToAmountMustBeNonNegative);
 
         RuleFor(x => x.FromAmount)
             .LessThanOrEqualTo(x => x.ToAmount)

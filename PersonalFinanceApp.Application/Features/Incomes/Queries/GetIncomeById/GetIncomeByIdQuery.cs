@@ -4,5 +4,5 @@ namespace PersonalFinanceApp.Application.Features.Incomes.Queries.GetIncomeById;
 
 public class GetIncomeByIdQuery : IRequest<IncomeDetailsDto>
 {
-    public Guid AccountingDocumentId { get; set; }
+    public Guid IncomeDocumentId { get; set; }
 }

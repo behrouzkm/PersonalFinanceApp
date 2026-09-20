@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PersonalFinanceApp.Domain.Enums;
 
-namespace PersonalFinanceApp.Application.Features.CashAccounts.Common;
+namespace PersonalFinanceApp.Application.Features.Common;
 
-public class CashAccountOptionDto
+public class MonetaryAccountOptionDto
 {
-    public Guid Id { get; set; }
+    public Guid MonetaryAccountId { get; set; }
     public string DisplayName { get; set; } = null!;
     public decimal CurrentBalance { get; set; }
     public string CurrencyName { get; set; } = null!;

@@ -8,5 +8,5 @@ namespace PersonalFinanceApp.Application.Features.Expenditures.Commands.RestoreE
 
 public class RestoreExpenditureCommand : IRequest
 {
-    public Guid AccountingDocumentId { get; set; }
+    public Guid ExpenditureDocumentId { get; set; }
 }

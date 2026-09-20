@@ -17,8 +17,10 @@ using PersonalFinanceApp.Application.Features.CashAccounts.Queries.GetCashAccoun
 using PersonalFinanceApp.Application.Features.CashAccounts.Queries.GetCashAccountsOptions;
 using PersonalFinanceApp.Domain.Enums;
 
+
 namespace PersonalFinanceApp.WebApi.Controllers;
 
+[Route("api/cash-accounts")]
 public class CashAccountController : AttachableApiController
 {
     protected override AttachmentOwnerType OwnerType => AttachmentOwnerType.MonetaryAccount;

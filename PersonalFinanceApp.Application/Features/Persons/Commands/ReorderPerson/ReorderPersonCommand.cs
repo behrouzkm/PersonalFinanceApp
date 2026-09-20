@@ -8,6 +8,6 @@ namespace PersonalFinanceApp.Application.Features.Persons.Commands.ReorderPerson
 
 public class ReorderPersonCommand : IRequest
 {
-    public Guid Id { get; set; }
+    public Guid PersonId { get; set; }
     public int NewDisplayOrder { get; set; }
 }

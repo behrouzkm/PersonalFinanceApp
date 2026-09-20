@@ -14,6 +14,18 @@ public class GetPersonsListQueryValidator : AbstractValidator<GetPersonsListQuer
         RuleFor(x => x.PageNumber).GreaterThan(0);
         RuleFor(x => x.PageSize).InclusiveBetween(1, 20);
 
+
+        RuleFor(x => x.SearchText)
+            .MaximumLength(200)
+            .When(x => !string.IsNullOrWhiteSpace(x.SearchText))
+            .WithErrorCode(ApplicationErrorCodes.Person.SearchTextTooLong);
+
+
+        RuleFor(x => x.FromBalance)
+            .LessThanOrEqualTo(x => x.ToBalance)
+            .When(x => x.FromBalance.HasValue && x.ToBalance.HasValue)
+            .WithErrorCode(ApplicationErrorCodes.Person.FromBalanceGreaterThanToBalance);
+
     }
 
 }

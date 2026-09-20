@@ -149,6 +149,10 @@ public static class ApplicationErrorCodes
         public const string FromLedgerAccountRequired = "ErrorCodes.MoneyTransfer.FromLedgerAccountRequired";
         public const string FromLaterThanToDate = "ErrorCodes.MoneyTransfer.FromLaterThanToDate";
         public const string FromAmountGreaterThanToAmount = "ErrorCodes.MoneyTransfer.FromAmountGreaterThanToAmount";
+        public const string SearchTextTooLong = "ErrorCodes.MoneyTransfer.SearchTextTooLong";
+        public const string FromAmountMustBeNonNegative = "ErrorCodes.MoneyTransfer.FromAmountMustBeNonNegative";
+        public const string ToAmountMustBeNonNegative = "ErrorCodes.MoneyTransfer.ToAmountMustBeNonNegative";
+
     }
 
     public static class CurrencyExchange
@@ -196,9 +200,8 @@ public static class ApplicationErrorCodes
         public const string EmailAddressIsTooLong = "ErrorCodes.Person.EmailAddressIsTooLong";
         public const string OpeningDateRequired = "ErrorCodes.Person.OpeningDateRequired";
         public const string OpeningDateInFuture = "ErrorCodes.Person.OpeningDateInFuture";
-        public const string InvalidParentLedgerAccount = "ErrorCodes.Person.InvalidParentLedgerAccount";
-        public const string InvalidOpeningAccountEquityLedgerAccount = "ErrorCodes.Person.InvalidOpeningAccountEquityLedgerAccount";
-        public const string OpeningDateCannotBeAfterExistingTransactions = "ErrorCodes.Person.OpeningDateCannotBeAfterExistingTransactions";
+        public const string FromBalanceGreaterThanToBalance = "ErrorCodes.Person.FromBalanceGreaterThanToBalance";
+        public const string SearchTextTooLong = "ErrorCodes.Person.SearchTextTooLong";
         public const string CannotDeleteWithAccountingHistory = "ErrorCodes.Person.CannotDeleteWithAccountingHistory";
         public const string InvalidDisplayOrder = "ErrorCodes.Person.InvalidDisplayOrder";
     }

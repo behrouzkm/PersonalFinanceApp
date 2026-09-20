@@ -3,33 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PersonalFinanceApp.Application.Common.Interfaces;
-using PersonalFinanceApp.Application.Common.Models;
-using PersonalFinanceApp.Application.Features.CashAccounts.Common;
+using PersonalFinanceApp.Application.Features.Common;
+using Microsoft.EntityFrameworkCore;
 
 
-namespace PersonalFinanceApp.Application.Features.CashAccounts.Queries.GetCashAccountsOptions;
+namespace PersonalFinanceApp.Application.Features.MonetaryAccounts.Queries.GetMonetaryAccountOptions;
 
-public class GetCashAccountsOptionsQueryHandler : IRequestHandler<GetCashAccountsOptionsQuery, List<CashAccountOptionDto>>
+public class GetMonetaryAccountOptionsQueryHandler : IRequestHandler<GetMonetaryAccountOptionsQuery, List<MonetaryAccountOptionDto>>
 {
     private readonly IApplicationDbContext _context;
 
-    public GetCashAccountsOptionsQueryHandler(IApplicationDbContext context)
+    public GetMonetaryAccountOptionsQueryHandler(IApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task<List<CashAccountOptionDto>> Handle(GetCashAccountsOptionsQuery request,
+    public async Task<List<MonetaryAccountOptionDto>> Handle(GetMonetaryAccountOptionsQuery request,
                         CancellationToken cancellationToken)
     {
-        var options = await _context.CashAccounts
-            .Include(b => b.Currency)
-            .AsNoTracking()
+        var options = await _context.MonetaryAccounts
             .OrderBy(o => o.DisplayOrder)
-            .Select(r => new CashAccountOptionDto
+            .Select(r => new MonetaryAccountOptionDto
             {
-                Id = r.Id,
+                MonetaryAccountId = r.Id,
                 DisplayName = r.DisplayName,
                 CurrencyName = r.Currency.Name,
                 CurrencySymbol = r.Currency.Symbol,
@@ -41,3 +38,4 @@ public class GetCashAccountsOptionsQueryHandler : IRequestHandler<GetCashAccount
         return options;
     }
 }
+

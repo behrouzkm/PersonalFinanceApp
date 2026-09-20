@@ -34,8 +34,8 @@ public class DeleteExpenditureCommandHandler : IRequestHandler<DeleteExpenditure
     {
         var document = await _context.AccountingDocuments
             .Include(d => d.Entries)
-            .FirstOrDefaultAsync(d => d.Id == request.AccountingDocumentId, cancellationToken)
-            ?? throw new NotFoundException(nameof(AccountingDocument), request.AccountingDocumentId);
+            .FirstOrDefaultAsync(d => d.Id == request.ExpenditureDocumentId, cancellationToken)
+            ?? throw new NotFoundException(nameof(AccountingDocument), request.ExpenditureDocumentId);
 
         // row version check for concurrency control
         _context.Entry(document).Property(d => d.RowVersion).OriginalValue = request.RowVersion;
