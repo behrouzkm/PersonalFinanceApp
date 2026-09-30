@@ -49,18 +49,26 @@ public class IdentityService : IIdentityService
         string firstName,
         string lastName,
         Guid tenantId,
+        int? languageId,
         CancellationToken cancellationToken)
     {
         await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
         try
         {
+            var tenant = await _context.Tenants
+                .FirstOrDefaultAsync(r => r.Id == tenantId, cancellationToken)
+                ?? throw new NotFoundException(nameof(Tenant), tenantId);
+
+
             var user = new ApplicationUser
             {
                 UserName = email,
                 Email = email,
                 FirstName = firstName,
                 LastName = lastName,
-                TenantId = tenantId
+                TenantId = tenantId,
+                LanguageId = languageId.HasValue ? languageId.Value : tenant.DefaultLanguageId,
+                CreatedAtUtc = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, password);
@@ -80,12 +88,12 @@ public class IdentityService : IIdentityService
             // TenantAdministrators is granted only at tenant-creation time (RegisterAsync),
             // never here. If this app later needs "invite as tenant admin", that's a
             // separate, explicit parameter on this call - not an implicit upgrade path.
-            if (!await _roleManager.RoleExistsAsync(Roles.Users))
+            if (!await _roleManager.RoleExistsAsync(Roles.TenantMembers))
             {
-                await _roleManager.CreateAsync(new IdentityRole<Guid>(Roles.Users));
+                await _roleManager.CreateAsync(new IdentityRole<Guid>(Roles.TenantMembers));
             }
 
-            var roleResult = await _userManager.AddToRoleAsync(user, Roles.Users);
+            var roleResult = await _userManager.AddToRoleAsync(user, Roles.TenantMembers);
 
             if (!roleResult.Succeeded)
             {
@@ -140,6 +148,9 @@ public class IdentityService : IIdentityService
             };
         }
 
+        user.LastLoginAtUtc = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
         // JWT bearer auth is stateless - [Authorize(Roles = ...)] reads role claims out
         // of the token itself, not a live DB lookup on every request. The user's current
         // roles have to be fetched and embedded here, or role checks can never pass no
@@ -190,7 +201,8 @@ public class IdentityService : IIdentityService
                 Email = email,
                 TenantId = tenant.Id,
                 FirstName = firstName,
-                LastName = lastName
+                LastName = lastName,
+                CreatedAtUtc = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, password);
@@ -278,6 +290,80 @@ public class IdentityService : IIdentityService
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+
+
+    public async Task<IdentityUserProfileResult> GetProfileAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString())
+            ?? throw new NotFoundException(nameof(ApplicationUser), userId);
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return new IdentityUserProfileResult
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email!,
+            ProfilePhotoStorageKey = user.ProfilePhotoStorageKey,
+            DateOfBirth = user.DateOfBirth,
+            Gender = user.Gender,
+            CreatedAtUtc = user.CreatedAtUtc,
+            LastLoginAtUtc = user.LastLoginAtUtc,
+            PasswordChangedAtUtc = user.PasswordChangedAtUtc,
+            Roles = roles.ToArray()
+        };
+    }
+
+    public async Task<IdentityOperationResult> UpdateProfileAsync(
+        Guid userId, string firstName, string lastName, DateOnly? dateOfBirth, Gender? gender,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString())
+            ?? throw new NotFoundException(nameof(ApplicationUser), userId);
+
+        user.FirstName = firstName;
+        user.LastName = lastName;
+        user.DateOfBirth = dateOfBirth;
+        user.Gender = gender;
+
+        var result = await _userManager.UpdateAsync(user);
+
+        return result.Succeeded
+            ? IdentityOperationResult.Success()
+            : IdentityOperationResult.Failure(result.Errors.Select(e => e.Description));
+    }
+
+    public async Task<IdentityOperationResult> SetProfilePhotoAsync(
+        Guid userId, string? storageKey, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString())
+            ?? throw new NotFoundException(nameof(ApplicationUser), userId);
+
+        user.ProfilePhotoStorageKey = storageKey;
+
+        var result = await _userManager.UpdateAsync(user);
+
+        return result.Succeeded
+            ? IdentityOperationResult.Success()
+            : IdentityOperationResult.Failure(result.Errors.Select(e => e.Description));
+    }
+
+    public async Task<IdentityOperationResult> ChangePasswordAsync(
+        Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString())
+            ?? throw new NotFoundException(nameof(ApplicationUser), userId);
+
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+
+        if (!result.Succeeded)
+            return IdentityOperationResult.Failure(result.Errors.Select(e => e.Description));
+
+        user.PasswordChangedAtUtc = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
+        return IdentityOperationResult.Success();
     }
 
     // every AccountCategory value must have a translation row for the

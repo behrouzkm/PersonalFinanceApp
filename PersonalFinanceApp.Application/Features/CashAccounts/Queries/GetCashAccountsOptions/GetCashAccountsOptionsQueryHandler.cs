@@ -23,13 +23,23 @@ public class GetCashAccountsOptionsQueryHandler : IRequestHandler<GetCashAccount
     public async Task<List<CashAccountOptionDto>> Handle(GetCashAccountsOptionsQuery request,
                         CancellationToken cancellationToken)
     {
-        var options = await _context.CashAccounts
+        var query = _context.CashAccounts
             .Include(b => b.Currency)
             .AsNoTracking()
+            .AsQueryable();
+
+
+        if (request.CurrencyId.HasValue)
+        {
+            query = query.Where(c => c.CurrencyId == request.CurrencyId.Value);
+        }
+
+        var projections = await query
             .OrderBy(o => o.DisplayOrder)
             .Select(r => new CashAccountOptionDto
             {
                 Id = r.Id,
+                LedgerAccountId = r.LedgerAccountId,
                 DisplayName = r.DisplayName,
                 CurrencyName = r.Currency.Name,
                 CurrencySymbol = r.Currency.Symbol,
@@ -38,6 +48,6 @@ public class GetCashAccountsOptionsQueryHandler : IRequestHandler<GetCashAccount
             })
             .ToListAsync(cancellationToken);
 
-        return options;
+        return projections;
     }
 }

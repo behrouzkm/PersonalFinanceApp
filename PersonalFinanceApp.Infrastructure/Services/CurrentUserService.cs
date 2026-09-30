@@ -18,6 +18,12 @@ public class CurrentUserService : ICurrentUserService
 
     public Guid UserId => GetGuidClaim(ClaimTypes.NameIdentifier);
 
+    // TokenService already embeds roles as ClaimTypes.Role claims (see
+    // GenerateToken), so this is a direct, zero-extra-plumbing read.
+    public bool IsInRole(string role) =>
+        _httpContextAccessor.HttpContext?.User?.IsInRole(role) ?? false;
+
+
     private Guid GetGuidClaim(string claimType)
     {
         var value = _httpContextAccessor.HttpContext?.User?.FindFirstValue(claimType);

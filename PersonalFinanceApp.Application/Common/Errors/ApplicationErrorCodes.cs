@@ -152,6 +152,8 @@ public static class ApplicationErrorCodes
         public const string SearchTextTooLong = "ErrorCodes.MoneyTransfer.SearchTextTooLong";
         public const string FromAmountMustBeNonNegative = "ErrorCodes.MoneyTransfer.FromAmountMustBeNonNegative";
         public const string ToAmountMustBeNonNegative = "ErrorCodes.MoneyTransfer.ToAmountMustBeNonNegative";
+      public const string MissingCreditEntry = "ErrorCodes.MoneyTransfer.MissingCreditEntry";
+      public const string MissingDebitEntry = "ErrorCodes.MoneyTransfer.MissingDebitEntry";
 
     }
 
@@ -256,5 +258,12 @@ public static class ApplicationErrorCodes
         public const string InvalidDisplayOrder = "ErrorCodes.LedgerAccount.InvalidDisplayOrder";
         public const string InvalidAccountTypeId = "ErrorCodes.LedgerAccount.InvalidAccountTypeId";
         public const string CannotDeleteDirectly = "ErrorCodes.LedgerAccount.CannotDeleteDirectly";
+    }
+
+    public static class Profile
+    {
+        public const string UpdateFailed = "ErrorCodes.Profile.UpdateFailed";
+        public const string ChangePasswordFailed = "ErrorCodes.Profile.ChangePasswordFailed";
+        public const string DateOfBirthInFuture = "ErrorCodes.Profile.DateOfBirthInFuture";
     }
 }

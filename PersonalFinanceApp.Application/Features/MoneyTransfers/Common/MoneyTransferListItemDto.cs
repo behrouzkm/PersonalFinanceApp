@@ -2,7 +2,7 @@ namespace PersonalFinanceApp.Application.Features.MoneyTransfers.Common;
 
 public sealed class MoneyTransferListItemDto
 {
-    public Guid AccountingDocumentId { get; init; }
+    public Guid MoneyTransferDocumentId { get; init; }
 
     public DateOnly TransferDate { get; init; }
 
@@ -21,4 +21,8 @@ public sealed class MoneyTransferListItemDto
     public string? Description { get; init; }
 
     public int AttachmentCount { get; init; }
+
+    public DateTime CreatedAt { get; set; }
+    public Guid? CreatedBy { get; set; }
+    public string? CreatedByUserName { get; set; }
 }

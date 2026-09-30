@@ -12,6 +12,7 @@ using PersonalFinanceApp.Application.Features.MoneyTransfers.Commands.RestoreMon
 using PersonalFinanceApp.Application.Features.MoneyTransfers.Commands.UpdateMoneyTransfer;
 using PersonalFinanceApp.Application.Features.MoneyTransfers.Common;
 using PersonalFinanceApp.Application.Features.MoneyTransfers.Queries.GetMoneyTransferById;
+using PersonalFinanceApp.Application.Features.MoneyTransfers.Queries.GetMoneyTransfersDeletedList;
 using PersonalFinanceApp.Application.Features.MoneyTransfers.Queries.GetMoneyTransfersList;
 using PersonalFinanceApp.Domain.Enums;
 
@@ -79,6 +80,15 @@ public class MoneyTransfersController : AttachableApiController
 
     [HttpGet]
     public async Task<ActionResult<PaginatedList<MoneyTransferListItemDto>>> GetList([FromQuery] GetMoneyTransfersListQuery query,
+                        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpGet("deleted-list")]
+    public async Task<ActionResult<PaginatedList<MoneyTransferDeletedListItemDto>>> GetDeletedList([FromQuery] GetMoneyTransfersDeletedListQuery query,
                         CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(query, cancellationToken);

@@ -46,6 +46,7 @@ public class CreateTenantUserCommandHandler : IRequestHandler<CreateTenantUserCo
             request.FirstName,
             request.LastName,
             tenantId,
+            request.LanguageId.HasValue ? request.LanguageId.Value : tenant.DefaultLanguageId,
             cancellationToken
         );
 

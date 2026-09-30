@@ -39,7 +39,7 @@ public class RestorePersonCommandHandler : IRequestHandler<RestorePersonCommand>
             .IgnoreQueryFilters()
             .Include(p => p.LedgerAccount)
             .Include(p => p.OpeningAccountingDocument)
-                .ThenInclude(p => p.Entries)
+                .ThenInclude(p => p!.Entries)
             .FirstOrDefaultAsync(d => d.Id == request.PersonId
                 && d.TenantId == _currentUser.TenantId, cancellationToken)
             ?? throw new NotFoundException(nameof(Person), request.PersonId);

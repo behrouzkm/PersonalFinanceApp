@@ -11,7 +11,7 @@ namespace PersonalFinanceApp.WebApi.Controllers.Admin;
 
 [ApiController]
 [Route("api/admin/[controller]")]
-[Authorize(Roles = Roles.SystemAdministrators)]
+[Authorize(Roles = Roles.PlatformAdministrators)]
 public class SystemAdminBaseApiController : ControllerBase
 {
     protected readonly IMediator _mediator;

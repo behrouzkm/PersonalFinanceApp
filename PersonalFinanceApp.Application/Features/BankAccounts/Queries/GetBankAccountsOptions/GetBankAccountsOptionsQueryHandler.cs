@@ -23,13 +23,22 @@ public class GetBankAccountsOptionsQueryHandler : IRequestHandler<GetBankAccount
     public async Task<List<BankAccountOptionDto>> Handle(GetBankAccountsOptionsQuery request,
                         CancellationToken cancellationToken)
     {
-        var options = await _context.BankAccounts
+        var query = _context.BankAccounts
             .Include(b => b.Currency)
             .AsNoTracking()
+            .AsQueryable();
+
+        if (request.CurrencyId.HasValue)
+        {
+            query = query.Where(b => b.CurrencyId == request.CurrencyId.Value);
+        }
+
+        var projections = await query
             .OrderBy(o => o.DisplayOrder)
             .Select(r => new BankAccountOptionDto
             {
                 Id = r.Id,
+                LedgerAccountId = r.LedgerAccountId,
                 BankAccountType = r.BankAccountType,
                 DisplayName = r.DisplayName,
                 CurrencyName = r.Currency.Name,
@@ -39,6 +48,6 @@ public class GetBankAccountsOptionsQueryHandler : IRequestHandler<GetBankAccount
             })
             .ToListAsync(cancellationToken);
 
-        return options;
+        return projections;
     }
 }

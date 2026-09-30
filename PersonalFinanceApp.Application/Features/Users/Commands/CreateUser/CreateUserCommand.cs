@@ -12,8 +12,5 @@ public class CreateUserCommand : IRequest<Guid>
     public string Password { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    // No TenantId here - deliberately. It comes from ICurrentUserService,
-    // the same "never accept client-supplied X for something derived from
-    // context" rule as LedgerAccountId elsewhere in this project. A tenant
-    // admin can only create users in their own tenant.
+    public int? LanguageId { get; set; }
 }

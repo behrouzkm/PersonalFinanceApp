@@ -17,11 +17,13 @@ public abstract class BaseAuditableEntity : BaseEntity
 
     // Soft delete properties
     public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
+    public Guid? DeletedBy { get; private set; }
 
 
     protected BaseAuditableEntity() { }
 
-    protected BaseAuditableEntity(Guid tenantId, Guid createdBy,string? description = null) : base(tenantId)
+    protected BaseAuditableEntity(Guid tenantId, Guid createdBy, string? description = null) : base(tenantId)
     {
         CreatedBy = createdBy;
         CreatedAt = DateTime.UtcNow;
@@ -37,13 +39,15 @@ public abstract class BaseAuditableEntity : BaseEntity
     public virtual void SoftDelete(Guid deletedBy)
     {
         IsDeleted = true;
-        UpdateAudit(deletedBy);
+        DeletedBy = deletedBy;
+        DeletedAt = DateTime.UtcNow;
     }
 
     public virtual void Restore(Guid restoredBy)
     {
         IsDeleted = false;
-        UpdateAudit(restoredBy);
+        DeletedBy = null;
+        DeletedAt = null;
     }
 
 

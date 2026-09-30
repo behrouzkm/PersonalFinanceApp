@@ -34,6 +34,10 @@ public class Tenant
         Name = newName.Trim();
     }
 
+    public void ChangeDefaultLanguage(int newLanguageId) => SetDefaultLanguage(newLanguageId);
+
+    public void ChangeDefaultCurrency(int newCurrencyId) => SetDefaultCurrency(newCurrencyId);
+
     public void Deactivate() => IsActive = false;
 
     public void Activate() => IsActive = true;

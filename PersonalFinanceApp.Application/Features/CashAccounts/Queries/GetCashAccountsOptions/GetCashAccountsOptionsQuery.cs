@@ -6,4 +6,5 @@ namespace PersonalFinanceApp.Application.Features.CashAccounts.Queries.GetCashAc
 
 public class GetCashAccountsOptionsQuery : IRequest<List<CashAccountOptionDto>>
 {
+    public int? CurrencyId { get; set; }
 }

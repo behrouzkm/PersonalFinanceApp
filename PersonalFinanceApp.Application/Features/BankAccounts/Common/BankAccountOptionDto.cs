@@ -9,6 +9,7 @@ namespace PersonalFinanceApp.Application.Features.BankAccounts.Common;
 public class BankAccountOptionDto
 {
     public Guid Id { get; set; }
+    public Guid LedgerAccountId { get; set; }
     public BankAccountType BankAccountType { get; set; }
     public string DisplayName { get; set; } = null!;
     public decimal CurrentBalance { get; set; }

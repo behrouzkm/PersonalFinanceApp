@@ -55,8 +55,10 @@ public static class DependencyInjection
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IUserLookupService, UserLookupService>();
 
         services.Configure<AttachmentOptions>(configuration.GetSection(AttachmentOptions.SectionName));
+        services.AddScoped<IFileContentValidator, FileContentValidator>();
 
         services.AddAuthentication(options =>
             {

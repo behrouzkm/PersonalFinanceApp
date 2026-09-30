@@ -6,4 +6,5 @@ namespace PersonalFinanceApp.Application.Features.BankAccounts.Queries.GetBankAc
 
 public class GetBankAccountsOptionsQuery : IRequest<List<BankAccountOptionDto>>
 {
+    public int? CurrencyId { get; set; }
 }

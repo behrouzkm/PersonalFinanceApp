@@ -23,16 +23,26 @@ public class GetPersonsOptionsQueryHandler : IRequestHandler<GetPersonsOptionsQu
     public async Task<List<PersonOptionDto>> Handle(GetPersonsOptionsQuery request,
                         CancellationToken cancellationToken)
     {
-        var options = await _context.Persons
+        var query = _context.Persons
             .AsNoTracking()
+            .AsQueryable();
+
+
+        if (request.CurrencyId.HasValue)
+        {
+            query = query.Where(p => p.CurrencyId == request.CurrencyId.Value);
+        }
+
+        var projections = await query
             .OrderBy(o => o.DisplayOrder)
             .Select(r => new PersonOptionDto
             {
                 Id = r.Id,
+                LedgerAccountId = r.LedgerAccountId,
                 DisplayName = r.DisplayName
             })
             .ToListAsync(cancellationToken);
 
-        return options;
+        return projections;
     }
 }

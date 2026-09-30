@@ -28,6 +28,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
             request.FirstName,
             request.LastName,
             _currentUser.TenantId,
+            request.LanguageId,
             cancellationToken);
 
         if (!result.Succeeded)

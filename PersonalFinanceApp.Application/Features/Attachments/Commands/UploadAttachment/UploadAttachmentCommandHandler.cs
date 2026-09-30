@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using PersonalFinanceApp.Application.Common.Errors;
 using PersonalFinanceApp.Application.Common.Exceptions;
 using PersonalFinanceApp.Application.Common.Interfaces;
 
 namespace PersonalFinanceApp.Application.Features.Attachments.Commands.UploadAttachment;
 
-public class UploadAttachmentCommandHandler
+public class UploadAttachmentCommandHandler : IRequestHandler<UploadAttachmentCommand, Guid>
 {
 
     private readonly IAttachmentService _attachmentService;

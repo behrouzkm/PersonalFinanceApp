@@ -7,4 +7,5 @@ namespace PersonalFinanceApp.Application.Features.Persons.Queries.GetPersonsOpti
 // axis - covers listing, date-range reporting, and account/person-based views at once.
 public class GetPersonsOptionsQuery : IRequest<List<PersonOptionDto>>
 {
+    public int? CurrencyId { get; set; }
 }

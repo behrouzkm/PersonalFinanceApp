@@ -15,10 +15,17 @@ public sealed class GetMoneyTransfersListQueryHandler
                         : IRequestHandler<GetMoneyTransfersListQuery, PaginatedList<MoneyTransferListItemDto>>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUserLookupService _userLookupService;
+    private readonly ICurrentUserService _currentUser;
 
-    public GetMoneyTransfersListQueryHandler(IApplicationDbContext context)
+    public GetMoneyTransfersListQueryHandler(
+        IApplicationDbContext context,
+        IUserLookupService userLookupService,
+        ICurrentUserService currentUser)
     {
         _context = context;
+        _userLookupService = userLookupService;
+        _currentUser = currentUser;
     }
 
     public async Task<PaginatedList<MoneyTransferListItemDto>> Handle(
@@ -142,12 +149,15 @@ public sealed class GetMoneyTransfersListQueryHandler
         // Projection
         // ------------------------------------------------------------
 
+        var tenantUsers = await _userLookupService.GetTenantUsersAsync(_currentUser.TenantId, cancellationToken);
+        var usersById = tenantUsers.ToDictionary(u => u.Id);
+
         var projected = query
             .OrderByDescending(d => d.DocumentDate)
             .ThenByDescending(d => d.CreatedAt)
             .Select(d => new MoneyTransferListItemDto
             {
-                AccountingDocumentId = d.Id,
+                MoneyTransferDocumentId = d.Id,
 
                 TransferDate = d.DocumentDate,
 
@@ -185,7 +195,12 @@ public sealed class GetMoneyTransfersListQueryHandler
                     .FirstOrDefault() ?? string.Empty,
 
                 AttachmentCount = _context.Attachments
-                    .Count(a => a.AccountingDocumentId == d.Id)
+                    .Count(a => a.AccountingDocumentId == d.Id),
+
+                CreatedAt = d.CreatedAt,
+                CreatedBy = d.CreatedBy,
+                CreatedByUserName = usersById.GetValueOrDefault(d.CreatedBy)!.FirstName + " " + usersById.GetValueOrDefault(d.CreatedBy)!.LastName
+
             });
 
         return await PaginatedList<MoneyTransferListItemDto>.CreateAsync(

@@ -32,6 +32,7 @@ public class GetLanguagesOptionsQueryHandler : IRequestHandler<GetLanguagesOptio
                 Id = r.Id,
                 Name = r.Name,
                 Code = r.Code,
+                IsRightToLeft = r.IsRightToLeft
             })
             .ToListAsync(cancellationToken);
 

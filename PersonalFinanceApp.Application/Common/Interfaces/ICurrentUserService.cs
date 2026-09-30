@@ -9,4 +9,6 @@ public interface ICurrentUserService
 {
     Guid TenantId { get; }
     Guid UserId { get; }
+
+    bool IsInRole(string role);
 }

@@ -50,13 +50,13 @@ public class DevelopmentDataSeeder(
             if (!userResult.Succeeded)
                 throw new InvalidOperationException(string.Join(", ", userResult.Errors.Select(e => e.Description)));
 
-            if (!await roleManager.RoleExistsAsync(Roles.SystemAdministrators))
-                await roleManager.CreateAsync(new IdentityRole<Guid>(Roles.SystemAdministrators));
+            if (!await roleManager.RoleExistsAsync(Roles.PlatformAdministrators))
+                await roleManager.CreateAsync(new IdentityRole<Guid>(Roles.PlatformAdministrators));
 
             if (!await roleManager.RoleExistsAsync(Roles.TenantAdministrators))
                 await roleManager.CreateAsync(new IdentityRole<Guid>(Roles.TenantAdministrators));
 
-            var systemAdminRoleAssignResult = await userManager.AddToRoleAsync(admin, Roles.SystemAdministrators);
+            var systemAdminRoleAssignResult = await userManager.AddToRoleAsync(admin, Roles.PlatformAdministrators);
             if (!systemAdminRoleAssignResult.Succeeded)
                 throw new InvalidOperationException(string.Join(", ", systemAdminRoleAssignResult.Errors.Select(e => e.Description)));
 
