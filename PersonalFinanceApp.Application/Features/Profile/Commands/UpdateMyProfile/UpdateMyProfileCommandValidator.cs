@@ -16,5 +16,11 @@ public class UpdateMyProfileCommandValidator : AbstractValidator<UpdateMyProfile
         RuleFor(x => x.DateOfBirth)
             .Must(d => d is null || d.Value <= DateOnly.FromDateTime(DateTime.UtcNow))
             .WithErrorCode(ApplicationErrorCodes.Profile.DateOfBirthInFuture);
+
+        RuleFor(x => x.LanguageId)
+            .NotEqual(0)
+            .When(x => x.LanguageId.HasValue)
+            .WithErrorCode(ApplicationErrorCodes.Auth.DefaultLanguageRequired);
+
     }
 }

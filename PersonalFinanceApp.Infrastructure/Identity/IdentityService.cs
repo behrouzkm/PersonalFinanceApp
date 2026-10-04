@@ -202,6 +202,7 @@ public class IdentityService : IIdentityService
                 TenantId = tenant.Id,
                 FirstName = firstName,
                 LastName = lastName,
+                LanguageId=defaultLanguageId,
                 CreatedAtUtc = DateTime.UtcNow
             };
 
@@ -308,6 +309,7 @@ public class IdentityService : IIdentityService
             ProfilePhotoStorageKey = user.ProfilePhotoStorageKey,
             DateOfBirth = user.DateOfBirth,
             Gender = user.Gender,
+            LanguageId = user.LanguageId,
             CreatedAtUtc = user.CreatedAtUtc,
             LastLoginAtUtc = user.LastLoginAtUtc,
             PasswordChangedAtUtc = user.PasswordChangedAtUtc,
@@ -316,7 +318,7 @@ public class IdentityService : IIdentityService
     }
 
     public async Task<IdentityOperationResult> UpdateProfileAsync(
-        Guid userId, string firstName, string lastName, DateOnly? dateOfBirth, Gender? gender,
+        Guid userId, string firstName, string lastName, DateOnly? dateOfBirth, Gender? gender,int? languageId,
         CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString())
@@ -326,6 +328,7 @@ public class IdentityService : IIdentityService
         user.LastName = lastName;
         user.DateOfBirth = dateOfBirth;
         user.Gender = gender;
+        user.LanguageId = languageId;
 
         var result = await _userManager.UpdateAsync(user);
 

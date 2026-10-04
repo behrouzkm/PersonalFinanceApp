@@ -33,5 +33,6 @@
   "editor.inlineSuggest.enabled": true,
 
   "workbench.editor.enablePreview": false,
-  "cSpell.words": ["IBAN", "Mediat", "Postable"]
+  "cSpell.words": ["IBAN", "Mediat", "Postable"],
+  "FSharp.suggestGitignore": false
 }

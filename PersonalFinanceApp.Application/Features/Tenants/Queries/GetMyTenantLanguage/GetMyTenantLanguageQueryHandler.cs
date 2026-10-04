@@ -11,34 +11,43 @@ public class GetMyTenantLanguageQueryHandler : IRequestHandler<GetMyTenantLangua
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
+    private readonly IIdentityService _identityService;
 
-    public GetMyTenantLanguageQueryHandler(IApplicationDbContext context, ICurrentUserService currentUser)
+    public GetMyTenantLanguageQueryHandler(
+        IApplicationDbContext context, ICurrentUserService currentUser, IIdentityService identityService)
     {
         _context = context;
         _currentUser = currentUser;
+        _identityService = identityService;
     }
 
     public async Task<LanguageOptionDto> Handle(GetMyTenantLanguageQuery request, CancellationToken cancellationToken)
     {
-        // Global query filter already scopes Tenants... except Tenant itself
-        // isn't a BaseAuditableEntity (it's the tenant boundary, not owned by
-        // one), so this is the one place TenantId is looked up directly rather
-        // than relied on to be pre-filtered.
-        var tenant = await _context.Tenants
-                .FirstOrDefaultAsync(t => t.Id == _currentUser.TenantId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Tenant), _currentUser.TenantId);
+        var profile = await _identityService.GetProfileAsync(_currentUser.UserId, cancellationToken);
 
-        var language = await _context.Languages
-                .Where(l => l.Id == tenant.DefaultLanguageId)
-                .Select(l => new LanguageOptionDto
-                {
-                    Id = l.Id,
-                    Code = l.Code,
-                    Name = l.Name,
-                })
+        int languageId;
+        if (profile.LanguageId is not null)
+        {
+            // Personal preference wins when set.
+            languageId = profile.LanguageId.Value;
+        }
+        else
+        {
+            // Falls back to the tenant's invite-time default - this is the
+            // ONLY remaining purpose of Tenant.DefaultLanguageId now that
+            // language is per-user: a sensible starting point for a newly
+            // invited member who hasn't set a personal preference yet.
+            var tenant = await _context.Tenants
+                    .FirstOrDefaultAsync(t => t.Id == _currentUser.TenantId, cancellationToken)
+                ?? throw new NotFoundException(nameof(Tenant), _currentUser.TenantId);
+
+            languageId = tenant.DefaultLanguageId;
+        }
+
+        return await _context.Languages
+                .Where(l => l.Id == languageId)
+                .Select(l => new LanguageOptionDto { Id = l.Id, Code = l.Code, Name = l.Name,IsRightToLeft=l.IsRightToLeft })
                 .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new NotFoundException(nameof(Language), tenant.DefaultLanguageId);
-
-        return language;
+            ?? throw new NotFoundException(nameof(Language), languageId);
     }
 }

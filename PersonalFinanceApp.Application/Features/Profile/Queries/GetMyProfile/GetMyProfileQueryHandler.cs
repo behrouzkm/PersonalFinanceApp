@@ -30,18 +30,28 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, MyPro
         // Application never queries the Identity tables directly (they're not
         // even exposed on IApplicationDbContext).
         var profile = await _identityService.GetProfileAsync(_currentUser.UserId, cancellationToken);
+        LanguageOptionDto? userLanguage = null;
 
         var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t => t.Id == _currentUser.TenantId, cancellationToken)
             ?? throw new NotFoundException(nameof(Tenant), _currentUser.TenantId);
 
-        var language = await _context.Languages
+        var tenantLanguage = await _context.Languages
                 .Where(l => l.Id == tenant.DefaultLanguageId)
                 .Select(l => new LanguageOptionDto { Id = l.Id, Code = l.Code, Name = l.Name })
                 .FirstOrDefaultAsync(cancellationToken)
             ?? throw new NotFoundException(nameof(Language), tenant.DefaultLanguageId);
 
-        var currency = await _context.Currencies
+        if(profile.LanguageId.HasValue)
+        {
+
+            userLanguage = await _context.Languages
+                    .Where(l => l.Id == profile.LanguageId.Value)
+                    .Select(l => new LanguageOptionDto { Id = l.Id, Code = l.Code, Name = l.Name })
+                    .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new NotFoundException(nameof(Language), profile.LanguageId.Value);
+        }
+        var tenantCurrency = await _context.Currencies
                 .Where(c => c.Id == tenant.DefaultCurrencyId)
                 .Select(c => new CurrencyOptionDto
                 {
@@ -62,11 +72,12 @@ public class GetMyProfileQueryHandler : IRequestHandler<GetMyProfileQuery, MyPro
             ProfilePhotoStorageKey = profile.ProfilePhotoStorageKey,
             DateOfBirth = profile.DateOfBirth,
             Gender = profile.Gender,
+            UserLanguage = userLanguage,
             CreatedAtUtc = profile.CreatedAtUtc,
             LastLoginAtUtc = profile.LastLoginAtUtc,
             PasswordChangedAtUtc = profile.PasswordChangedAtUtc,
-            TenantLanguage = language,
-            TenantCurrency = currency,
+            TenantLanguage = tenantLanguage,
+            TenantCurrency = tenantCurrency,
             CanEditTenantSettings = _currentUser.IsInRole(Roles.TenantAdministrators)
         };
     }

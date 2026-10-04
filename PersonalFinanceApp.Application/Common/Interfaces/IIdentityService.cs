@@ -41,7 +41,7 @@ public interface IIdentityService
     Task<IdentityUserProfileResult> GetProfileAsync(Guid userId, CancellationToken cancellationToken);
 
     Task<IdentityOperationResult> UpdateProfileAsync(
-        Guid userId, string firstName, string lastName, DateOnly? dateOfBirth, Gender? gender,
+        Guid userId, string firstName, string lastName, DateOnly? dateOfBirth, Gender? gender, int? languageId,
         CancellationToken cancellationToken);
 
     // storageKey null clears the photo (used when removing it without replacing).
@@ -85,6 +85,7 @@ public class IdentityUserProfileResult
     public string? ProfilePhotoStorageKey { get; init; }
     public DateOnly? DateOfBirth { get; init; }
     public Gender? Gender { get; init; }
+    public int? LanguageId { get; init; }
     public DateTime CreatedAtUtc { get; init; }
     public DateTime? LastLoginAtUtc { get; init; }
     public DateTime? PasswordChangedAtUtc { get; init; }

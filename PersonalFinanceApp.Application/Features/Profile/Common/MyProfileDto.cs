@@ -17,7 +17,7 @@ public class MyProfileDto
     public string? ProfilePhotoStorageKey { get; set; }
     public DateOnly? DateOfBirth { get; set; }
     public Gender? Gender { get; set; }
-
+    public LanguageOptionDto? UserLanguage { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? LastLoginAtUtc { get; set; }
     public DateTime? PasswordChangedAtUtc { get; set; }
